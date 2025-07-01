@@ -1,15 +1,20 @@
+val projectVersion: String by project
+val javaSdkVersion: String by project
+val bytebuddyVersion: String by project
+
 plugins {
-    kotlin("jvm") version "1.7.10"
+    kotlin("jvm")
 }
 
 group = "com.runninglane"
-version = "1.0-SNAPSHOT"
+version = projectVersion
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
+    implementation("net.bytebuddy:byte-buddy:$bytebuddyVersion")
     testImplementation(kotlin("test"))
 }
 
@@ -19,6 +24,6 @@ tasks.test {
 
 kotlin {
     jvmToolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
+        languageVersion.set(JavaLanguageVersion.of(javaSdkVersion.toInt()))
     }
 }
