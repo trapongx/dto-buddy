@@ -18,7 +18,7 @@ internal data class PropertyDescriptor(
     val genericStructure: GenericStructure? = null
 ) {
     fun isPartiallyImplemented(): Boolean {
-        return (getter != null && setter != null) && (!hasConcreteGetter || !hasConcreteSetter)
+        return (getter != null && setter != null) && (hasConcreteGetter != hasConcreteSetter)
     }
 
     fun shouldImplement(): Boolean {
