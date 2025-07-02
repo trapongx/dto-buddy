@@ -126,7 +126,7 @@ object DtoBuddy {
      * @param baseClass
      * @param packageName, default value is the same package name as of the base class
      * @param name, default value is the name of the base class with "$Dto" added at the end
-     * @param nameSuffix, there might be some scenario to generate classes for the same interface multiple time,
+     * @param nameSuffix, there might be some scenario to generate classes for the same interface single time,
      * nameSuffix will be added at the very end of their name to avoid name collision. For this project, the test cases
      * make use of this parameter a lot.
      * @return generated class of type Class<*>
@@ -134,6 +134,7 @@ object DtoBuddy {
     @JvmStatic
     fun implement(
         baseClass: Class<*>,
+        typeParams: List<Class<*>>? = null,
         packageName: String? = null,
         name: String? = null,
         nameSuffix: String? = null
@@ -149,6 +150,9 @@ object DtoBuddy {
         // Check cache first
         classCache[cacheKey]?.let { return it }
 
+        require((typeParams?.size ?: 0) == baseClass.typeParameters.size) {
+            "Type parameter count mismatch: ${typeParams?.size} != ${baseClass.typeParameters.size}"
+        }
         // Though cacheKey is not in classCache, it does not mean that the base class has never been analyzed before.
         // It's possible that the same baseClass passed in with different other parameters.
         val properties = propertiesCache.getOrPut(baseClass) {
@@ -163,10 +167,17 @@ object DtoBuddy {
 
         try {
             // Create dynamic type builder
-            val builder = byteBuddyWrapper.createDynamicType(baseClass, packageName, fullClassName)
+            val builder = byteBuddyWrapper.createDynamicType(baseClass, typeParams, packageName, fullClassName)
+
+            // Create a map of type parameter names to actual types
+            val typeParamsMapByName = typeParams?.takeIf { it.isNotEmpty() }
+                ?.let { typeParams ->
+                    val typeParameterNames = baseClass.typeParameters.map { it.name }
+                        typeParameterNames.zip(typeParams).toMap()
+                } ?: emptyMap()
 
             // Implement properties
-            val implementedBuilder = byteBuddyWrapper.implementProperties(builder, properties)
+            val implementedBuilder = byteBuddyWrapper.implementProperties(builder, properties, typeParamsMapByName)
 
             // Load the generated class
             val generatedClass = byteBuddyWrapper.loadClass(implementedBuilder)

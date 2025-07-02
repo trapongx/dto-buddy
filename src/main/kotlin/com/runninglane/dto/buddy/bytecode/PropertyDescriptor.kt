@@ -2,6 +2,7 @@ package com.runninglane.dto.buddy.bytecode
 
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
+import java.lang.reflect.Type
 
 /**
  * Helper class to track property metadata during analysis
@@ -9,6 +10,7 @@ import java.lang.reflect.Modifier
 internal data class PropertyDescriptor(
     val name: String,
     val type: Class<*>?,
+    val genericType: Type?,
     val getter: Method?,
     val setter: Method?,
     val hasConcreteGetter: Boolean,
@@ -28,10 +30,11 @@ internal data class PropertyDescriptor(
 
         fun build(): PropertyDescriptor {
             val type = getter?.returnType ?: setter?.parameterTypes?.get(0)
+            val genericType = getter?.genericReturnType ?: setter?.genericParameterTypes?.get(0)
             val hasConcreteGetter = getter != null && Modifier.isAbstract(getter!!.modifiers).not()
             val hasConcreteSetter = setter != null && Modifier.isAbstract(setter!!.modifiers).not()
             return PropertyDescriptor(
-                name, type, getter, setter, hasConcreteGetter, hasConcreteSetter
+                name, type, genericType, getter, setter, hasConcreteGetter, hasConcreteSetter
             )
         }
     }

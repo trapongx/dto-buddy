@@ -6,11 +6,12 @@ import com.runninglane.dto.buddy.exception.DtoBuddySystemException
 import com.runninglane.dto.buddy.util.capitalize
 import net.bytebuddy.ByteBuddy
 import net.bytebuddy.description.modifier.Visibility
+import net.bytebuddy.description.type.TypeDescription
 import net.bytebuddy.dynamic.DynamicType
 import net.bytebuddy.implementation.FieldAccessor
 import net.bytebuddy.matcher.ElementMatchers
-import java.lang.Override
 import java.lang.reflect.Modifier
+import java.lang.reflect.TypeVariable
 
 /**
  * A wrapper around ByteBuddy to simplify its usage for DTO generation
@@ -26,23 +27,35 @@ internal class ByteBuddyWrapper {
      */
     fun createDynamicType(
         sourceClass: Class<*>,
+        typeParams: List<Class<*>>?,
         packageName: String,
         className: String
     ): DynamicType.Builder<*> {
+        val typeDesc = if (typeParams != null && typeParams.isNotEmpty()) {
+            TypeDescription.Generic.Builder.parameterizedType(
+                sourceClass,
+                *typeParams.toTypedArray()
+            )
+        } else {
+            TypeDescription.Generic.Builder.rawType(sourceClass)
+        }.build()
+
         return when {
             sourceClass.isInterface -> {
                 byteBuddy
                     .subclass(Any::class.java)
-                    .implement(sourceClass)
+                    .implement(typeDesc)
                     .name("$packageName.$className")
                     .annotateType(DtoBuddyGenerated())
             }
+
             Modifier.isAbstract(sourceClass.modifiers) -> {
                 byteBuddy
-                    .subclass(sourceClass)
+                    .subclass(typeDesc)
                     .name("$packageName.$className")
                     .annotateType(DtoBuddyGenerated())
             }
+
             else -> {
                 // For concrete classes, create a subclass that makes all properties mutable
                 byteBuddy
@@ -55,45 +68,69 @@ internal class ByteBuddyWrapper {
 
     /**
      * Adds fields and accessors for all the properties
+     * @param typeParamsMapByName Optional map of type parameter names to their actual types for generic classes
      */
     fun implementProperties(
         builder: DynamicType.Builder<*>,
-        properties: List<PropertyDescriptor>
+        properties: List<PropertyDescriptor>,
+        typeParamsMapByName: Map<String, Class<*>>? = null
     ): DynamicType.Builder<*> {
         var resultBuilder = builder
 
         properties.forEach { it.validate() }
 
-        properties.filter {
-            it.shouldImplement()
-        }
+        properties.filter { it.shouldImplement() }
 
         for (property in properties) {
+            property.type!! // after validated and filtered by shouldImplement(), it is surely not null
+
+            // Resolve the property type if it's a type parameter
+            val resolvedType = (property.genericType as? TypeVariable<*>)
+                ?.let { typeParamsMapByName?.get(it.name) }
+                ?: property.type
+
             // Define field
             resultBuilder = resultBuilder.defineField(
-                property.name, property.type, Visibility.PRIVATE
+                property.name, resolvedType, Visibility.PRIVATE
             )
 
             // Implement getter if needed
             if (property.getter != null) {
-                // Add @Override annotation if the method is overriding an interface or superclass method
-                resultBuilder = resultBuilder.method(ElementMatchers.`is`(property.getter))
-                    .intercept(FieldAccessor.ofField(property.name))
-                    .annotateMethod(Override())
+                if (property.genericType is TypeVariable<*>) {
+                    // For generic types, always define a new method with the resolved return type
+                    val getterName = property.getter.name
+                    resultBuilder = resultBuilder.defineMethod(getterName, resolvedType, Visibility.PUBLIC)
+                        .intercept(FieldAccessor.ofField(property.name))
+                        .annotateMethod(Override())
+                } else {
+                    // For non-generic types, we can just intercept the existing method
+                    resultBuilder = resultBuilder.method(ElementMatchers.`is`(property.getter))
+                        .intercept(FieldAccessor.ofField(property.name))
+                        .annotateMethod(Override())
+                }
             }
 
             // Implement setter if needed
             if (property.setter != null) {
-                // Add @Override annotation if the method is overriding an interface or superclass method
-                resultBuilder = resultBuilder.method(ElementMatchers.`is`(property.setter))
-                    .intercept(FieldAccessor.ofField(property.name))
-                    .annotateMethod(Override())
+                if (property.genericType is TypeVariable<*>) {
+                    // For generic types, always define a new method with the resolved parameter type
+                    val setterName = property.setter.name
+                    resultBuilder = resultBuilder.defineMethod(setterName, Void.TYPE, Visibility.PUBLIC)
+                        .withParameter(resolvedType)
+                        .intercept(FieldAccessor.ofField(property.name))
+                        .annotateMethod(Override())
+                } else {
+                    // For non-generic types, we can just intercept the existing method
+                    resultBuilder = resultBuilder.method(ElementMatchers.`is`(property.setter))
+                        .intercept(FieldAccessor.ofField(property.name))
+                        .annotateMethod(Override())
+                }
             } else {
                 // Always add a setter, even for read-only properties in the original interface
                 // This follows the requirement to make all properties mutable
                 val setterName = "set" + property.name.capitalize()
                 resultBuilder = resultBuilder.defineMethod(setterName, Void.TYPE, Visibility.PUBLIC)
-                    .withParameter(property.type)
+                    .withParameter(resolvedType)
                     .intercept(FieldAccessor.ofField(property.name))
             }
         }
