@@ -3,39 +3,38 @@ package com.runninglane.dto.buddy.builder
 import com.runninglane.dto.buddy.DtoBuddy
 
 class ImplementationBuilder() {
-    private var baseClass: Class<*>? = null
-    private var typeParams: List<Class<*>>? = null
+    private var `interface`: Class<*>? = null
     private var packageName: String? = null
     private var name: String? = null
     private var nameSuffix: String? = null
 
-    constructor(baseClass: Class<*>) : this() {
-        this.baseClass = baseClass
+    constructor(`interface`: Class<*>) : this() {
+        this.`interface` = `interface`
     }
 
-    fun withBaseClass(baseClass: Class<*>): ImplementationBuilder = this.also {
-        it.baseClass = baseClass
+    fun withInterface(`interface`: Class<*>): ImplementationBuilder {
+        this.`interface` = `interface`
+        return this
     }
 
-    fun withTypeParams(typeParams: List<Class<*>>): ImplementationBuilder = this.also {
-        it.typeParams = typeParams
+    fun withPackageName(packageName: String): ImplementationBuilder {
+        this.packageName = packageName
+        return this
     }
 
-    fun withPackageName(packageName: String): ImplementationBuilder = this.also {
-        it.packageName = packageName
+    fun withName(name: String): ImplementationBuilder {
+        this.name = name
+        return this
     }
 
-    fun withName(name: String): ImplementationBuilder = this.also {
-        it.name = name
-    }
-
-    fun withNameSuffix(nameSuffix: String): ImplementationBuilder = this.also {
-        it.nameSuffix = nameSuffix
+    fun withNameSuffix(nameSuffix: String): ImplementationBuilder {
+        this.nameSuffix = nameSuffix
+        return this
     }
 
     fun implement(): Class<*> {
-        requireNotNull(baseClass) { "Interface must be specified" }
+        requireNotNull(`interface`) { "Interface must be specified" }
 
-        return DtoBuddy.implement(baseClass!!, typeParams, packageName, name, nameSuffix)
+        return DtoBuddy.implement(`interface`!!, packageName, name, nameSuffix)
     }
 }
