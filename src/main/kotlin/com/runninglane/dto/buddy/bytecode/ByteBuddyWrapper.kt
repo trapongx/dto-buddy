@@ -11,6 +11,7 @@ import net.bytebuddy.dynamic.DynamicType
 import net.bytebuddy.implementation.FieldAccessor
 import net.bytebuddy.matcher.ElementMatchers
 import java.lang.reflect.Modifier
+import java.lang.reflect.ParameterizedType
 import java.lang.reflect.TypeVariable
 
 /**
@@ -18,6 +19,7 @@ import java.lang.reflect.TypeVariable
  */
 internal class ByteBuddyWrapper {
     private val byteBuddy = ByteBuddy()
+    private val genericTypeHandler = GenericTypeHandler()
 
     /**
      * Create a dynamic type builder based on the source class
@@ -84,10 +86,8 @@ internal class ByteBuddyWrapper {
         for (property in properties) {
             property.type!! // after validated and filtered by shouldImplement(), it is surely not null
 
-            // Resolve the property type if it's a type parameter
-            val resolvedType = (property.genericType as? TypeVariable<*>)
-                ?.let { typeParamsMapByName?.get(it.name) }
-                ?: property.type
+            // Resolve the property type based on its generic structure
+            val resolvedType = genericTypeHandler.resolvePropertyType(property, typeParamsMapByName)
 
             // Define field
             resultBuilder = resultBuilder.defineField(
@@ -96,8 +96,9 @@ internal class ByteBuddyWrapper {
 
             // Implement getter if needed
             if (property.getter != null) {
-                if (property.genericType is TypeVariable<*>) {
-                    // For generic types, always define a new method with the resolved return type
+                if (property.genericType is TypeVariable<*> || 
+                    (property.genericType is ParameterizedType && genericTypeHandler.containsTypeVariable(property.genericType))) {
+                    // For all generic types (simple or complex), define a new method with the correctly resolved return type
                     val getterName = property.getter.name
                     resultBuilder = resultBuilder.defineMethod(getterName, resolvedType, Visibility.PUBLIC)
                         .intercept(FieldAccessor.ofField(property.name))
@@ -112,8 +113,9 @@ internal class ByteBuddyWrapper {
 
             // Implement setter if needed
             if (property.setter != null) {
-                if (property.genericType is TypeVariable<*>) {
-                    // For generic types, always define a new method with the resolved parameter type
+                if (property.genericType is TypeVariable<*> || 
+                    (property.genericType is ParameterizedType && genericTypeHandler.containsTypeVariable(property.genericType))) {
+                    // For all generic types (simple or complex), define a new method with correctly resolved parameter type
                     val setterName = property.setter.name
                     resultBuilder = resultBuilder.defineMethod(setterName, Void.TYPE, Visibility.PUBLIC)
                         .withParameter(resolvedType)

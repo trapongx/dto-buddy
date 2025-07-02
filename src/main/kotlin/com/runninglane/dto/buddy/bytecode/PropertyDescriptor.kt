@@ -14,7 +14,8 @@ internal data class PropertyDescriptor(
     val getter: Method?,
     val setter: Method?,
     val hasConcreteGetter: Boolean,
-    val hasConcreteSetter: Boolean
+    val hasConcreteSetter: Boolean,
+    val genericStructure: GenericStructure? = null
 ) {
     fun isPartiallyImplemented(): Boolean {
         return (getter != null && setter != null) && (!hasConcreteGetter || !hasConcreteSetter)
@@ -33,8 +34,14 @@ internal data class PropertyDescriptor(
             val genericType = getter?.genericReturnType ?: setter?.genericParameterTypes?.get(0)
             val hasConcreteGetter = getter != null && Modifier.isAbstract(getter!!.modifiers).not()
             val hasConcreteSetter = setter != null && Modifier.isAbstract(setter!!.modifiers).not()
+
+            // Extract generic structure information
+            val genericStructure = if (genericType != null) {
+                GenericStructure.from(genericType)
+            } else null
+
             return PropertyDescriptor(
-                name, type, genericType, getter, setter, hasConcreteGetter, hasConcreteSetter
+                name, type, genericType, getter, setter, hasConcreteGetter, hasConcreteSetter, genericStructure
             )
         }
     }
