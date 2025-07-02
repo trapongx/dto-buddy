@@ -65,6 +65,7 @@ class SimpleDtoInterfaceTest {
             assertEquals(Object.class, concreteClass.getSuperclass());
         }
 
+        assertThrows(IllegalArgumentException.class, () -> DtoBuddy.implementor().implement());
     }
 
     @Test
