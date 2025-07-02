@@ -1,5 +1,6 @@
 package com.runninglane.dto.buddy
 
+import com.runninglane.dto.buddy.builder.ImplementationBuilder
 import com.runninglane.dto.buddy.bytecode.ByteBuddyWrapper
 import com.runninglane.dto.buddy.bytecode.PropertyDescriptor
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
@@ -130,14 +131,19 @@ object DtoBuddy {
      * make use of this parameter a lot.
      * @return generated class of type Class<*>
      */
+    @JvmStatic
     fun implement(
         `interface`: Class<*>,
-        packageName: String = `interface`.packageName,
-        name: String = `interface`.simpleName + "\$Dto",
+        packageName: String? = null,
+        name: String? = null,
         nameSuffix: String? = null
     ): Class<*> {
+        val packageName = packageName ?: `interface`.packageName
+        val name = name ?: "${`interface`.simpleName}\$Dto"
+        val nameSuffix = nameSuffix ?: ""
+
         // Generate full class name
-        val fullClassName = if (nameSuffix != null) "$name$nameSuffix" else name
+        val fullClassName = "$name$nameSuffix"
         val cacheKey = "$packageName.$fullClassName"
 
         // Check cache first
@@ -177,6 +183,12 @@ object DtoBuddy {
         }
     }
 
+    @JvmStatic
+    fun implementor() = ImplementationBuilder()
+
+    @JvmStatic
+    fun implementor(`interface`: Class<*>) = ImplementationBuilder(`interface`)
+
     /**
      * Creates a new instance of a DTO class and populates it with the provided parameters
      *
@@ -184,6 +196,7 @@ object DtoBuddy {
      * @param params Map of property names to values
      * @return A new instance of the DTO class with populated properties
      */
+    @JvmStatic
     @Suppress("UNCHECKED_CAST")
     fun <DTO> create(concrete: Class<*>, params: Map<String, Any?>): DTO {
         try {
@@ -213,6 +226,7 @@ object DtoBuddy {
      * @param dto The DTO instance to populate
      * @param params Map of property names to values
      */
+    @JvmStatic
     fun <DTO> populate(dto: DTO, params: Map<String, Any?>) {
         try {
             val dtoClass = dto!!::class.java
