@@ -1,8 +1,28 @@
 package com.runninglane.dto.buddy
 
+import com.runninglane.dto.buddy.bytecode.ByteBuddyWrapper
+import com.runninglane.dto.buddy.bytecode.PropertyDescriptor
+import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
+import com.runninglane.dto.buddy.exception.DtoBuddySystemException
+
+/**
+ * DtoBuddy provides utilities for working with Data Transfer Objects (DTOs).
+ * It can dynamically create concrete implementations of interfaces or abstract classes,
+ * instantiate those implementations, and populate their properties.
+ */
 object DtoBuddy {
+    private val byteBuddyWrapper = ByteBuddyWrapper()
+
+    // Cache for generated classes to avoid regenerating the same class
+    private val classCache = mutableMapOf<String, Class<*>>()
+
+    // Cache for property info to avoid reanalyzing classes (for implementation)
+    private val propertiesCache = mutableMapOf<Class<*>, List<PropertyDescriptor>>()
+
+
     /**
-     * Return a new generated class that implement `interface` but have all fields provided with getter and setter.
+     * Return a new generated class that implements `interface` class but have all fields provided with getter and setter.
+     * Or says, a class to instantiate mutable objects that is subclass of `interface` class.
      * For each abstract property, it aims to provide 3 class members including field, getter, and setter.
      * For concrete properties, it will just inherit them.
      * The `interface` class must not have partially implemented property that is mutable but only have one of
@@ -115,9 +135,101 @@ object DtoBuddy {
         packageName: String = `interface`.packageName,
         name: String = `interface`.simpleName + "\$Dto",
         nameSuffix: String? = null
-    ): Class<*> = TODO("Not yet implemented")
+    ): Class<*> {
+        // Generate full class name
+        val fullClassName = if (nameSuffix != null) "$name$nameSuffix" else name
+        val cacheKey = "$packageName.$fullClassName"
 
-    fun <DTO> create(concrete: Class<*>, params: Map<String, Any?>): DTO = TODO("Not yet implemented")
+        // Check cache first
+        classCache[cacheKey]?.let { return it }
 
-    fun <DTO> populate(dto: DTO, params: Map<String, Any?>) { TODO("Not yet implemented") }
+        // Though cacheKey is not in classCache, it does not mean that the `interface` has never been analyzed before.
+        // It's possible that the same `interface` passed in with different other parameters.
+        val properties = propertiesCache.getOrPut(`interface`) {
+            PropertyDescriptor.from(`interface`)
+        }
+
+        if (properties.isEmpty()) {
+            // All properties are already mutable, return the original class
+            classCache[cacheKey] = `interface`
+            return `interface`
+        }
+
+        try {
+            // Create dynamic type builder
+            val builder = byteBuddyWrapper.createDynamicType(`interface`, packageName, fullClassName)
+
+            // Implement properties
+            val implementedBuilder = byteBuddyWrapper.implementProperties(builder, properties)
+
+            // Load the generated class
+            val generatedClass = byteBuddyWrapper.loadClass(implementedBuilder)
+
+            // Cache the result
+            classCache[cacheKey] = generatedClass
+
+            return generatedClass
+        } catch (e: Exception) {
+            when (e) {
+                is DtoBuddyBadInputException, is DtoBuddySystemException -> throw e
+                else -> throw DtoBuddySystemException("Failed to implement DTO: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Creates a new instance of a DTO class and populates it with the provided parameters
+     *
+     * @param concrete The class to instantiate
+     * @param params Map of property names to values
+     * @return A new instance of the DTO class with populated properties
+     */
+    @Suppress("UNCHECKED_CAST")
+    fun <DTO> create(concrete: Class<*>, params: Map<String, Any?>): DTO {
+        try {
+            // Create a new instance
+            val instance = byteBuddyWrapper.createInstance<Any>(concrete)
+
+            // Use the cached property info or analyze if not cached
+            val properties = propertiesCache.getOrPut(concrete) {
+                PropertyDescriptor.from(concrete)
+            }
+
+            // Populate the properties
+            byteBuddyWrapper.populate(instance, properties, params)
+
+            return instance as DTO
+        } catch (e: Exception) {
+            when (e) {
+                is DtoBuddyBadInputException, is DtoBuddySystemException -> throw e
+                else -> throw DtoBuddySystemException("Failed to create DTO instance: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Populates an existing DTO instance with values from the provided parameter map
+     *
+     * @param dto The DTO instance to populate
+     * @param params Map of property names to values
+     */
+    fun <DTO> populate(dto: DTO, params: Map<String, Any?>) {
+        try {
+            val dtoClass = dto!!::class.java
+
+            // For population, we need ALL properties, not just those to implement
+            // Use the all-properties cache for population
+            val properties = propertiesCache.getOrPut(dtoClass) {
+                PropertyDescriptor.from(dtoClass)
+            }
+
+            // Populate the properties
+            byteBuddyWrapper.populate(dto, properties, params)
+        } catch (e: Exception) {
+            when (e) {
+                is DtoBuddyBadInputException, is DtoBuddySystemException -> throw e
+                else -> throw DtoBuddySystemException("Failed to populate DTO: ${e.message}")
+            }
+        }
+    }
 }
