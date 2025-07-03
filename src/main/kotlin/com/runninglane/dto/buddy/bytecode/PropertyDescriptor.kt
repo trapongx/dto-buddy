@@ -1,5 +1,6 @@
 package com.runninglane.dto.buddy.bytecode
 
+import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.lang.reflect.Type
@@ -23,6 +24,29 @@ internal data class PropertyDescriptor(
 
     fun shouldImplement(): Boolean {
         return !hasConcreteGetter || !hasConcreteSetter
+    }
+
+    /**
+     * Validates that getters and setters meet the requirements:
+     * - Abstract getters and setters must be public
+     * - In Kotlin, abstract methods are inherently open, but in Java they need to be explicitly checked
+     */
+    fun validateAccessModifiers() {
+        getter?.let {
+            if (Modifier.isAbstract(it.modifiers) && !Modifier.isPublic(it.modifiers)) {
+                throw DtoBuddyBadInputException(
+                    "Abstract getter ${it.name} for property $name must be public."
+                )
+            }
+        }
+
+        setter?.let {
+            if (Modifier.isAbstract(it.modifiers) && !Modifier.isPublic(it.modifiers)) {
+                throw DtoBuddyBadInputException(
+                    "Abstract setter ${it.name} for property $name must be public."
+                )
+            }
+        }
     }
 
     class Builder(val name: String) {

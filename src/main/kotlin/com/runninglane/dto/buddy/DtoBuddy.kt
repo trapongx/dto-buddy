@@ -5,6 +5,7 @@ import com.runninglane.dto.buddy.bytecode.ByteBuddyWrapper
 import com.runninglane.dto.buddy.bytecode.PropertyDescriptor
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
 import com.runninglane.dto.buddy.exception.DtoBuddySystemException
+import java.lang.reflect.Modifier
 
 /**
  * DtoBuddy provides utilities for working with Data Transfer Objects (DTOs).
@@ -22,14 +23,14 @@ object DtoBuddy {
 
 
     /**
-     * Return a new generated class that implements `interface` class but have all fields provided with getter and setter.
-     * Or says, a class to instantiate mutable objects that is subclass of `interface` class.
+     * Return a new generated class that implements base class but have all fields provided with getter and setter.
+     * Or say, a class to instantiate mutable objects that are subclass of the base class.
      * For each abstract property, it aims to provide 3 class members including field, getter, and setter.
      * For concrete properties, it will just inherit them.
-     * The `interface` class must not have partially implemented property that is mutable but only have one of
+     * The base class must not have a partially implemented property that is mutable but only have one of
      * its getter or setter abstract.
-     * Generated class will be annotated with #com.runninglane.dto.buddy.annotation.DtoBuddyGenerated
-     * These are examples of valid `interface` parameter and their expected generated classes.
+     * Generated classes will be annotated with #com.runninglane.dto.buddy.annotation.DtoBuddyGenerated
+     * These are examples of valid base classes and their expected generated classes.
      * 
      * For this input
      * ```kotlin
@@ -105,7 +106,7 @@ object DtoBuddy {
      * }
      * ```
      *
-     * These are example `interface` classes that will cause an exception to type DtoBuddyBadInputException.
+     * These are example base classes that will cause an exception to type DtoBuddyBadInputException.
      *
      * ```kotin
      * abstract class Child {
@@ -123,23 +124,24 @@ object DtoBuddy {
      * }
      * ```
      *
-     * @param `interface`
-     * @param packageName, default value is the same package name as of the `interface` param
-     * @param name, default value is the name of the `interface` param with "$Dto" added at the end
-     * @param nameSuffix, there might be some scenario to generate classes for the same interface multiple time,
+     * @param baseClass
+     * @param packageName, default value is the same package name as of the base class
+     * @param name, default value is the name of the base class with "$Dto" added at the end
+     * @param nameSuffix, there might be some scenario to generate classes for the same interface single time,
      * nameSuffix will be added at the very end of their name to avoid name collision. For this project, the test cases
      * make use of this parameter a lot.
      * @return generated class of type Class<*>
      */
     @JvmStatic
     fun implement(
-        `interface`: Class<*>,
+        baseClass: Class<*>,
+        typeParams: List<Class<*>>? = null,
         packageName: String? = null,
         name: String? = null,
         nameSuffix: String? = null
     ): Class<*> {
-        val packageName = packageName ?: `interface`.packageName
-        val name = name ?: "${`interface`.simpleName}\$Dto"
+        val packageName = packageName ?: baseClass.packageName
+        val name = name ?: "${baseClass.simpleName}\$Dto"
         val nameSuffix = nameSuffix ?: ""
 
         // Generate full class name
@@ -149,24 +151,34 @@ object DtoBuddy {
         // Check cache first
         classCache[cacheKey]?.let { return it }
 
-        // Though cacheKey is not in classCache, it does not mean that the `interface` has never been analyzed before.
-        // It's possible that the same `interface` passed in with different other parameters.
-        val properties = propertiesCache.getOrPut(`interface`) {
-            PropertyDescriptor.from(`interface`)
+        require((typeParams?.size ?: 0) == baseClass.typeParameters.size) {
+            "Type parameter count mismatch: ${typeParams?.size} != ${baseClass.typeParameters.size}"
+        }
+        // Though cacheKey is not in classCache, it does not mean that the base class has never been analyzed before.
+        // It's possible that the same baseClass passed in with different other parameters.
+        val properties = propertiesCache.getOrPut(baseClass) {
+            PropertyDescriptor.from(baseClass)
         }
 
-        if (properties.isEmpty()) {
-            // All properties are already mutable, return the original class
-            classCache[cacheKey] = `interface`
-            return `interface`
+        if (properties.isEmpty() && !baseClass.isInterface && Modifier.isAbstract(baseClass.modifiers)) {
+            // All properties are already mutable and it's not an interface, return the original class
+            classCache[cacheKey] = baseClass
+            return baseClass
         }
 
         try {
             // Create dynamic type builder
-            val builder = byteBuddyWrapper.createDynamicType(`interface`, packageName, fullClassName)
+            val builder = byteBuddyWrapper.createDynamicType(baseClass, typeParams, packageName, fullClassName)
+
+            // Create a map of type parameter names to actual types
+            val typeParamsMapByName = typeParams?.takeIf { it.isNotEmpty() }
+                ?.let { typeParams ->
+                    val typeParameterNames = baseClass.typeParameters.map { it.name }
+                        typeParameterNames.zip(typeParams).toMap()
+                } ?: emptyMap()
 
             // Implement properties
-            val implementedBuilder = byteBuddyWrapper.implementProperties(builder, properties)
+            val implementedBuilder = byteBuddyWrapper.implementProperties(builder, properties, typeParamsMapByName)
 
             // Load the generated class
             val generatedClass = byteBuddyWrapper.loadClass(implementedBuilder)
@@ -187,7 +199,7 @@ object DtoBuddy {
     fun implementor() = ImplementationBuilder()
 
     @JvmStatic
-    fun implementor(`interface`: Class<*>) = ImplementationBuilder(`interface`)
+    fun implementor(baseClass: Class<*>) = ImplementationBuilder(baseClass)
 
     /**
      * Creates a new instance of a DTO class and populates it with the provided parameters

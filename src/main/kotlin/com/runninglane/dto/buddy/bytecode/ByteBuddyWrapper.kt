@@ -33,6 +33,8 @@ internal class ByteBuddyWrapper {
         packageName: String,
         className: String
     ): DynamicType.Builder<*> {
+        // Validate that base class is public
+        validateBaseClass(sourceClass)
         val typeDesc = if (typeParams != null && typeParams.isNotEmpty()) {
             TypeDescription.Generic.Builder.parameterizedType(
                 sourceClass,
@@ -207,6 +209,26 @@ internal class ByteBuddyWrapper {
     }
 
     /**
+     * Validates that a base class meets the requirements:
+     * - Must be public
+     * - If class (not interface), must be open/abstract
+     */
+    private fun validateBaseClass(baseClass: Class<*>) {
+        if (!Modifier.isPublic(baseClass.modifiers)) {
+            throw DtoBuddyBadInputException(
+                "Base class ${baseClass.name} must be public."
+            )
+        }
+
+        // For classes (not interfaces), check if they are open/abstract and not final
+        if (Modifier.isFinal(baseClass.modifiers)) {
+            throw DtoBuddyBadInputException(
+                "Base class ${baseClass.name} must be not be final class."
+            )
+        }
+    }
+
+    /**
      * Validates that a property has consistent getter and setter
      */
     private fun PropertyDescriptor.validate() {
@@ -237,6 +259,9 @@ internal class ByteBuddyWrapper {
                 )
             }
         }
+
+        // Validate access modifiers of abstract getters and setters
+        validateAccessModifiers()
     }
 
 }
