@@ -3,6 +3,7 @@ package com.runninglane.dto.buddy
 import com.runninglane.dto.buddy.builder.ImplementationBuilder
 import com.runninglane.dto.buddy.bytecode.ByteBuddyWrapper
 import com.runninglane.dto.buddy.bytecode.PropertyDescriptor
+import com.runninglane.dto.buddy.bytecode.PropertyDescriptorList
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
 import com.runninglane.dto.buddy.exception.DtoBuddySystemException
 import java.lang.reflect.Modifier
@@ -158,7 +159,7 @@ object DtoBuddy {
         // Though cacheKey is not in classCache, it does not mean that the base class has never been analyzed before.
         // It's possible that the same baseClass passed in with different other parameters.
         val properties = propertiesCache.getOrPut(baseClass) {
-            PropertyDescriptor.from(baseClass)
+            PropertyDescriptorList.from(baseClass)
         }
 
         val isConcreteClass = !baseClass.isInterface && !Modifier.isAbstract(baseClass.modifiers)
@@ -220,7 +221,7 @@ object DtoBuddy {
 
             // Use the cached property info or analyze if not cached
             val properties = propertiesCache.getOrPut(concrete) {
-                PropertyDescriptor.from(concrete)
+                PropertyDescriptorList.from(concrete)
             }
 
             // Populate the properties
@@ -249,7 +250,7 @@ object DtoBuddy {
             // For population, we need ALL properties, not just those to implement
             // Use the all-properties cache for population
             val properties = propertiesCache.getOrPut(dtoClass) {
-                PropertyDescriptor.from(dtoClass)
+                PropertyDescriptorList.from(dtoClass)
             }
 
             // Populate the properties
