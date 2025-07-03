@@ -8,6 +8,7 @@ import java.lang.reflect.Type
  * Helper class to track property metadata during analysis
  */
 internal data class PropertyDescriptor(
+    val baseClass: Class<*>,
     val name: String,
     val type: Class<*>?,
     val genericType: Type?,
@@ -17,15 +18,15 @@ internal data class PropertyDescriptor(
     val hasConcreteSetter: Boolean,
     val genericStructure: GenericStructure? = null
 ) {
-    fun isPartiallyImplemented(): Boolean {
-        return (getter != null && setter != null) && (hasConcreteGetter != hasConcreteSetter)
+    fun isAlreadyCompleteAndMutable(): Boolean {
+        return getter != null && setter != null && hasConcreteGetter && hasConcreteSetter
     }
 
     fun shouldImplement(): Boolean {
-        return !hasConcreteGetter || !hasConcreteSetter
+        return getter != null && !hasConcreteGetter
     }
 
-    class Builder(val name: String) {
+    class Builder(val baseClass: Class<*>, val name: String) {
         var getter: Method? = null
         var setter: Method? = null
 
@@ -41,7 +42,11 @@ internal data class PropertyDescriptor(
             } else null
 
             return PropertyDescriptor(
-                name, type, genericType, getter, setter, hasConcreteGetter, hasConcreteSetter, genericStructure
+                baseClass, name,
+                type, genericType,
+                getter, setter,
+                hasConcreteGetter, hasConcreteSetter,
+                genericStructure
             )
         }
     }

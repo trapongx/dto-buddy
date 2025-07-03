@@ -18,10 +18,6 @@ public class ReturnedClassContractTest {
         String getName();
     }
 
-    public interface InterfaceWithAbstractSetter {
-        void setName(String name);
-    }
-
     public interface InterfaceWithAbstractGetterAndAbstractSetter {
         String getName();
 
@@ -37,10 +33,6 @@ public class ReturnedClassContractTest {
 
     public abstract static class AbstractClassWithAbstractGetter {
         public abstract String getName();
-    }
-
-    public abstract static class AbstractClassWithAbstractSetter {
-        public abstract void setName(String name);
     }
 
     public abstract static class AbstractClassWithAbstractGetterAndAbstractSetter {
@@ -135,7 +127,6 @@ public class ReturnedClassContractTest {
         Arrays.asList(
             InterfaceWithNoMember.class,
             InterfaceWithAbstractGetter.class,
-            InterfaceWithAbstractSetter.class,
             InterfaceWithAbstractGetterAndAbstractSetter.class,
             InterfaceWithAbstractProperty.class
         ).forEach(baseClass -> {
@@ -150,7 +141,6 @@ public class ReturnedClassContractTest {
         Arrays.asList(
             AbstractClassWithNoMember.class,
             AbstractClassWithAbstractGetter.class,
-            AbstractClassWithAbstractSetter.class,
             AbstractClassWithAbstractGetterAndAbstractSetter.class,
             AbstractClassWithConcreteGetterAndConcreteSetterWithoutField.class,
             AbstractClassWithConcreteGetterAndConcreteSetterWithField.class,

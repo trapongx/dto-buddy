@@ -163,8 +163,8 @@ object DtoBuddy {
         }
 
         val isConcreteClass = !baseClass.isInterface && !Modifier.isAbstract(baseClass.modifiers)
-        val isMutableClass = properties.none { it.shouldImplement() }
-        if (isConcreteClass && isMutableClass) {
+        val isCompleteAndMutable = properties.all { it.isAlreadyCompleteAndMutable() }
+        if (isConcreteClass && isCompleteAndMutable) {
             // All properties are already mutable and it's not an interface, return the original class
             classCache[cacheKey] = baseClass
             return baseClass

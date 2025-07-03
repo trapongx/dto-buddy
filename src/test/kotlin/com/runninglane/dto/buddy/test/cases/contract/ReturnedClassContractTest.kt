@@ -14,10 +14,6 @@ class ReturnedClassContractTest {
         fun getName(): String
     }
 
-    interface InterfaceWithAbstractSetter {
-        fun setName(name: String)
-    }
-
     interface InterfaceWithAbstractGetterAndAbstractSetter {
         fun getName(): String
         fun setName(name: String)
@@ -45,10 +41,6 @@ class ReturnedClassContractTest {
 
     abstract class AbstractClassWithAbstractGetter {
         abstract fun getName(): String
-    }
-
-    abstract class AbstractClassWithAbstractSetter {
-        abstract fun setName(name: String)
     }
 
     abstract class AbstractClassWithAbstractGetterAndAbstractSetter {
@@ -125,7 +117,6 @@ class ReturnedClassContractTest {
         listOf(
             InterfaceWithNoMember::class.java,
             InterfaceWithAbstractGetter::class.java,
-            InterfaceWithAbstractSetter::class.java,
             InterfaceWithAbstractGetterAndAbstractSetter::class.java,
             InterfaceWithDefaultGetter::class.java,
             InterfaceWithDefaultGetterAndAbstractSetter::class.java,
@@ -143,7 +134,6 @@ class ReturnedClassContractTest {
         listOf(
             AbstractClassWithNoMember::class.java,
             AbstractClassWithAbstractGetter::class.java,
-            AbstractClassWithAbstractSetter::class.java,
             AbstractClassWithAbstractGetterAndAbstractSetter::class.java,
             AbstractClassWithConcreteGetter::class.java,
             AbstractClassWithConcreteSetter::class.java,

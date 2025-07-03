@@ -36,7 +36,9 @@ internal object PropertyDescriptorList {
         for ((propertyName, getters) in gettersByProperty) {
             val concreteGetter = getters.find { !Modifier.isAbstract(it.modifiers) } ?: getters.firstOrNull()
             if (concreteGetter != null) {
-                val builder = builders.getOrPut(propertyName) { PropertyDescriptor.Builder(propertyName) }
+                val builder = builders.getOrPut(propertyName) {
+                    PropertyDescriptor.Builder(baseClass, propertyName)
+                }
                 builder.getter = concreteGetter
             }
         }
@@ -45,7 +47,9 @@ internal object PropertyDescriptorList {
         for ((propertyName, setters) in settersByProperty) {
             val concreteSetter = setters.find { !Modifier.isAbstract(it.modifiers) } ?: setters.firstOrNull()
             if (concreteSetter != null) {
-                val builder = builders.getOrPut(propertyName) { PropertyDescriptor.Builder(propertyName) }
+                val builder = builders.getOrPut(propertyName) {
+                    PropertyDescriptor.Builder(baseClass, propertyName)
+                }
                 builder.setter = concreteSetter
             }
         }

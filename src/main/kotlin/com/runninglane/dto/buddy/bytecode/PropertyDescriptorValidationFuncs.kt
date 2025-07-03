@@ -7,36 +7,46 @@ import java.lang.reflect.Modifier
  * Validates that a property has consistent getter and setter
  */
 internal fun PropertyDescriptor.validate() {
-    // Check if property has a type
-    if (type == null && shouldImplement()) {
-        throw DtoBuddyBadInputException(
-            "Property $name has no type information."
-        )
-    }
+    if (isAlreadyCompleteAndMutable()) return
 
-    // Check if property has partially implemented accessors
-    if (isPartiallyImplemented()) {
-        throw DtoBuddyBadInputException(
-            "Property $name has partially implemented accessors. " +
-                    "Both getter and setter must be either abstract or concrete."
-        )
-    }
+    if (shouldImplement()) {
+        // Validate access modifiers of abstract getters and setters
+        validateAccessModifiers()
 
-    // Check for type consistency between getter and setter
-    if (getter != null && setter != null) {
-        val getterType = getter.returnType
-        val setterType = setter.parameterTypes[0]
-
-        if (getterType != setterType) {
+        // Check if property has a type
+        if (type == null) {
             throw DtoBuddyBadInputException(
-                "Property $name has inconsistent types: " +
-                        "getter returns $getterType but setter accepts $setterType"
+                "Property $name in ${baseClass.name} has no type information."
+            )
+        }
+
+        if (hasConcreteSetter) {
+            throw DtoBuddyBadInputException(
+                "Property $name in ${baseClass.name} is having concrete setter and cannot be implemented. " +
+                        "Please remove the setter or make it abstract."
+            )
+        }
+
+        // Check for type consistency between getter and setter
+        if (getter != null && setter != null) {
+            val getterType = getter.returnType
+            val setterType = setter.parameterTypes[0]
+
+            if (getterType != setterType) {
+                throw DtoBuddyBadInputException(
+                    "Property $name has in ${baseClass.name} inconsistent types: " +
+                            "getter returns $getterType but setter accepts $setterType"
+                )
+            }
+        }
+    } else {
+        if (setter != null && !hasConcreteSetter) {
+            throw DtoBuddyBadInputException(
+                "Property $name in ${baseClass.name} has abstract setter while getter is missing or concrete. " +
+                        "Please add the abstract getter or remove the setter."
             )
         }
     }
-
-    // Validate access modifiers of abstract getters and setters
-    validateAccessModifiers()
 }
 
 /**
@@ -48,7 +58,7 @@ internal fun PropertyDescriptor.validateAccessModifiers() {
     getter?.let {
         if (Modifier.isAbstract(it.modifiers) && !Modifier.isPublic(it.modifiers)) {
             throw DtoBuddyBadInputException(
-                "Abstract getter ${it.name} for property $name must be public."
+                "Abstract getter ${it.name} for property $name in ${baseClass.name} must be public."
             )
         }
     }
@@ -56,7 +66,7 @@ internal fun PropertyDescriptor.validateAccessModifiers() {
     setter?.let {
         if (Modifier.isAbstract(it.modifiers) && !Modifier.isPublic(it.modifiers)) {
             throw DtoBuddyBadInputException(
-                "Abstract setter ${it.name} for property $name must be public."
+                "Abstract setter ${it.name} for property $name in ${baseClass.name} must be public."
             )
         }
     }
