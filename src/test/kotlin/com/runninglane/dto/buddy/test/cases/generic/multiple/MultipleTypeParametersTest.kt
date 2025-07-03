@@ -14,16 +14,16 @@ class MultipleTypeParametersTest {
     @Test
     fun testImplement() {
         run {
-            val implementedClass = DtoBuddy.implement(
+            val concreteClass = DtoBuddy.implement(
                 DtoInterfaceWithMultipleTypeParameters::class.java,
                 listOf(String::class.java, Int::class.java, String::class.java, Long::class.java)
             )
 
-            assertNotNull(implementedClass)
-            assertTrue(DtoInterfaceWithMultipleTypeParameters::class.java.isAssignableFrom(implementedClass))
-            assertEquals(String::class.java, implementedClass.methods.first { it.name == "getSimple" }.returnType)
-            assertEquals(List::class.java, implementedClass.methods.first { it.name == "getList" }.returnType)
-            assertEquals(Map::class.java, implementedClass.methods.first { it.name == "getMap" }.returnType)
+            assertNotNull(concreteClass)
+            assertTrue(DtoInterfaceWithMultipleTypeParameters::class.java.isAssignableFrom(concreteClass))
+            assertEquals(String::class.java, concreteClass.methods.first { it.name == "getSimple" }.returnType)
+            assertEquals(List::class.java, concreteClass.methods.first { it.name == "getList" }.returnType)
+            assertEquals(Map::class.java, concreteClass.methods.first { it.name == "getMap" }.returnType)
         }
     }
 

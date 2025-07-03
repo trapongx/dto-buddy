@@ -13,10 +13,10 @@ class SimpleAbstractDtoTest {
 
     @Test
     public void testImplement() {
-        Class<?> implementedClass = DtoBuddy.implementor(SimpleAbstractDto.class).implement();
+        Class<?> concreteClass = DtoBuddy.implementor(SimpleAbstractDto.class).implement();
 
-        assertNotNull(implementedClass);
-        assertTrue(SimpleAbstractDto.class.isAssignableFrom(implementedClass));
+        assertNotNull(concreteClass);
+        assertTrue(SimpleAbstractDto.class.isAssignableFrom(concreteClass));
     }
 
     @Test

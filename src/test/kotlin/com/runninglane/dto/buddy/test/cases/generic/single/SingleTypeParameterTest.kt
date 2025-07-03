@@ -14,16 +14,16 @@ class SingleTypeParameterTest {
     @Test
     fun testImplement() {
         run {
-            val implementedClass = DtoBuddy.implement(
+            val concreteClass = DtoBuddy.implement(
                 DtoInterfaceWithSingleTypeParameter::class.java,
                 listOf(String::class.java)
             )
 
-            assertNotNull(implementedClass)
-            assertTrue(DtoInterfaceWithSingleTypeParameter::class.java.isAssignableFrom(implementedClass))
-            assertEquals(String::class.java, implementedClass.methods.first { it.name == "getName" }.returnType)
-            assertEquals(Int::class.java, implementedClass.methods.first { it.name == "getAge" }.returnType)
-            assertEquals(String::class.java, implementedClass.methods.first { it.name == "getEmail" }.returnType)
+            assertNotNull(concreteClass)
+            assertTrue(DtoInterfaceWithSingleTypeParameter::class.java.isAssignableFrom(concreteClass))
+            assertEquals(String::class.java, concreteClass.methods.first { it.name == "getName" }.returnType)
+            assertEquals(Int::class.java, concreteClass.methods.first { it.name == "getAge" }.returnType)
+            assertEquals(String::class.java, concreteClass.methods.first { it.name == "getEmail" }.returnType)
         }
     }
 

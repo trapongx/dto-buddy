@@ -15,15 +15,15 @@ public class MultipleTypeParametersTest {
 
     @Test
     public void testImplement() {
-        Class<?> implementedClass = DtoBuddy.implementor(DtoInterfaceWithMultipleTypeParameters.class)
+        Class<?> concreteClass = DtoBuddy.implementor(DtoInterfaceWithMultipleTypeParameters.class)
             .withTypeParams(List.of(String.class, Integer.class, String.class, Long.class))
             .implement();
 
-        assertNotNull(implementedClass);
-        assertTrue(DtoInterfaceWithMultipleTypeParameters.class.isAssignableFrom(implementedClass));
-        assertEquals(String.class, findMethodByName(implementedClass, "getSimple").getReturnType());
-        assertEquals(List.class, findMethodByName(implementedClass, "getList").getReturnType());
-        assertEquals(Map.class, findMethodByName(implementedClass, "getMap").getReturnType());
+        assertNotNull(concreteClass);
+        assertTrue(DtoInterfaceWithMultipleTypeParameters.class.isAssignableFrom(concreteClass));
+        assertEquals(String.class, findMethodByName(concreteClass, "getSimple").getReturnType());
+        assertEquals(List.class, findMethodByName(concreteClass, "getList").getReturnType());
+        assertEquals(Map.class, findMethodByName(concreteClass, "getMap").getReturnType());
     }
 
     private java.lang.reflect.Method findMethodByName(Class<?> clazz, String name) {

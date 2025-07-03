@@ -13,10 +13,10 @@ class SimpleAbstractDtoTest {
 
     @Test
     fun testImplement() {
-         val implementedClass = DtoBuddy.implement(SimpleAbstractDto::class.java)
+         val concreteClass = DtoBuddy.implement(SimpleAbstractDto::class.java)
 
-         assertNotNull(implementedClass)
-         assertTrue(SimpleAbstractDto::class.java.isAssignableFrom(implementedClass))
+         assertNotNull(concreteClass)
+         assertTrue(SimpleAbstractDto::class.java.isAssignableFrom(concreteClass))
     }
 
     @Test

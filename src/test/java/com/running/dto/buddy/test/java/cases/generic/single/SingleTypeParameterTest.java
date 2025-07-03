@@ -9,25 +9,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SingleTypeParameterTest {
     private static int nameSuffix = 0;
 
     @Test
     public void testImplement() {
-        Class<?> implementedClass = DtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
+        Class<?> concreteClass = DtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
             .withTypeParams(Collections.singletonList(String.class))
             .implement();
 
-        assertNotNull(implementedClass);
-        assertTrue(DtoInterfaceWithSingleTypeParameter.class.isAssignableFrom(implementedClass));
-        assertEquals(String.class, Arrays.stream(implementedClass.getMethods())
+        assertNotNull(concreteClass);
+        assertTrue(DtoInterfaceWithSingleTypeParameter.class.isAssignableFrom(concreteClass));
+        assertEquals(String.class, Arrays.stream(concreteClass.getMethods())
             .filter(m -> m.getName().equals("getName"))
             .findFirst().get().getReturnType());
-        assertEquals(Integer.class, Arrays.stream(implementedClass.getMethods())
+        assertEquals(Integer.class, Arrays.stream(concreteClass.getMethods())
             .filter(m -> m.getName().equals("getAge"))
             .findFirst().get().getReturnType());
-        assertEquals(String.class, Arrays.stream(implementedClass.getMethods())
+        assertEquals(String.class, Arrays.stream(concreteClass.getMethods())
             .filter(m -> m.getName().equals("getEmail"))
             .findFirst().get().getReturnType());
     }
