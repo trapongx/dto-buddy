@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 val projectVersion: String by project
 val javaSdkVersion: String by project
 val bytebuddyVersion: String by project
+val junitJupiterVersion: String by project
 
 plugins {
     kotlin("jvm")
@@ -18,6 +19,8 @@ repositories {
 dependencies {
     implementation("net.bytebuddy:byte-buddy:$bytebuddyVersion")
     testImplementation(kotlin("test"))
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
 }
 
 tasks.test {
