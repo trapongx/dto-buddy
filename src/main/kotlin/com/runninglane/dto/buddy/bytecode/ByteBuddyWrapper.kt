@@ -227,41 +227,4 @@ internal class ByteBuddyWrapper {
             )
         }
     }
-
-    /**
-     * Validates that a property has consistent getter and setter
-     */
-    private fun PropertyDescriptor.validate() {
-        // Check if property has a type
-        if (type == null && shouldImplement()) {
-            throw DtoBuddyBadInputException(
-                "Property $name has no type information."
-            )
-        }
-
-        // Check if property has partially implemented accessors
-        if (isPartiallyImplemented()) {
-            throw DtoBuddyBadInputException(
-                "Property $name has partially implemented accessors. " +
-                "Both getter and setter must be either abstract or concrete."
-            )
-        }
-
-        // Check for type consistency between getter and setter
-        if (getter != null && setter != null) {
-            val getterType = getter.returnType
-            val setterType = setter.parameterTypes[0]
-
-            if (getterType != setterType) {
-                throw DtoBuddyBadInputException(
-                    "Property $name has inconsistent types: " +
-                    "getter returns $getterType but setter accepts $setterType"
-                )
-            }
-        }
-
-        // Validate access modifiers of abstract getters and setters
-        validateAccessModifiers()
-    }
-
 }
