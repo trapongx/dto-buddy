@@ -151,9 +151,10 @@ object DtoBuddy {
         // Check cache first
         classCache[cacheKey]?.let { return it }
 
-        require((typeParams?.size ?: 0) == baseClass.typeParameters.size) {
-            "Type parameter count mismatch: ${typeParams?.size} != ${baseClass.typeParameters.size}"
+        if((typeParams?.size ?: 0) != baseClass.typeParameters.size) {
+            throw DtoBuddyBadInputException("Type parameter count mismatch: ${typeParams?.size} != ${baseClass.typeParameters.size}")
         }
+
         // Though cacheKey is not in classCache, it does not mean that the base class has never been analyzed before.
         // It's possible that the same baseClass passed in with different other parameters.
         val properties = propertiesCache.getOrPut(baseClass) {
