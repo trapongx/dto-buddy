@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 val projectVersion: String by project
 val javaSdkVersion: String by project
 val bytebuddyVersion: String by project
@@ -25,5 +27,13 @@ tasks.test {
 kotlin {
     jvmToolchain {
         languageVersion.set(JavaLanguageVersion.of(javaSdkVersion.toInt()))
+    }
+
+    // Configure JSR-305 strict mode for proper nullability handling
+    tasks.withType<KotlinCompile>().configureEach {
+        kotlinOptions {
+            // Enable JSR-305 strict mode for proper nullability with Java interop
+            freeCompilerArgs += "-Xjsr305=strict"
+        }
     }
 }
