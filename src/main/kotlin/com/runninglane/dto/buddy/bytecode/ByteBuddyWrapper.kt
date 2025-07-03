@@ -28,24 +28,24 @@ internal class ByteBuddyWrapper {
      * - For concrete classes: creates a subclass with all properties made mutable
      */
     fun createDynamicType(
-        sourceClass: Class<*>,
+        baseClass: Class<*>,
         typeParams: List<Class<*>>?,
         packageName: String,
         className: String
     ): DynamicType.Builder<*> {
         // Validate that base class is public
-        validateBaseClass(sourceClass)
+        validateBaseClass(baseClass)
         val typeDesc = if (typeParams != null && typeParams.isNotEmpty()) {
             TypeDescription.Generic.Builder.parameterizedType(
-                sourceClass,
+                baseClass,
                 *typeParams.toTypedArray()
             )
         } else {
-            TypeDescription.Generic.Builder.rawType(sourceClass)
+            TypeDescription.Generic.Builder.rawType(baseClass)
         }.build()
 
         return when {
-            sourceClass.isInterface -> {
+            baseClass.isInterface -> {
                 byteBuddy
                     .subclass(Any::class.java)
                     .implement(typeDesc)
@@ -53,7 +53,7 @@ internal class ByteBuddyWrapper {
                     .annotateType(DtoBuddyGenerated())
             }
 
-            Modifier.isAbstract(sourceClass.modifiers) -> {
+            Modifier.isAbstract(baseClass.modifiers) -> {
                 byteBuddy
                     .subclass(typeDesc)
                     .name("$packageName.$className")
@@ -63,7 +63,7 @@ internal class ByteBuddyWrapper {
             else -> {
                 // For concrete classes, create a subclass that makes all properties mutable
                 byteBuddy
-                    .subclass(sourceClass)
+                    .subclass(baseClass)
                     .name("$packageName.$className")
                     .annotateType(DtoBuddyGenerated())
             }

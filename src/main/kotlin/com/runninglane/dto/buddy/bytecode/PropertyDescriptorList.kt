@@ -8,8 +8,8 @@ internal object PropertyDescriptorList {
     /**
      * Analyzes a source class and returns information about properties to implement
      */
-    fun from(sourceClass: Class<*>): List<PropertyDescriptor> {
-        val methods = getAllMethods(sourceClass)
+    fun from(baseClass: Class<*>): List<PropertyDescriptor> {
+        val methods = getAllMethods(baseClass)
         val gettersByProperty = mutableMapOf<String, MutableList<Method>>()
         val settersByProperty = mutableMapOf<String, MutableList<Method>>()
 
