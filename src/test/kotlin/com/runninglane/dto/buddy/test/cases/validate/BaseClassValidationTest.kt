@@ -13,7 +13,13 @@ open class BaseClassValidationTest {
     protected interface ProtectedInterface
     internal interface InternalInterface
     interface PublicInterface
-    class FinalClass
+    class FinalClassWithNoProperties
+    class FinalClassWithImmutableProperties {
+        val name: String = "John"
+    }
+    class FinalClassWithMutableProperties {
+        var name: String = "John"
+    }
     open class OpenClass
 
     @Test
@@ -31,9 +37,19 @@ open class BaseClassValidationTest {
     }
 
     @Test
-    fun shouldFailWhenClassIsFinal() {
+    fun shouldFailWhenClassIsFinalAndIsNotCompleteAndMutable() {
         assertThrows<DtoBuddyBadInputException> {
-            DtoBuddy.implement(FinalClass::class.java)
+            DtoBuddy.implement(FinalClassWithImmutableProperties::class.java)
+        }
+    }
+
+    @Test
+    fun shouldFailWhenClassIsFinalAndIsCompleteAndMutable() {
+        assertDoesNotThrow {
+            DtoBuddy.implement(FinalClassWithNoProperties::class.java)
+        }
+        assertDoesNotThrow {
+            DtoBuddy.implement(FinalClassWithMutableProperties::class.java)
         }
     }
 

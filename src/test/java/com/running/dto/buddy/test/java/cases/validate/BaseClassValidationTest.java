@@ -17,7 +17,27 @@ public class BaseClassValidationTest {
     public interface PublicInterface {
     }
 
-    public static final class FinalClass {
+    class FinalClassWithNoProperties {
+    }
+
+    class FinalClassWithImmutableProperties {
+        private final String name = "John";
+
+        public String getName() {
+            return name;
+        }
+    }
+
+    class FinalClassWithMutableProperties {
+        private String name = "John";
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
     }
 
     public static class OpenClass {
@@ -36,9 +56,17 @@ public class BaseClassValidationTest {
     }
 
     @Test
-    public void shouldFailWhenClassIsFinal() {
+    public void shouldFailWhenClassIsFinalAndIsNotCompleteAndMutable() {
         assertThrows(DtoBuddyBadInputException.class, () ->
-            DtoBuddy.implementor().withBaseClass(FinalClass.class).implement());
+            DtoBuddy.implementor(FinalClassWithImmutableProperties.class).implement());
+    }
+
+    @Test
+    public void shouldFailWhenClassIsFinalAndIsCompleteAndMutable() {
+        assertDoesNotThrow(() ->
+            DtoBuddy.implementor(FinalClassWithNoProperties.class).implement());
+        assertDoesNotThrow(() ->
+            DtoBuddy.implementor(FinalClassWithMutableProperties.class).implement());
     }
 
     @Test
