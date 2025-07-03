@@ -1,0 +1,106 @@
+package com.running.dto.buddy.test.java.cases.abstracts;
+
+import com.runninglane.dto.buddy.DtoBuddy;
+import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class SimpleAbstractDtoTest {
+    private static int nameSuffix = 0;
+
+    @Test
+    public void testImplement() {
+        Class<?> implementedClass = DtoBuddy.implementor(SimpleAbstractDto.class).implement();
+
+        assertNotNull(implementedClass);
+        assertTrue(SimpleAbstractDto.class.isAssignableFrom(implementedClass));
+    }
+
+    @Test
+    public void testCreate() {
+        // This test will fail until create() is implemented
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "John Doe");
+        params.put("age", 30);
+        params.put("email", "john.doe@example.com");
+
+        Class<?> concreteClass = DtoBuddy.implementor(SimpleAbstractDto.class)
+            .withNameSuffix(String.valueOf(++nameSuffix))
+            .implement();
+        SimpleAbstractDto dto = DtoBuddy.create(concreteClass, params);
+
+        assertNotNull(dto);
+        assertEquals("John Doe", dto.getName());
+        assertEquals(30, dto.getAge());
+        assertEquals("john.doe@example.com", dto.getEmail());
+    }
+
+    @Test
+    public void testCreateThenPopulate() {
+        // This test will fail until populate() is implemented
+        Map<String, Object> params = new HashMap<>();
+        params.put("email", "john.doe@example.com");
+
+        Class<?> concreteClass = DtoBuddy.implementor(SimpleAbstractDto.class)
+            .withNameSuffix(String.valueOf(++nameSuffix))
+            .implement();
+        Map<String, Object> initialParams = new HashMap<>();
+        initialParams.put("name", "John Doe");
+        initialParams.put("age", 30);
+        initialParams.put("email", null);
+        SimpleAbstractDto dto = DtoBuddy.create(concreteClass, initialParams);
+
+        assertNotNull(dto);
+        DtoBuddy.populate(dto, params);
+        assertEquals("John Doe", dto.getName());
+        assertEquals(30, dto.getAge());
+        assertEquals("john.doe@example.com", dto.getEmail());
+    }
+
+    @Test
+    public void testCreateWithNullValues() {
+        // This test will fail until create() is implemented
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "Jane Doe");
+        params.put("age", 25);
+        params.put("email", null);
+
+        Class<?> concreteClass = DtoBuddy.implementor(SimpleAbstractDto.class)
+            .withNameSuffix(String.valueOf(++nameSuffix))
+            .implement();
+        SimpleAbstractDto dto = DtoBuddy.create(concreteClass, params);
+
+        assertNotNull(dto);
+        assertEquals("Jane Doe", dto.getName());
+        assertEquals(25, dto.getAge());
+        assertNull(dto.getEmail());
+    }
+
+    @Test
+    public void testCreateThenPopulateWithMultipleValues() {
+        // This test will fail until populate() is implemented
+        Map<String, Object> params = new HashMap<>();
+        params.put("age", 30);
+        params.put("email", "john.doe@example.com");
+
+        Class<?> concreteClass = DtoBuddy.implementor(SimpleAbstractDto.class)
+            .withNameSuffix(String.valueOf(++nameSuffix))
+            .implement();
+        Map<String, Object> initialParams = new HashMap<>();
+        initialParams.put("name", "John Doe");
+        initialParams.put("age", 10);
+        initialParams.put("email", null);
+        SimpleAbstractDto dto = DtoBuddy.create(concreteClass, initialParams);
+
+        assertNotNull(dto);
+
+        DtoBuddy.populate(dto, params);
+
+        assertEquals("John Doe", dto.getName());
+        assertEquals(30, dto.getAge());
+        assertEquals("john.doe@example.com", dto.getEmail());
+    }
+}
