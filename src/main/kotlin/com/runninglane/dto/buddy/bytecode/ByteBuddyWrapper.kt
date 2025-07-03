@@ -223,7 +223,7 @@ internal class ByteBuddyWrapper {
         // For classes (not interfaces), check if they are open/abstract and not final
         if (Modifier.isFinal(baseClass.modifiers)) {
             throw DtoBuddyBadInputException(
-                "Base class ${baseClass.name} must be not be final class."
+                "Base class ${baseClass.name} must not be final class."
             )
         }
     }
