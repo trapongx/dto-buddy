@@ -9,6 +9,9 @@ import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+/**
+ * The rule is the returned class must be a concrete class
+ */
 public class ReturnedClassContractTest {
 
     public interface InterfaceWithNoMember {

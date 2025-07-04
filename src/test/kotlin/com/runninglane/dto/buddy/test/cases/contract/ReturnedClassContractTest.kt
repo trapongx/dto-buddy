@@ -6,6 +6,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
+/**
+ * The rule is the returned class must be a concrete class
+ */
 class ReturnedClassContractTest {
 
     interface InterfaceWithNoMember
