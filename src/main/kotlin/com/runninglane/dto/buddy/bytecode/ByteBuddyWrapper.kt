@@ -81,11 +81,9 @@ internal class ByteBuddyWrapper {
     ): DynamicType.Builder<*> {
         var resultBuilder = builder
 
-        properties.forEach { it.validate() }
+        properties.forEach { it.validateContractCompliance() }
 
-        properties.filter { it.shouldImplement() }
-
-        for (property in properties) {
+        for (property in properties.filter { it.shouldImplement() }) {
             property.type!! // after validated and filtered by shouldImplement(), it is surely not null
 
             // Resolve the property type based on its generic structure
