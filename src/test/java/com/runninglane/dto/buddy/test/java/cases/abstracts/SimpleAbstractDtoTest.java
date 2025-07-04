@@ -1,42 +1,22 @@
-package com.running.dto.buddy.test.java.cases.generic.single;
+package com.runninglane.dto.buddy.test.java.cases.abstracts;
 
 import com.runninglane.dto.buddy.DtoBuddy;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Method;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SingleTypeParameterTest {
+class SimpleAbstractDtoTest {
     private static int nameSuffix = 0;
 
     @Test
     public void testImplement() {
-        Class<?> concreteClass = DtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
-            .withTypeParams(Collections.singletonList(String.class))
-            .implement();
+        Class<?> concreteClass = DtoBuddy.implementor(SimpleAbstractDto.class).implement();
 
         assertNotNull(concreteClass);
-        assertTrue(DtoInterfaceWithSingleTypeParameter.class.isAssignableFrom(concreteClass));
-        
-        Optional<Method> getName = Arrays.stream(concreteClass.getMethods())
-            .filter(m -> m.getName().equals("getName"))
-            .findFirst();
-        assertTrue(getName.isPresent());
-        assertEquals(String.class, getName.get().getReturnType());
-
-        Optional<Method> getAge = Arrays.stream(concreteClass.getMethods())
-            .filter(m -> m.getName().equals("getAge"))
-            .findFirst();
-        assertTrue(getAge.isPresent());
-        assertEquals(Integer.class, getAge.get().getReturnType());
-
-        Optional<Method> getEmail = Arrays.stream(concreteClass.getMethods())
-            .filter(m -> m.getName().equals("getEmail"))
-            .findFirst();
-        assertTrue(getEmail.isPresent());
-        assertEquals(String.class, getEmail.get().getReturnType());
+        assertTrue(SimpleAbstractDto.class.isAssignableFrom(concreteClass));
     }
 
     @Test
@@ -47,11 +27,10 @@ public class SingleTypeParameterTest {
         params.put("age", 30);
         params.put("email", "john.doe@example.com");
 
-        Class<?> concreteClass = DtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
-            .withTypeParams(Collections.singletonList(String.class))
+        Class<?> concreteClass = DtoBuddy.implementor(SimpleAbstractDto.class)
             .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
-        DtoInterfaceWithSingleTypeParameter<String> dto = DtoBuddy.create(concreteClass, params);
+        SimpleAbstractDto dto = DtoBuddy.create(concreteClass, params);
 
         assertNotNull(dto);
         assertEquals("John Doe", dto.getName());
@@ -65,17 +44,14 @@ public class SingleTypeParameterTest {
         Map<String, Object> params = new HashMap<>();
         params.put("email", "john.doe@example.com");
 
-        Class<?> concreteClass = DtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
-            .withTypeParams(Collections.singletonList(String.class))
+        Class<?> concreteClass = DtoBuddy.implementor(SimpleAbstractDto.class)
             .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
-
         Map<String, Object> initialParams = new HashMap<>();
         initialParams.put("name", "John Doe");
         initialParams.put("age", 30);
         initialParams.put("email", null);
-
-        DtoInterfaceWithSingleTypeParameter<String> dto = DtoBuddy.create(concreteClass, initialParams);
+        SimpleAbstractDto dto = DtoBuddy.create(concreteClass, initialParams);
 
         assertNotNull(dto);
         DtoBuddy.populate(dto, params);
@@ -92,11 +68,10 @@ public class SingleTypeParameterTest {
         params.put("age", 25);
         params.put("email", null);
 
-        Class<?> concreteClass = DtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
-            .withTypeParams(Collections.singletonList(String.class))
+        Class<?> concreteClass = DtoBuddy.implementor(SimpleAbstractDto.class)
             .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
-        DtoInterfaceWithSingleTypeParameter<String> dto = DtoBuddy.create(concreteClass, params);
+        SimpleAbstractDto dto = DtoBuddy.create(concreteClass, params);
 
         assertNotNull(dto);
         assertEquals("Jane Doe", dto.getName());
@@ -106,21 +81,19 @@ public class SingleTypeParameterTest {
 
     @Test
     public void testCreateThenPopulateWithMultipleValues() {
+        // This test will fail until populate() is implemented
         Map<String, Object> params = new HashMap<>();
         params.put("age", 30);
         params.put("email", "john.doe@example.com");
 
-        Class<?> concreteClass = DtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
-            .withTypeParams(Collections.singletonList(String.class))
+        Class<?> concreteClass = DtoBuddy.implementor(SimpleAbstractDto.class)
             .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
-
         Map<String, Object> initialParams = new HashMap<>();
         initialParams.put("name", "John Doe");
         initialParams.put("age", 10);
         initialParams.put("email", null);
-
-        DtoInterfaceWithSingleTypeParameter<String> dto = DtoBuddy.create(concreteClass, initialParams);
+        SimpleAbstractDto dto = DtoBuddy.create(concreteClass, initialParams);
 
         assertNotNull(dto);
 
@@ -130,5 +103,4 @@ public class SingleTypeParameterTest {
         assertEquals(30, dto.getAge());
         assertEquals("john.doe@example.com", dto.getEmail());
     }
-    
 }

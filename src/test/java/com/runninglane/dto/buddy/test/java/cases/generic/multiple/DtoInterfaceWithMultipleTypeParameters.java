@@ -1,4 +1,4 @@
-package com.running.dto.buddy.test.java.cases.generic.multiple;
+package com.runninglane.dto.buddy.test.java.cases.generic.multiple;
 
 import java.util.List;
 import java.util.Map;

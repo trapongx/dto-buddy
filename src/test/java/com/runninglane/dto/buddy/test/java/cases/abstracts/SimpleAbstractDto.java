@@ -1,4 +1,4 @@
-package com.running.dto.buddy.test.java.cases.abstracts;
+package com.runninglane.dto.buddy.test.java.cases.abstracts;
 
 public abstract class SimpleAbstractDto {
     public abstract String getName();

@@ -1,4 +1,4 @@
-package com.running.dto.buddy.test.java.cases.contract;
+package com.runninglane.dto.buddy.test.java.cases.contract;
 
 import com.runninglane.dto.buddy.DtoBuddy;
 import com.runninglane.dto.buddy.test.cases.contract.*;

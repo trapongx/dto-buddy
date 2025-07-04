@@ -1,4 +1,4 @@
-package com.running.dto.buddy.test.java.cases.contract;
+package com.runninglane.dto.buddy.test.java.cases.contract;
 
 interface BaseClasses {
     interface InterfaceWithNoMember {

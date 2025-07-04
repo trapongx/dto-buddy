@@ -1,4 +1,4 @@
-package com.running.dto.buddy.test.java.cases.simple;
+package com.runninglane.dto.buddy.test.java.cases.simple;
 
 import com.runninglane.dto.buddy.DtoBuddy;
 import org.junit.jupiter.api.Test;

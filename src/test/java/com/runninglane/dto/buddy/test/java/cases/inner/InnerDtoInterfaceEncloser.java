@@ -1,4 +1,4 @@
-package com.running.dto.buddy.test.java.cases.inner;
+package com.runninglane.dto.buddy.test.java.cases.inner;
 
 public interface InnerDtoInterfaceEncloser {
     interface InnerDtoInterface {

@@ -1,4 +1,4 @@
-package com.running.dto.buddy.test.java.cases.contract;
+package com.runninglane.dto.buddy.test.java.cases.contract;
 
 import com.runninglane.dto.buddy.DtoBuddy;
 import org.junit.jupiter.api.Test;
@@ -7,7 +7,7 @@ import java.lang.reflect.Modifier;
 import java.util.AbstractMap;
 import java.util.Arrays;
 
-import static com.running.dto.buddy.test.java.cases.contract.BaseClasses.*;
+import static com.runninglane.dto.buddy.test.java.cases.contract.BaseClasses.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
