@@ -7,14 +7,13 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class MultipleTypeParametersTest {
-    companion object {
-        private var nameSuffix: Int = 0
-    }
+    private val dtoBuddy = DtoBuddy()
+    private var nameSuffix: Int = 0
 
     @Test
     fun testImplement() {
         run {
-            val concreteClass = DtoBuddy.implement(
+            val concreteClass = dtoBuddy.implement(
                 DtoInterfaceWithMultipleTypeParameters::class.java,
                 listOf(String::class.java, Int::class.java, String::class.java, Long::class.java)
             )
@@ -36,12 +35,12 @@ class MultipleTypeParametersTest {
             "map" to mapOf("key1" to 1L, "key2" to 2L, "key3" to 3L)
         )
 
-        val concreteClass = DtoBuddy.implement(
+        val concreteClass = dtoBuddy.implement(
             DtoInterfaceWithMultipleTypeParameters::class.java,
             typeParams = listOf(String::class.java, Int::class.java, String::class.java, Long::class.java),
             nameSuffix = "${++nameSuffix}"
         )
-        val dto: DtoInterfaceWithMultipleTypeParameters<String, Int, String, Long> = DtoBuddy.create(concreteClass, params)
+        val dto: DtoInterfaceWithMultipleTypeParameters<String, Int, String, Long> = dtoBuddy.create(concreteClass, params)
 
         assertNotNull(dto)
         assertEquals("Simple String", dto.simple)
@@ -56,18 +55,18 @@ class MultipleTypeParametersTest {
             "map" to mapOf("key4" to 4L, "key5" to 5L)
         )
 
-        val concreteClass = DtoBuddy.implement(
+        val concreteClass = dtoBuddy.implement(
             DtoInterfaceWithMultipleTypeParameters::class.java,
             typeParams = listOf(String::class.java, Int::class.java, String::class.java, Long::class.java),
             nameSuffix = "${++nameSuffix}"
         )
-        val dto: DtoInterfaceWithMultipleTypeParameters<String, Int, String, Long> = DtoBuddy.create(
+        val dto: DtoInterfaceWithMultipleTypeParameters<String, Int, String, Long> = dtoBuddy.create(
             concreteClass,
             mapOf("simple" to "Initial String", "list" to listOf(1, 2, 3), "map" to null)
         )
 
         assertNotNull(dto)
-        DtoBuddy.populate(dto, params)
+        dtoBuddy.populate(dto, params)
         assertEquals("Initial String", dto.simple)
         assertEquals(listOf(1, 2, 3), dto.list)
         assertEquals(mapOf("key4" to 4L, "key5" to 5L), dto.map)
@@ -82,12 +81,12 @@ class MultipleTypeParametersTest {
             "map" to null
         )
 
-        val concreteClass = DtoBuddy.implement(
+        val concreteClass = dtoBuddy.implement(
             DtoInterfaceWithMultipleTypeParameters::class.java,
             typeParams = listOf(String::class.java, Int::class.java, String::class.java, Long::class.java),
             nameSuffix = "${++nameSuffix}"
         )
-        val dto: DtoInterfaceWithMultipleTypeParameters<String, Int, String, Long> = DtoBuddy.create(concreteClass, params)
+        val dto: DtoInterfaceWithMultipleTypeParameters<String, Int, String, Long> = dtoBuddy.create(concreteClass, params)
 
         assertNotNull(dto)
         assertEquals("Test String", dto.simple)
@@ -104,19 +103,19 @@ class MultipleTypeParametersTest {
             "map" to mapOf("keyA" to 10L, "keyB" to 20L)
         )
 
-        val concreteClass = DtoBuddy.implement(
+        val concreteClass = dtoBuddy.implement(
             DtoInterfaceWithMultipleTypeParameters::class.java,
             typeParams = listOf(String::class.java, Int::class.java, String::class.java, Long::class.java),
             nameSuffix = "${++nameSuffix}"
         )
-        val dto: DtoInterfaceWithMultipleTypeParameters<String, Int, String, Long> = DtoBuddy.create(
+        val dto: DtoInterfaceWithMultipleTypeParameters<String, Int, String, Long> = dtoBuddy.create(
             concreteClass,
             mapOf("simple" to "Original String", "list" to listOf(1), "map" to mapOf("key1" to 1L))
         )
 
         assertNotNull(dto)
 
-        DtoBuddy.populate(dto, params)
+        dtoBuddy.populate(dto, params)
 
         assertEquals("Updated String", dto.simple)
         assertEquals(listOf(100, 200, 300), dto.list)

@@ -11,11 +11,12 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MultipleTypeParametersTest {
+    private final DtoBuddy dtoBuddy = new DtoBuddy();
     private static int nameSuffix = 0;
 
     @Test
     public void testImplement() {
-        Class<?> concreteClass = DtoBuddy.implementor(DtoInterfaceWithMultipleTypeParameters.class)
+        Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithMultipleTypeParameters.class)
             .withTypeParams(List.of(String.class, Integer.class, String.class, Long.class))
             .implement();
 
@@ -45,11 +46,11 @@ public class MultipleTypeParametersTest {
         mapParam.put("key3", 3L);
         params.put("map", mapParam);
 
-        Class<?> concreteClass = DtoBuddy.implementor(DtoInterfaceWithMultipleTypeParameters.class)
+        Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithMultipleTypeParameters.class)
             .withTypeParams(List.of(String.class, Integer.class, String.class, Long.class))
             .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
-        DtoInterfaceWithMultipleTypeParameters<String, Integer, String, Long> dto = DtoBuddy.create(concreteClass, params);
+        DtoInterfaceWithMultipleTypeParameters<String, Integer, String, Long> dto = dtoBuddy.create(concreteClass, params);
 
         assertNotNull(dto);
         assertEquals("Simple String", dto.getSimple());
@@ -66,7 +67,7 @@ public class MultipleTypeParametersTest {
         mapParam.put("key5", 5L);
         params.put("map", mapParam);
 
-        Class<?> concreteClass = DtoBuddy.implementor(DtoInterfaceWithMultipleTypeParameters.class)
+        Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithMultipleTypeParameters.class)
             .withTypeParams(List.of(String.class, Integer.class, String.class, Long.class))
             .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
@@ -76,10 +77,10 @@ public class MultipleTypeParametersTest {
         createParams.put("list", List.of(1, 2, 3));
         createParams.put("map", null);
 
-        DtoInterfaceWithMultipleTypeParameters<String, Integer, String, Long> dto = DtoBuddy.create(concreteClass, createParams);
+        DtoInterfaceWithMultipleTypeParameters<String, Integer, String, Long> dto = dtoBuddy.create(concreteClass, createParams);
 
         assertNotNull(dto);
-        DtoBuddy.populate(dto, params);
+        dtoBuddy.populate(dto, params);
         assertEquals("Initial String", dto.getSimple());
         assertEquals(List.of(1, 2, 3), dto.getList());
         assertEquals(mapParam, dto.getMap());
@@ -93,12 +94,12 @@ public class MultipleTypeParametersTest {
             params.put("list", List.of(10, 20, 30));
             params.put("map", null);
 
-            Class<?> concreteClass = DtoBuddy.implementor(DtoInterfaceWithMultipleTypeParameters.class)
+            Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithMultipleTypeParameters.class)
                 .withTypeParams(List.of(String.class, Integer.class, String.class, Long.class))
                 .withNameSuffix(String.valueOf(++nameSuffix))
                 .implement();
 
-            DtoInterfaceWithMultipleTypeParameters<String, Integer, String, Long> dto = DtoBuddy.create(concreteClass, params);
+            DtoInterfaceWithMultipleTypeParameters<String, Integer, String, Long> dto = dtoBuddy.create(concreteClass, params);
 
             assertNotNull(dto);
             assertEquals("Test String", dto.getSimple());
@@ -116,7 +117,7 @@ public class MultipleTypeParametersTest {
             mapParam.put("keyB", 20L);
             params.put("map", mapParam);
 
-            Class<?> concreteClass = DtoBuddy.implementor(DtoInterfaceWithMultipleTypeParameters.class)
+            Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithMultipleTypeParameters.class)
                 .withTypeParams(List.of(String.class, Integer.class, String.class, Long.class))
                 .withNameSuffix(String.valueOf(++nameSuffix))
                 .implement();
@@ -128,11 +129,11 @@ public class MultipleTypeParametersTest {
             initialMap.put("key1", 1L);
             createParams.put("map", initialMap);
 
-            DtoInterfaceWithMultipleTypeParameters<String, Integer, String, Long> dto = DtoBuddy.create(concreteClass, createParams);
+            DtoInterfaceWithMultipleTypeParameters<String, Integer, String, Long> dto = dtoBuddy.create(concreteClass, createParams);
 
             assertNotNull(dto);
 
-            DtoBuddy.populate(dto, params);
+            dtoBuddy.populate(dto, params);
 
             assertEquals("Updated String", dto.getSimple());
             assertEquals(List.of(100, 200, 300), dto.getList());

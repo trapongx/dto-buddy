@@ -13,7 +13,7 @@ import java.lang.reflect.Modifier
  * It can dynamically create concrete implementations of interfaces or abstract classes,
  * instantiate those implementations, and populate their properties.
  */
-object DtoBuddy {
+class DtoBuddy {
     private val byteBuddyWrapper = ByteBuddyWrapper()
 
     // Cache for generated classes to avoid regenerating the same class
@@ -133,7 +133,6 @@ object DtoBuddy {
      * make use of this parameter a lot.
      * @return generated class of type Class<*>
      */
-    @JvmStatic
     fun implement(
         baseClass: Class<*>,
         typeParams: List<Class<*>>? = null,
@@ -199,11 +198,9 @@ object DtoBuddy {
         }
     }
 
-    @JvmStatic
-    fun implementor() = ImplementationBuilder()
+    fun implementor() = ImplementationBuilder(this)
 
-    @JvmStatic
-    fun implementor(baseClass: Class<*>) = ImplementationBuilder(baseClass)
+    fun implementor(baseClass: Class<*>) = ImplementationBuilder(this, baseClass)
 
     /**
      * Creates a new instance of a DTO class and populates it with the provided parameters
@@ -212,7 +209,6 @@ object DtoBuddy {
      * @param params Map of property names to values
      * @return A new instance of the DTO class with populated properties
      */
-    @JvmStatic
     @Suppress("UNCHECKED_CAST")
     fun <DTO> create(concrete: Class<*>, params: Map<String, Any?>): DTO {
         try {
@@ -242,7 +238,6 @@ object DtoBuddy {
      * @param dto The DTO instance to populate
      * @param params Map of property names to values
      */
-    @JvmStatic
     fun <DTO> populate(dto: DTO, params: Map<String, Any?>) {
         try {
             val dtoClass = dto!!::class.java

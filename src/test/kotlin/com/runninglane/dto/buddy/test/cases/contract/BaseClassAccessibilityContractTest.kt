@@ -28,50 +28,52 @@ open class BaseClassAccessibilityContractTest {
 
     open class OpenClass
 
+    private val dtoBuddy = DtoBuddy()
+
     @Test
     fun shouldFailWhenClassIsPrivate() {
         assertThrows<DtoBuddyBadInputException> {
-            DtoBuddy.implement(PrivateInterface::class.java)
+            dtoBuddy.implement(PrivateInterface::class.java)
         }
     }
 
     @Test
     fun shouldFailWhenClassIsProtected() {
         assertThrows<DtoBuddyBadInputException> {
-            DtoBuddy.implement(ProtectedInterface::class.java)
+            dtoBuddy.implement(ProtectedInterface::class.java)
         }
     }
 
     @Test
     fun shouldFailWhenClassIsFinalAndIsNotCompleteAndMutable() {
         assertThrows<DtoBuddyBadInputException> {
-            DtoBuddy.implement(FinalClassWithImmutableProperties::class.java)
+            dtoBuddy.implement(FinalClassWithImmutableProperties::class.java)
         }
     }
 
     @Test
     fun shouldFailWhenClassIsFinalAndIsCompleteAndMutable() {
         assertDoesNotThrow {
-            DtoBuddy.implement(FinalClassWithNoProperties::class.java)
+            dtoBuddy.implement(FinalClassWithNoProperties::class.java)
         }
         assertDoesNotThrow {
-            DtoBuddy.implement(FinalClassWithMutableProperties::class.java)
+            dtoBuddy.implement(FinalClassWithMutableProperties::class.java)
         }
     }
 
     @Test
     fun shouldSuccessWhenClassIsOpenAndPublic() {
         assertDoesNotThrow {
-            DtoBuddy.implement(OpenClass::class.java)
+            dtoBuddy.implement(OpenClass::class.java)
         }
 
         assertDoesNotThrow {
-            DtoBuddy.implement(PublicInterface::class.java)
+            dtoBuddy.implement(PublicInterface::class.java)
         }
 
         assertDoesNotThrow {
             // Public internal
-            DtoBuddy.implement(InternalInterface::class.java)
+            dtoBuddy.implement(InternalInterface::class.java)
         }
     }
 

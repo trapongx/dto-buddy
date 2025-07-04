@@ -10,17 +10,18 @@ import kotlin.test.assertFalse
  * The rule is the returned class must be a concrete class
  */
 class GetterSetterBehaviorContractTest {
+    private val dtoBuddy = DtoBuddy()
 
     private fun test(baseClass: Class<*>, expectBaseClassReturned: Boolean, testGetSet: Boolean) {
         try {
-            val createdClass = DtoBuddy.implement(baseClass)
+            val createdClass = dtoBuddy.implement(baseClass)
             assertFalse(createdClass.isInterface)
             assertFalse(Modifier.isAbstract(createdClass.modifiers))
             if (expectBaseClassReturned) {
                 assertEquals(baseClass, createdClass)
             }
             if (testGetSet) {
-                val dto = DtoBuddy.create<Any>(createdClass, mapOf("name" to "Test"))
+                val dto = dtoBuddy.create<Any>(createdClass, mapOf("name" to "Test"))
                 val getName = createdClass.getMethod("getName")
                 val setName = createdClass.getMethod("setName", String::class.java)
                 assertEquals("Test", getName.invoke(dto))

@@ -1,21 +1,16 @@
 package com.runninglane.dto.buddy.test.cases.simple
 
 import com.runninglane.dto.buddy.DtoBuddy
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class SimpleDtoInterfaceTest {
-    companion object {
-        private var nameSuffix: Int = 0
-    }
+    private val dtoBuddy = DtoBuddy()
+    private var nameSuffix: Int = 0
 
     @Test
     fun testImplement() {
         run {
-            val concreteClass = DtoBuddy.implement(SimpleDtoInterface::class.java, nameSuffix = "${++nameSuffix}")
+            val concreteClass = dtoBuddy.implement(SimpleDtoInterface::class.java, nameSuffix = "${++nameSuffix}")
             assertNotNull(concreteClass)
             assertTrue(SimpleDtoInterface::class.java.isAssignableFrom(concreteClass))
             assertEquals("SimpleDtoInterface\$Dto$nameSuffix", concreteClass.simpleName)
@@ -25,7 +20,7 @@ class SimpleDtoInterfaceTest {
         }
 
         run {
-            val concreteClass = DtoBuddy.implement(SimpleDtoInterface::class.java)
+            val concreteClass = dtoBuddy.implement(SimpleDtoInterface::class.java)
             assertNotNull(concreteClass)
             assertTrue(SimpleDtoInterface::class.java.isAssignableFrom(concreteClass))
             assertEquals("SimpleDtoInterface\$Dto", concreteClass.simpleName)
@@ -36,7 +31,7 @@ class SimpleDtoInterfaceTest {
 
         run {
             val customPackage = "com.example.test"
-            val concreteClass = DtoBuddy.implement(SimpleDtoInterface::class.java, packageName = customPackage)
+            val concreteClass = dtoBuddy.implement(SimpleDtoInterface::class.java, packageName = customPackage)
             assertNotNull(concreteClass)
             assertTrue(SimpleDtoInterface::class.java.isAssignableFrom(concreteClass))
             assertEquals("SimpleDtoInterface\$Dto", concreteClass.simpleName)
@@ -47,7 +42,7 @@ class SimpleDtoInterfaceTest {
 
         run {
             val customPackage = "com.example.test"
-            val concreteClass = DtoBuddy.implement(
+            val concreteClass = dtoBuddy.implement(
                 SimpleDtoInterface::class.java,
                 packageName = customPackage,
                 nameSuffix = "${++nameSuffix}"
@@ -70,8 +65,8 @@ class SimpleDtoInterfaceTest {
             "email" to "john.doe@example.com"
         )
 
-        val concreteClass = DtoBuddy.implement(SimpleDtoInterface::class.java, nameSuffix = "${++nameSuffix}")
-        val dto: SimpleDtoInterface = DtoBuddy.create(concreteClass, params)
+        val concreteClass = dtoBuddy.implement(SimpleDtoInterface::class.java, nameSuffix = "${++nameSuffix}")
+        val dto: SimpleDtoInterface = dtoBuddy.create(concreteClass, params)
         assertNotNull(dto)
         assertEquals("John Doe", dto.name)
         assertEquals(30, dto.age)
@@ -84,13 +79,13 @@ class SimpleDtoInterfaceTest {
             "email" to "john.doe@example.com"
         )
 
-        val concreteClass = DtoBuddy.implement(SimpleDtoInterface::class.java, nameSuffix = "${++nameSuffix}")
-        val dto: SimpleDtoInterface = DtoBuddy.create(
+        val concreteClass = dtoBuddy.implement(SimpleDtoInterface::class.java, nameSuffix = "${++nameSuffix}")
+        val dto: SimpleDtoInterface = dtoBuddy.create(
             concreteClass,
             mapOf("name" to "John Doe", "age" to 30, "email" to null)
         )
         assertNotNull(dto)
-        DtoBuddy.populate(dto, params)
+        dtoBuddy.populate(dto, params)
         assertEquals("John Doe", dto.name)
         assertEquals(30, dto.age)
         assertEquals("john.doe@example.com", dto.email)
@@ -104,8 +99,8 @@ class SimpleDtoInterfaceTest {
             "email" to null
         )
 
-        val concreteClass = DtoBuddy.implement(SimpleDtoInterface::class.java, nameSuffix = "${++nameSuffix}")
-        val dto: SimpleDtoInterface = DtoBuddy.create(concreteClass, params)
+        val concreteClass = dtoBuddy.implement(SimpleDtoInterface::class.java, nameSuffix = "${++nameSuffix}")
+        val dto: SimpleDtoInterface = dtoBuddy.create(concreteClass, params)
         assertNotNull(dto)
         assertEquals("Jane Doe", dto.name)
         assertEquals(25, dto.age)
@@ -119,13 +114,13 @@ class SimpleDtoInterfaceTest {
             "email" to "john.doe@example.com"
         )
 
-        val concreteClass = DtoBuddy.implement(SimpleDtoInterface::class.java, nameSuffix = "${++nameSuffix}")
-        val dto: SimpleDtoInterface = DtoBuddy.create(
+        val concreteClass = dtoBuddy.implement(SimpleDtoInterface::class.java, nameSuffix = "${++nameSuffix}")
+        val dto: SimpleDtoInterface = dtoBuddy.create(
             concreteClass,
             mapOf("name" to "John Doe", "age" to 10, "email" to null)
         )
         assertNotNull(dto)
-        DtoBuddy.populate(dto, params)
+        dtoBuddy.populate(dto, params)
         assertEquals("John Doe", dto.name)
         assertEquals(30, dto.age)
         assertEquals("john.doe@example.com", dto.email)

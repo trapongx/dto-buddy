@@ -2,39 +2,45 @@ package com.runninglane.dto.buddy.builder
 
 import com.runninglane.dto.buddy.DtoBuddy
 
-class ImplementationBuilder() {
-    private var `interface`: Class<*>? = null
+class ImplementationBuilder {
+    private val dtoBuddy: DtoBuddy;
+    private var baseClass: Class<*>? = null
+    private var typeParams: List<Class<*>>? = null
     private var packageName: String? = null
     private var name: String? = null
     private var nameSuffix: String? = null
 
-    constructor(`interface`: Class<*>) : this() {
-        this.`interface` = `interface`
+    constructor(dtoBuddy: DtoBuddy) {
+        this.dtoBuddy = dtoBuddy;
     }
 
-    fun withInterface(`interface`: Class<*>): ImplementationBuilder {
-        this.`interface` = `interface`
-        return this
+    constructor(dtoBuddy: DtoBuddy, baseClass: Class<*>) : this(dtoBuddy) {
+        this.baseClass = baseClass
     }
 
-    fun withPackageName(packageName: String): ImplementationBuilder {
-        this.packageName = packageName
-        return this
+    fun withBaseClass(baseClass: Class<*>): ImplementationBuilder = this.also {
+        it.baseClass = baseClass
     }
 
-    fun withName(name: String): ImplementationBuilder {
-        this.name = name
-        return this
+    fun withTypeParams(typeParams: List<Class<*>>): ImplementationBuilder = this.also {
+        it.typeParams = typeParams
     }
 
-    fun withNameSuffix(nameSuffix: String): ImplementationBuilder {
-        this.nameSuffix = nameSuffix
-        return this
+    fun withPackageName(packageName: String): ImplementationBuilder = this.also {
+        it.packageName = packageName
+    }
+
+    fun withName(name: String): ImplementationBuilder = this.also {
+        it.name = name
+    }
+
+    fun withNameSuffix(nameSuffix: String): ImplementationBuilder = this.also {
+        it.nameSuffix = nameSuffix
     }
 
     fun implement(): Class<*> {
-        requireNotNull(`interface`) { "Interface must be specified" }
+        requireNotNull(baseClass) { "Base class must be specified" }
 
-        return DtoBuddy.implement(`interface`!!, packageName, name, nameSuffix)
+        return dtoBuddy.implement(baseClass!!, typeParams, packageName, name, nameSuffix)
     }
 }

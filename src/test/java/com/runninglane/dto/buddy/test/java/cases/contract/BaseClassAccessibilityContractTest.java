@@ -47,50 +47,52 @@ public class BaseClassAccessibilityContractTest {
     public static class OpenClass {
     }
 
+    private final DtoBuddy dtoBuddy = new DtoBuddy();
+    
     @Test
     public void shouldFailWhenClassIsPrivate() {
         assertThrows(DtoBuddyBadInputException.class, () ->
-            DtoBuddy.implementor(PrivateInterface.class).implement()
+            dtoBuddy.implementor(PrivateInterface.class).implement()
         );
     }
 
     @Test
     public void shouldFailWhenClassIsProtected() {
         assertThrows(DtoBuddyBadInputException.class, () ->
-            DtoBuddy.implementor(ProtectedInterface.class).implement()
+            dtoBuddy.implementor(ProtectedInterface.class).implement()
         );
     }
 
     @Test
     public void shouldFailWhenClassIsFinalAndIsNotCompleteAndMutable() {
         assertThrows(DtoBuddyBadInputException.class, () ->
-            DtoBuddy.implementor(FinalClassWithImmutableProperties.class).implement()
+            dtoBuddy.implementor(FinalClassWithImmutableProperties.class).implement()
         );
     }
 
     @Test
     public void shouldFailWhenClassIsFinalAndIsCompleteAndMutable() {
         assertDoesNotThrow(() ->
-            DtoBuddy.implementor(FinalClassWithNoProperties.class).implement()
+            dtoBuddy.implementor(FinalClassWithNoProperties.class).implement()
         );
         assertDoesNotThrow(() ->
-            DtoBuddy.implementor(FinalClassWithMutableProperties.class).implement()
+            dtoBuddy.implementor(FinalClassWithMutableProperties.class).implement()
         );
     }
 
     @Test
     public void shouldSuccessWhenClassIsOpenAndPublic() {
         assertDoesNotThrow(() ->
-            DtoBuddy.implementor(OpenClass.class).implement()
+            dtoBuddy.implementor(OpenClass.class).implement()
         );
 
         assertDoesNotThrow(() ->
-            DtoBuddy.implementor(PublicInterface.class).implement()
+            dtoBuddy.implementor(PublicInterface.class).implement()
         );
 
         assertDoesNotThrow(() -> {
             // Public internal
-            DtoBuddy.implementor(InternalInterface.class).implement();
+            dtoBuddy.implementor(InternalInterface.class).implement();
         });
     }
 

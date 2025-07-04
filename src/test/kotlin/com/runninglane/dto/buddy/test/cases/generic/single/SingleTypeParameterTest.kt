@@ -11,10 +11,12 @@ class SingleTypeParameterTest {
         private var nameSuffix: Int = 0
     }
 
+    private val dtoBuddy = DtoBuddy()
+
     @Test
     fun testImplement() {
         run {
-            val concreteClass = DtoBuddy.implement(
+            val concreteClass = dtoBuddy.implement(
                 DtoInterfaceWithSingleTypeParameter::class.java,
                 listOf(String::class.java)
             )
@@ -36,12 +38,12 @@ class SingleTypeParameterTest {
             "email" to "john.doe@example.com"
         )
 
-        val concreteClass = DtoBuddy.implement(
+        val concreteClass = dtoBuddy.implement(
             DtoInterfaceWithSingleTypeParameter::class.java,
             typeParams = listOf(String::class.java),
             nameSuffix = "${++nameSuffix}"
         )
-        val dto: DtoInterfaceWithSingleTypeParameter<String> = DtoBuddy.create(concreteClass, params)
+        val dto: DtoInterfaceWithSingleTypeParameter<String> = dtoBuddy.create(concreteClass, params)
 
         assertNotNull(dto)
         assertEquals("John Doe", dto.name)
@@ -56,18 +58,18 @@ class SingleTypeParameterTest {
             "email" to "john.doe@example.com"
         )
 
-        val concreteClass = DtoBuddy.implement(
+        val concreteClass = dtoBuddy.implement(
             DtoInterfaceWithSingleTypeParameter::class.java,
             typeParams = listOf(String::class.java),
             nameSuffix = "${++nameSuffix}"
         )
-        val dto: DtoInterfaceWithSingleTypeParameter<String> = DtoBuddy.create(
+        val dto: DtoInterfaceWithSingleTypeParameter<String> = dtoBuddy.create(
             concreteClass,
             mapOf("name" to "John Doe", "age" to 30, "email" to null)
         )
 
         assertNotNull(dto)
-        DtoBuddy.populate(dto, params)
+        dtoBuddy.populate(dto, params)
         assertEquals("John Doe", dto.name)
         assertEquals(30, dto.age)
         assertEquals("john.doe@example.com", dto.email)
@@ -82,12 +84,12 @@ class SingleTypeParameterTest {
             "email" to null
         )
 
-        val concreteClass = DtoBuddy.implement(
+        val concreteClass = dtoBuddy.implement(
             DtoInterfaceWithSingleTypeParameter::class.java,
             typeParams = listOf(String::class.java),
             nameSuffix = "${++nameSuffix}"
         )
-        val dto: DtoInterfaceWithSingleTypeParameter<String> = DtoBuddy.create(concreteClass, params)
+        val dto: DtoInterfaceWithSingleTypeParameter<String> = dtoBuddy.create(concreteClass, params)
 
         assertNotNull(dto)
         assertEquals("Jane Doe", dto.name)
@@ -103,19 +105,19 @@ class SingleTypeParameterTest {
             "email" to "john.doe@example.com"
         )
 
-        val concreteClass = DtoBuddy.implement(
+        val concreteClass = dtoBuddy.implement(
             DtoInterfaceWithSingleTypeParameter::class.java,
             typeParams = listOf(String::class.java),
             nameSuffix = "${++nameSuffix}"
         )
-        val dto: DtoInterfaceWithSingleTypeParameter<String> = DtoBuddy.create(
+        val dto: DtoInterfaceWithSingleTypeParameter<String> = dtoBuddy.create(
             concreteClass,
             mapOf("name" to "John Doe", "age" to 10, "email" to null)
         )
 
         assertNotNull(dto)
 
-        DtoBuddy.populate(dto, params)
+        dtoBuddy.populate(dto, params)
 
         assertEquals("John Doe", dto.name)
         assertEquals(30, dto.age)

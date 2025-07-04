@@ -9,11 +9,12 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SimpleAbstractDtoTest {
+    private final DtoBuddy dtoBuddy = new DtoBuddy();
     private static int nameSuffix = 0;
 
     @Test
     public void testImplement() {
-        Class<?> concreteClass = DtoBuddy.implementor(SimpleAbstractDto.class).implement();
+        Class<?> concreteClass = dtoBuddy.implementor(SimpleAbstractDto.class).implement();
 
         assertNotNull(concreteClass);
         assertTrue(SimpleAbstractDto.class.isAssignableFrom(concreteClass));
@@ -27,10 +28,10 @@ class SimpleAbstractDtoTest {
         params.put("age", 30);
         params.put("email", "john.doe@example.com");
 
-        Class<?> concreteClass = DtoBuddy.implementor(SimpleAbstractDto.class)
+        Class<?> concreteClass = dtoBuddy.implementor(SimpleAbstractDto.class)
             .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
-        SimpleAbstractDto dto = DtoBuddy.create(concreteClass, params);
+        SimpleAbstractDto dto = dtoBuddy.create(concreteClass, params);
 
         assertNotNull(dto);
         assertEquals("John Doe", dto.getName());
@@ -44,17 +45,17 @@ class SimpleAbstractDtoTest {
         Map<String, Object> params = new HashMap<>();
         params.put("email", "john.doe@example.com");
 
-        Class<?> concreteClass = DtoBuddy.implementor(SimpleAbstractDto.class)
+        Class<?> concreteClass = dtoBuddy.implementor(SimpleAbstractDto.class)
             .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
         Map<String, Object> initialParams = new HashMap<>();
         initialParams.put("name", "John Doe");
         initialParams.put("age", 30);
         initialParams.put("email", null);
-        SimpleAbstractDto dto = DtoBuddy.create(concreteClass, initialParams);
+        SimpleAbstractDto dto = dtoBuddy.create(concreteClass, initialParams);
 
         assertNotNull(dto);
-        DtoBuddy.populate(dto, params);
+        dtoBuddy.populate(dto, params);
         assertEquals("John Doe", dto.getName());
         assertEquals(30, dto.getAge());
         assertEquals("john.doe@example.com", dto.getEmail());
@@ -68,10 +69,10 @@ class SimpleAbstractDtoTest {
         params.put("age", 25);
         params.put("email", null);
 
-        Class<?> concreteClass = DtoBuddy.implementor(SimpleAbstractDto.class)
+        Class<?> concreteClass = dtoBuddy.implementor(SimpleAbstractDto.class)
             .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
-        SimpleAbstractDto dto = DtoBuddy.create(concreteClass, params);
+        SimpleAbstractDto dto = dtoBuddy.create(concreteClass, params);
 
         assertNotNull(dto);
         assertEquals("Jane Doe", dto.getName());
@@ -86,18 +87,18 @@ class SimpleAbstractDtoTest {
         params.put("age", 30);
         params.put("email", "john.doe@example.com");
 
-        Class<?> concreteClass = DtoBuddy.implementor(SimpleAbstractDto.class)
+        Class<?> concreteClass = dtoBuddy.implementor(SimpleAbstractDto.class)
             .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
         Map<String, Object> initialParams = new HashMap<>();
         initialParams.put("name", "John Doe");
         initialParams.put("age", 10);
         initialParams.put("email", null);
-        SimpleAbstractDto dto = DtoBuddy.create(concreteClass, initialParams);
+        SimpleAbstractDto dto = dtoBuddy.create(concreteClass, initialParams);
 
         assertNotNull(dto);
 
-        DtoBuddy.populate(dto, params);
+        dtoBuddy.populate(dto, params);
 
         assertEquals("John Doe", dto.getName());
         assertEquals(30, dto.getAge());

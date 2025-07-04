@@ -9,11 +9,12 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SingleTypeParameterTest {
+    private final DtoBuddy dtoBuddy = new DtoBuddy();
     private static int nameSuffix = 0;
 
     @Test
     public void testImplement() {
-        Class<?> concreteClass = DtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
+        Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
             .withTypeParams(Collections.singletonList(String.class))
             .implement();
 
@@ -47,11 +48,11 @@ public class SingleTypeParameterTest {
         params.put("age", 30);
         params.put("email", "john.doe@example.com");
 
-        Class<?> concreteClass = DtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
+        Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
             .withTypeParams(Collections.singletonList(String.class))
             .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
-        DtoInterfaceWithSingleTypeParameter<String> dto = DtoBuddy.create(concreteClass, params);
+        DtoInterfaceWithSingleTypeParameter<String> dto = dtoBuddy.create(concreteClass, params);
 
         assertNotNull(dto);
         assertEquals("John Doe", dto.getName());
@@ -65,7 +66,7 @@ public class SingleTypeParameterTest {
         Map<String, Object> params = new HashMap<>();
         params.put("email", "john.doe@example.com");
 
-        Class<?> concreteClass = DtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
+        Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
             .withTypeParams(Collections.singletonList(String.class))
             .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
@@ -75,10 +76,10 @@ public class SingleTypeParameterTest {
         initialParams.put("age", 30);
         initialParams.put("email", null);
 
-        DtoInterfaceWithSingleTypeParameter<String> dto = DtoBuddy.create(concreteClass, initialParams);
+        DtoInterfaceWithSingleTypeParameter<String> dto = dtoBuddy.create(concreteClass, initialParams);
 
         assertNotNull(dto);
-        DtoBuddy.populate(dto, params);
+        dtoBuddy.populate(dto, params);
         assertEquals("John Doe", dto.getName());
         assertEquals(30, dto.getAge());
         assertEquals("john.doe@example.com", dto.getEmail());
@@ -92,11 +93,11 @@ public class SingleTypeParameterTest {
         params.put("age", 25);
         params.put("email", null);
 
-        Class<?> concreteClass = DtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
+        Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
             .withTypeParams(Collections.singletonList(String.class))
             .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
-        DtoInterfaceWithSingleTypeParameter<String> dto = DtoBuddy.create(concreteClass, params);
+        DtoInterfaceWithSingleTypeParameter<String> dto = dtoBuddy.create(concreteClass, params);
 
         assertNotNull(dto);
         assertEquals("Jane Doe", dto.getName());
@@ -110,7 +111,7 @@ public class SingleTypeParameterTest {
         params.put("age", 30);
         params.put("email", "john.doe@example.com");
 
-        Class<?> concreteClass = DtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
+        Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
             .withTypeParams(Collections.singletonList(String.class))
             .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
@@ -120,11 +121,11 @@ public class SingleTypeParameterTest {
         initialParams.put("age", 10);
         initialParams.put("email", null);
 
-        DtoInterfaceWithSingleTypeParameter<String> dto = DtoBuddy.create(concreteClass, initialParams);
+        DtoInterfaceWithSingleTypeParameter<String> dto = dtoBuddy.create(concreteClass, initialParams);
 
         assertNotNull(dto);
 
-        DtoBuddy.populate(dto, params);
+        dtoBuddy.populate(dto, params);
 
         assertEquals("John Doe", dto.getName());
         assertEquals(30, dto.getAge());

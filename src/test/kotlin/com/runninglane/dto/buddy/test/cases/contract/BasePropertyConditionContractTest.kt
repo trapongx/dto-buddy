@@ -68,10 +68,12 @@ class BasePropertyConditionContractTest {
         val name: String = "John Doe"
     }
 
+    private val dtoBuddy = DtoBuddy()
+
     private fun assertSucceed(baseClass: Class<*>) {
         try {
-            val concreteClass = DtoBuddy.implement(baseClass)
-            val dto = DtoBuddy.create<Any>(concreteClass, mapOf("name" to "Test"))
+            val concreteClass = dtoBuddy.implement(baseClass)
+            val dto = dtoBuddy.create<Any>(concreteClass, mapOf("name" to "Test"))
             val getName = concreteClass.getMethod("getName")
             assertEquals("Test", getName.invoke(dto))
             val setName = concreteClass.getMethod("setName", String::class.java)
@@ -109,19 +111,19 @@ class BasePropertyConditionContractTest {
     @Test
     fun shouldSucceedWithoutPropertyImplementationWhenBaseClassIsAbstractClassHavingEitherConcreteGetterOrConcreteSetter() {
         run {
-            val concreteClass = DtoBuddy.implement(AbstractClassWithConcreteGetter::class.java)
+            val concreteClass = dtoBuddy.implement(AbstractClassWithConcreteGetter::class.java)
             assertTrue(concreteClass.methods.any { it.name == "getName" })
             assertFalse(concreteClass.methods.any { it.name == "setName" })
         }
 
         run {
-            val concreteClass = DtoBuddy.implement(AbstractClassWithConcreteSetter::class.java)
+            val concreteClass = dtoBuddy.implement(AbstractClassWithConcreteSetter::class.java)
             assertFalse(concreteClass.methods.any { it.name == "getName" })
             assertTrue(concreteClass.methods.any { it.name == "setName" })
         }
 
         run {
-            val concreteClass = DtoBuddy.implement(AbstractClassWithConcreteImmutableProperty::class.java)
+            val concreteClass = dtoBuddy.implement(AbstractClassWithConcreteImmutableProperty::class.java)
             assertTrue(concreteClass.methods.any { it.name == "getName" })
             assertFalse(concreteClass.methods.any { it.name == "setName" })
         }
@@ -135,7 +137,7 @@ class BasePropertyConditionContractTest {
         ).forEach { baseClass ->
             try {
                 assertThrows<DtoBuddyBadInputException> {
-                    DtoBuddy.implement(baseClass)
+                    dtoBuddy.implement(baseClass)
                 }
             } catch (e: Throwable) {
                 throw RuntimeException("Failed to test ${baseClass.simpleName}", e)

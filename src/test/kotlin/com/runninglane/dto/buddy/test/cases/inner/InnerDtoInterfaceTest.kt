@@ -6,10 +6,11 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class InnerDtoInterfaceTest {
+    private val dtoBuddy = DtoBuddy()
 
     @Test
     fun testImplement() {
-        val concreteClass = DtoBuddy.implement(InnerDtoInterfaceEncloser.InnerDtoInterface::class.java)
+        val concreteClass = dtoBuddy.implement(InnerDtoInterfaceEncloser.InnerDtoInterface::class.java)
         assertNotNull(concreteClass)
         assertTrue(InnerDtoInterfaceEncloser.InnerDtoInterface::class.java.isAssignableFrom(concreteClass))
     }

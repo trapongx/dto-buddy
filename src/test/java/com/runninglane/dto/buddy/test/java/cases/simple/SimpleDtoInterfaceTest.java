@@ -10,12 +10,13 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SimpleDtoInterfaceTest {
+    private final DtoBuddy dtoBuddy = new DtoBuddy();
     private static int nameSuffix = 0;
 
     @Test
     public void testImplement() {
         {
-            Class<?> concreteClass = DtoBuddy.implementor(SimpleDtoInterface.class)
+            Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class)
                 .withNameSuffix(String.valueOf(++nameSuffix))
                 .implement();
             assertNotNull(concreteClass);
@@ -27,7 +28,7 @@ class SimpleDtoInterfaceTest {
         }
 
         {
-            Class<?> concreteClass = DtoBuddy.implementor(SimpleDtoInterface.class)
+            Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class)
                 .implement();
             assertNotNull(concreteClass);
             assertTrue(SimpleDtoInterface.class.isAssignableFrom(concreteClass));
@@ -39,7 +40,7 @@ class SimpleDtoInterfaceTest {
 
         {
             String customPackage = "com.example.test.java";
-            Class<?> concreteClass = DtoBuddy.implementor(SimpleDtoInterface.class)
+            Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class)
                 .withPackageName(customPackage)
                 .implement();
             assertNotNull(concreteClass);
@@ -52,7 +53,7 @@ class SimpleDtoInterfaceTest {
 
         {
             String customPackage = "com.example.test.java";
-            Class<?> concreteClass = DtoBuddy.implementor(SimpleDtoInterface.class)
+            Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class)
                 .withPackageName(customPackage)
                 .withNameSuffix(String.valueOf(++nameSuffix))
                 .implement();
@@ -64,6 +65,7 @@ class SimpleDtoInterfaceTest {
             assertEquals(Object.class, concreteClass.getSuperclass());
         }
 
+        assertThrows(IllegalArgumentException.class, () -> dtoBuddy.implementor().implement());
     }
 
     @Test
@@ -74,10 +76,10 @@ class SimpleDtoInterfaceTest {
             "email", "john.doe@example.com"
         );
 
-        Class<?> concreteClass = DtoBuddy.implementor(SimpleDtoInterface.class)
+        Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class)
             .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
-        SimpleDtoInterface dto = DtoBuddy.create(concreteClass, params);
+        SimpleDtoInterface dto = dtoBuddy.create(concreteClass, params);
         assertNotNull(dto);
         assertEquals("John Doe", dto.getName());
         assertEquals(30, dto.getAge());
@@ -90,16 +92,16 @@ class SimpleDtoInterfaceTest {
             "email", "john.doe@example.com"
         );
 
-        Class<?> concreteClass = DtoBuddy.implementor(SimpleDtoInterface.class)
+        Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class)
             .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
         Map<String, Object> initialParams = new HashMap<>();
         initialParams.put("name", "John Doe");
         initialParams.put("age", 30);
         initialParams.put("email", null);
-        SimpleDtoInterface dto = DtoBuddy.create(concreteClass, initialParams);
+        SimpleDtoInterface dto = dtoBuddy.create(concreteClass, initialParams);
         assertNotNull(dto);
-        DtoBuddy.populate(dto, params);
+        dtoBuddy.populate(dto, params);
         assertEquals("John Doe", dto.getName());
         assertEquals(30, dto.getAge());
         assertEquals("john.doe@example.com", dto.getEmail());
@@ -112,10 +114,10 @@ class SimpleDtoInterfaceTest {
         params.put("age", 25);
         params.put("email", null);
 
-        Class<?> concreteClass = DtoBuddy.implementor(SimpleDtoInterface.class)
+        Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class)
             .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
-        SimpleDtoInterface dto = DtoBuddy.create(concreteClass, params);
+        SimpleDtoInterface dto = dtoBuddy.create(concreteClass, params);
         assertNotNull(dto);
         assertEquals("Jane Doe", dto.getName());
         assertEquals(25, dto.getAge());
@@ -129,16 +131,16 @@ class SimpleDtoInterfaceTest {
             "email", "john.doe@example.com"
         );
 
-        Class<?> concreteClass = DtoBuddy.implementor(SimpleDtoInterface.class)
+        Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class)
             .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
         Map<String, Object> initialParams = new HashMap<>();
         initialParams.put("name", "John Doe");
         initialParams.put("age", 10);
         initialParams.put("email", null);
-        SimpleDtoInterface dto = DtoBuddy.create(concreteClass, initialParams);
+        SimpleDtoInterface dto = dtoBuddy.create(concreteClass, initialParams);
         assertNotNull(dto);
-        DtoBuddy.populate(dto, params);
+        dtoBuddy.populate(dto, params);
         assertEquals("John Doe", dto.getName());
         assertEquals(30, dto.getAge());
         assertEquals("john.doe@example.com", dto.getEmail());

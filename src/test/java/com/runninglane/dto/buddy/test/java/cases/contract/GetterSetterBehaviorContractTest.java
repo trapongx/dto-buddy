@@ -15,17 +15,18 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  * The rule is the returned class must be a concrete class
  */
 public class GetterSetterBehaviorContractTest {
-
+    private final DtoBuddy dtoBuddy = new DtoBuddy();
+    
     private void test(Class<?> baseClass, boolean expectBaseClassReturned, boolean testGetSet) {
         try {
-            Class<?> createdClass = DtoBuddy.implementor(baseClass).implement();
+            Class<?> createdClass = dtoBuddy.implementor(baseClass).implement();
             assertFalse(createdClass.isInterface());
             assertFalse(Modifier.isAbstract(createdClass.getModifiers()));
             if (expectBaseClassReturned) {
                 assertEquals(baseClass, createdClass);
             }
             if (testGetSet) {
-                Object dto = DtoBuddy.create(createdClass, Map.of("name", "Test"));
+                Object dto = dtoBuddy.create(createdClass, Map.of("name", "Test"));
                 var getName = createdClass.getMethod("getName");
                 var setName = createdClass.getMethod("setName", String.class);
                 assertEquals("Test", getName.invoke(dto));

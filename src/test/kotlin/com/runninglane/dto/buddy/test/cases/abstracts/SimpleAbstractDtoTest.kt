@@ -7,13 +7,12 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class SimpleAbstractDtoTest {
-    companion object {
-        private var nameSuffix: Int = 0
-    }
+    private val dtoBuddy = DtoBuddy()
+    private var nameSuffix: Int = 0
 
     @Test
     fun testImplement() {
-         val concreteClass = DtoBuddy.implement(SimpleAbstractDto::class.java)
+         val concreteClass = dtoBuddy.implement(SimpleAbstractDto::class.java)
 
          assertNotNull(concreteClass)
          assertTrue(SimpleAbstractDto::class.java.isAssignableFrom(concreteClass))
@@ -28,8 +27,8 @@ class SimpleAbstractDtoTest {
             "email" to "john.doe@example.com"
         )
 
-        val concreteClass = DtoBuddy.implement(SimpleAbstractDto::class.java, nameSuffix = "${++nameSuffix}")
-        val dto: SimpleAbstractDto = DtoBuddy.create(concreteClass, params)
+        val concreteClass = dtoBuddy.implement(SimpleAbstractDto::class.java, nameSuffix = "${++nameSuffix}")
+        val dto: SimpleAbstractDto = dtoBuddy.create(concreteClass, params)
 
         assertNotNull(dto)
         assertEquals("John Doe", dto.name)
@@ -44,14 +43,14 @@ class SimpleAbstractDtoTest {
             "email" to "john.doe@example.com"
         )
 
-        val concreteClass = DtoBuddy.implement(SimpleAbstractDto::class.java, nameSuffix = "${++nameSuffix}")
-        val dto: SimpleAbstractDto = DtoBuddy.create(
+        val concreteClass = dtoBuddy.implement(SimpleAbstractDto::class.java, nameSuffix = "${++nameSuffix}")
+        val dto: SimpleAbstractDto = dtoBuddy.create(
             concreteClass,
             mapOf("name" to "John Doe", "age" to 30, "email" to null)
         )
 
         assertNotNull(dto)
-        DtoBuddy.populate(dto, params)
+        dtoBuddy.populate(dto, params)
         assertEquals("John Doe", dto.name)
         assertEquals(30, dto.age)
         assertEquals("john.doe@example.com", dto.email)
@@ -66,8 +65,8 @@ class SimpleAbstractDtoTest {
             "email" to null
         )
 
-        val concreteClass = DtoBuddy.implement(SimpleAbstractDto::class.java, nameSuffix = "${++nameSuffix}")
-        val dto: SimpleAbstractDto = DtoBuddy.create(concreteClass, params)
+        val concreteClass = dtoBuddy.implement(SimpleAbstractDto::class.java, nameSuffix = "${++nameSuffix}")
+        val dto: SimpleAbstractDto = dtoBuddy.create(concreteClass, params)
 
         assertNotNull(dto)
         assertEquals("Jane Doe", dto.name)
@@ -83,15 +82,15 @@ class SimpleAbstractDtoTest {
             "email" to "john.doe@example.com"
         )
 
-        val concreteClass = DtoBuddy.implement(SimpleAbstractDto::class.java, nameSuffix = "${++nameSuffix}")
-        val dto: SimpleAbstractDto = DtoBuddy.create(
+        val concreteClass = dtoBuddy.implement(SimpleAbstractDto::class.java, nameSuffix = "${++nameSuffix}")
+        val dto: SimpleAbstractDto = dtoBuddy.create(
             concreteClass,
             mapOf("name" to "John Doe", "age" to 10, "email" to null)
         )
 
         assertNotNull(dto)
 
-        DtoBuddy.populate(dto, params)
+        dtoBuddy.populate(dto, params)
 
         assertEquals("John Doe", dto.name)
         assertEquals(30, dto.age)

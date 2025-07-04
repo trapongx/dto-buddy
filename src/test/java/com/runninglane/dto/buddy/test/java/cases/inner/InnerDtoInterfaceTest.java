@@ -8,10 +8,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class InnerDtoInterfaceTest {
 
+    private final DtoBuddy dtoBuddy = new DtoBuddy();
+    
     @Test
     public void testImplement()
     {
-        Class<?> concreteClass = DtoBuddy.implementor()
+        Class<?> concreteClass = dtoBuddy.implementor()
             .withBaseClass(InnerDtoInterfaceEncloser.InnerDtoInterface.class)
             .implement();
         assertNotNull(concreteClass);

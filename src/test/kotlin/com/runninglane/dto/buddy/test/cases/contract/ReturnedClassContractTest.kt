@@ -10,10 +10,11 @@ import kotlin.test.assertFalse
  * The rule is the returned class must be a concrete class
  */
 class ReturnedClassContractTest {
+    private val dtoBuddy = DtoBuddy()
 
     private fun test(baseClass: Class<*>, expectBaseClassReturned: Boolean) {
         try {
-            val createdClass = DtoBuddy.implement(baseClass)
+            val createdClass = dtoBuddy.implement(baseClass)
             assertFalse(createdClass.isInterface)
             assertFalse(Modifier.isAbstract(createdClass.modifiers))
             if (expectBaseClassReturned) {

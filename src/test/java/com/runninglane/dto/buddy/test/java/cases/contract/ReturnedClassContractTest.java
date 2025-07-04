@@ -16,9 +16,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  */
 public class ReturnedClassContractTest {
 
+    private final DtoBuddy dtoBuddy = new DtoBuddy();
+
     private void test(Class<?> baseClass, boolean expectBaseClassReturned) {
         try {
-            Class<?> createdClass = DtoBuddy.implementor(baseClass).implement();
+            Class<?> createdClass = dtoBuddy.implementor(baseClass).implement();
             assertFalse(createdClass.isInterface());
             assertFalse(Modifier.isAbstract(createdClass.getModifiers()));
             if (expectBaseClassReturned) {

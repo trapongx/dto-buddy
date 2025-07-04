@@ -91,10 +91,12 @@ public class BasePropertyConditionContractTest {
         }
     }
 
+    private final DtoBuddy dtoBuddy = new DtoBuddy();
+    
     private void assertSucceed(Class<?> baseClass) {
         try {
-            Class<?> concreteClass = DtoBuddy.implementor(baseClass).implement();
-            Object dto = DtoBuddy.create(concreteClass, Map.of("name", "Test"));
+            Class<?> concreteClass = dtoBuddy.implementor(baseClass).implement();
+            Object dto = dtoBuddy.create(concreteClass, Map.of("name", "Test"));
             var getName = concreteClass.getMethod("getName");
             assertEquals("Test", getName.invoke(dto));
             var setName = concreteClass.getMethod("setName", String.class);
@@ -128,19 +130,19 @@ public class BasePropertyConditionContractTest {
     @Test
     public void shouldSucceedWithoutPropertyImplementationWhenBaseClassIsAbstractClassHavingEitherConcreteGetterOrConcreteSetter() {
         {
-            Class<?> concreteClass = DtoBuddy.implementor(AbstractClassWithConcreteGetter.class).implement();
+            Class<?> concreteClass = dtoBuddy.implementor(AbstractClassWithConcreteGetter.class).implement();
             assertTrue(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("getName")));
             assertFalse(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("setName")));
         }
 
         {
-            Class<?> concreteClass = DtoBuddy.implementor(AbstractClassWithConcreteSetter.class).implement();
+            Class<?> concreteClass = dtoBuddy.implementor(AbstractClassWithConcreteSetter.class).implement();
             assertFalse(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("getName")));
             assertTrue(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("setName")));
         }
 
         {
-            Class<?> concreteClass = DtoBuddy.implementor(AbstractClassWithConcreteImmutableProperty.class).implement();
+            Class<?> concreteClass = dtoBuddy.implementor(AbstractClassWithConcreteImmutableProperty.class).implement();
             assertTrue(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("getName")));
             assertFalse(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("setName")));
         }
@@ -154,7 +156,7 @@ public class BasePropertyConditionContractTest {
         ).forEach(baseClass -> {
             try {
                 assertThrows(DtoBuddyBadInputException.class, () ->
-                    DtoBuddy.implementor(baseClass).implement()
+                    dtoBuddy.implementor(baseClass).implement()
                 );
             } catch (Throwable e) {
                 throw new RuntimeException("Failed to test " + baseClass.getSimpleName(), e);
