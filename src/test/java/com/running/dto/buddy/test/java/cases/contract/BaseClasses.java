@@ -1,7 +1,6 @@
 package com.running.dto.buddy.test.java.cases.contract;
 
-public interface BaseClasses {
-
+interface BaseClasses {
     interface InterfaceWithNoMember {
     }
 
@@ -15,24 +14,44 @@ public interface BaseClasses {
         void setName(String name);
     }
 
+    interface InterfaceWithDefaultGetter {
+        default String getName() {
+            return "John Doe";
+        }
+    }
+
+    interface InterfaceWithDefaultGetterAndAbstractSetter {
+        default String getName() {
+            return "John Doe";
+        }
+
+        void setName(String name);
+    }
+
     interface InterfaceWithAbstractProperty {
         String getName();
     }
 
-    abstract static class AbstractClassWithNoMember {
+    interface InterfaceWithAbstractPropertyAndDefaultGetter {
+        default String getName() {
+            return "John Doe";
+        }
     }
 
-    abstract static class AbstractClassWithAbstractGetter {
+    abstract class AbstractClassWithNoMember {
+    }
+
+    abstract class AbstractClassWithAbstractGetter {
         public abstract String getName();
     }
 
-    abstract static class AbstractClassWithAbstractGetterAndAbstractSetter {
+    abstract class AbstractClassWithAbstractGetterAndAbstractSetter {
         public abstract String getName();
 
         public abstract void setName(String name);
     }
 
-    abstract static class AbstractClassWithConcreteGetterAndConcreteSetterWithoutField {
+    abstract class AbstractClassWithConcreteGetterAndConcreteSetterWithoutField {
         public String getName() {
             return "John Doe";
         }
@@ -42,7 +61,7 @@ public interface BaseClasses {
         }
     }
 
-    abstract static class AbstractClassWithConcreteGetterAndConcreteSetterWithField {
+    abstract class AbstractClassWithConcreteGetterAndConcreteSetterWithField {
         private String _name = "John Doe";
 
         public String getName() {
@@ -54,17 +73,17 @@ public interface BaseClasses {
         }
     }
 
-    abstract static class AbstractClassWithAbstractImmutableProperty {
+    abstract class AbstractClassWithAbstractImmutableProperty {
         public abstract String getName();
     }
 
-    abstract static class AbstractClassWithAbstractMutableProperty {
+    abstract class AbstractClassWithAbstractMutableProperty {
         public abstract String getName();
 
         public abstract void setName(String name);
     }
 
-    abstract static class AbstractClassWithConcreteMutableProperty {
+    abstract class AbstractClassWithConcreteMutableProperty {
         private String name = "John Doe";
 
         public String getName() {
@@ -76,10 +95,22 @@ public interface BaseClasses {
         }
     }
 
-    static class ConcreteClassWithNoMember {
+    class ConcreteClassWithNoMember {
     }
 
-    static class ConcreteClassWithGetterAndSetterWithoutField {
+    class ConcreteClassWithGetter {
+        public String getName() {
+            return "John Doe";
+        }
+    }
+
+    class ConcreteClassWithSetter {
+        public void setName(String name) {
+            throw new UnsupportedOperationException("Not yet implemented");
+        }
+    }
+
+    class ConcreteClassWithGetterAndSetterWithoutField {
         public String getName() {
             return "John Doe";
         }
@@ -89,7 +120,7 @@ public interface BaseClasses {
         }
     }
 
-    static class ConcreteClassWithGetterAndSetterWithField {
+    class ConcreteClassWithGetterAndSetterWithField {
         private String _name = "John Doe";
 
         public String getName() {
@@ -101,7 +132,15 @@ public interface BaseClasses {
         }
     }
 
-    static class ConcreteClassWithConcreteMutableProperty {
+    class ConcreteClassWithConcreteImmutableProperty {
+        private final String name = "John Doe";
+
+        public String getName() {
+            return name;
+        }
+    }
+
+    class ConcreteClassWithConcreteMutableProperty {
         private String name = "John Doe";
 
         public String getName() {
@@ -112,5 +151,4 @@ public interface BaseClasses {
             this.name = name;
         }
     }
-
 }

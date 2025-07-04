@@ -1,4 +1,4 @@
-package com.runninglane.dto.buddy.test.cases.validate
+package com.runninglane.dto.buddy.test.cases.contract
 
 import com.runninglane.dto.buddy.DtoBuddy
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
@@ -6,33 +6,39 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 
-private interface PrivateInterface
+open class BaseClassAccessibilityContractTest {
 
-open class BaseClassValidationTest {
+    private interface PrivateInterface
 
     protected interface ProtectedInterface
+
     internal interface InternalInterface
+
     interface PublicInterface
+
     class FinalClassWithNoProperties
+
     class FinalClassWithImmutableProperties {
         val name: String = "John"
     }
+
     class FinalClassWithMutableProperties {
         var name: String = "John"
     }
-    open class OpenClass
 
-    @Test
-    fun shouldFailWhenClassIsProtected() {
-        assertThrows<DtoBuddyBadInputException> {
-            DtoBuddy.implement(ProtectedInterface::class.java)
-        }
-    }
+    open class OpenClass
 
     @Test
     fun shouldFailWhenClassIsPrivate() {
         assertThrows<DtoBuddyBadInputException> {
             DtoBuddy.implement(PrivateInterface::class.java)
+        }
+    }
+
+    @Test
+    fun shouldFailWhenClassIsProtected() {
+        assertThrows<DtoBuddyBadInputException> {
+            DtoBuddy.implement(ProtectedInterface::class.java)
         }
     }
 

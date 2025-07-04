@@ -1,4 +1,4 @@
-package com.running.dto.buddy.test.java.cases.validate;
+package com.running.dto.buddy.test.java.cases.contract;
 
 import com.runninglane.dto.buddy.DtoBuddy;
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException;
@@ -7,20 +7,24 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-interface PrivateInterface {
-}
+public class BaseClassAccessibilityContractTest {
 
-public class BaseClassValidationTest {
+    interface PrivateInterface {
+    }
+
     protected interface ProtectedInterface {
+    }
+
+    public interface InternalInterface {
     }
 
     public interface PublicInterface {
     }
 
-    class FinalClassWithNoProperties {
+    public static final class FinalClassWithNoProperties {
     }
 
-    class FinalClassWithImmutableProperties {
+    public static final class FinalClassWithImmutableProperties {
         private final String name = "John";
 
         public String getName() {
@@ -28,7 +32,7 @@ public class BaseClassValidationTest {
         }
     }
 
-    class FinalClassWithMutableProperties {
+    public static final class FinalClassWithMutableProperties {
         private String name = "John";
 
         public String getName() {
@@ -44,38 +48,50 @@ public class BaseClassValidationTest {
     }
 
     @Test
-    public void shouldFailWhenClassIsProtected() {
+    public void shouldFailWhenClassIsPrivate() {
         assertThrows(DtoBuddyBadInputException.class, () ->
-            DtoBuddy.implementor().withBaseClass(ProtectedInterface.class).implement());
+            DtoBuddy.implementor(PrivateInterface.class).implement()
+        );
     }
 
     @Test
-    public void shouldFailWhenClassIsPrivate() {
+    public void shouldFailWhenClassIsProtected() {
         assertThrows(DtoBuddyBadInputException.class, () ->
-            DtoBuddy.implementor().withBaseClass(PrivateInterface.class).implement());
+            DtoBuddy.implementor(ProtectedInterface.class).implement()
+        );
     }
 
     @Test
     public void shouldFailWhenClassIsFinalAndIsNotCompleteAndMutable() {
         assertThrows(DtoBuddyBadInputException.class, () ->
-            DtoBuddy.implementor(FinalClassWithImmutableProperties.class).implement());
+            DtoBuddy.implementor(FinalClassWithImmutableProperties.class).implement()
+        );
     }
 
     @Test
     public void shouldFailWhenClassIsFinalAndIsCompleteAndMutable() {
         assertDoesNotThrow(() ->
-            DtoBuddy.implementor(FinalClassWithNoProperties.class).implement());
+            DtoBuddy.implementor(FinalClassWithNoProperties.class).implement()
+        );
         assertDoesNotThrow(() ->
-            DtoBuddy.implementor(FinalClassWithMutableProperties.class).implement());
+            DtoBuddy.implementor(FinalClassWithMutableProperties.class).implement()
+        );
     }
 
     @Test
     public void shouldSuccessWhenClassIsOpenAndPublic() {
         assertDoesNotThrow(() ->
-            DtoBuddy.implementor().withBaseClass(OpenClass.class).implement());
+            DtoBuddy.implementor(OpenClass.class).implement()
+        );
 
         assertDoesNotThrow(() ->
-            DtoBuddy.implementor().withBaseClass(PublicInterface.class).implement());
+            DtoBuddy.implementor(PublicInterface.class).implement()
+        );
+
+        assertDoesNotThrow(() -> {
+            // Public internal
+            DtoBuddy.implementor(InternalInterface.class).implement();
+        });
     }
 
 }

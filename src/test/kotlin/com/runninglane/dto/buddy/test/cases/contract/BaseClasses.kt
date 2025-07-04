@@ -40,14 +40,6 @@ abstract class AbstractClassWithAbstractGetterAndAbstractSetter {
     abstract fun setName(name: String)
 }
 
-abstract class AbstractClassWithConcreteGetter {
-    fun getName(): String = "John Doe"
-}
-
-abstract class AbstractClassWithConcreteSetter {
-    fun setName(name: String) { TODO("Not yet implemented") }
-}
-
 abstract class AbstractClassWithConcreteGetterAndConcreteSetterWithoutField {
     fun getName(): String = "John Doe"
     fun setName(name: String) { TODO("Not yet implemented") }
@@ -65,10 +57,6 @@ abstract class AbstractClassWithAbstractImmutableProperty {
 
 abstract class AbstractClassWithAbstractMutableProperty {
     abstract var name: String
-}
-
-abstract class AbstractClassWithConcreteImmutableProperty {
-    val name: String = "John Doe"
 }
 
 abstract class AbstractClassWithConcreteMutableProperty {

@@ -6,7 +6,7 @@ import java.lang.reflect.Modifier
 /**
  * Validates that a property has consistent getter and setter
  */
-internal fun PropertyDescriptor.validate() {
+internal fun PropertyDescriptor.validateContractCompliance() {
     if (isAlreadyCompleteAndMutable()) return
 
     if (shouldImplement()) {
@@ -54,7 +54,7 @@ internal fun PropertyDescriptor.validate() {
  * - Abstract getters and setters must be public
  * - In Kotlin, abstract methods are inherently open, but in Java they need to be explicitly checked
  */
-internal fun PropertyDescriptor.validateAccessModifiers() {
+private fun PropertyDescriptor.validateAccessModifiers() {
     getter?.let {
         if (Modifier.isAbstract(it.modifiers) && !Modifier.isPublic(it.modifiers)) {
             throw DtoBuddyBadInputException(

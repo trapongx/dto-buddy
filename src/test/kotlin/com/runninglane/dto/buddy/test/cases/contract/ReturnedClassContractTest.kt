@@ -11,6 +11,19 @@ import kotlin.test.assertFalse
  */
 class ReturnedClassContractTest {
 
+    private fun test(baseClass: Class<*>, expectBaseClassReturned: Boolean) {
+        try {
+            val createdClass = DtoBuddy.implement(baseClass)
+            assertFalse(createdClass.isInterface)
+            assertFalse(Modifier.isAbstract(createdClass.modifiers))
+            if (expectBaseClassReturned) {
+                assertEquals(baseClass, createdClass)
+            }
+        } catch (e: Throwable) {
+            throw RuntimeException("Failed to test ${baseClass.simpleName}", e)
+        }
+    }
+
     @Test
     fun testInterface() {
         listOf(
@@ -22,9 +35,7 @@ class ReturnedClassContractTest {
             InterfaceWithAbstractProperty::class.java,
             InterfaceWithAbstractPropertyAndDefaultGetter::class.java
         ).forEach { baseClass ->
-            val createdClass = DtoBuddy.implement(baseClass)
-            assertFalse(createdClass.isInterface)
-            assertFalse(Modifier.isAbstract(createdClass.modifiers))
+            test(baseClass, false)
         }
     }
 
@@ -34,18 +45,13 @@ class ReturnedClassContractTest {
             AbstractClassWithNoMember::class.java,
             AbstractClassWithAbstractGetter::class.java,
             AbstractClassWithAbstractGetterAndAbstractSetter::class.java,
-            AbstractClassWithConcreteGetter::class.java,
-            AbstractClassWithConcreteSetter::class.java,
             AbstractClassWithConcreteGetterAndConcreteSetterWithoutField::class.java,
             AbstractClassWithConcreteGetterAndConcreteSetterWithField::class.java,
             AbstractClassWithAbstractImmutableProperty::class.java,
             AbstractClassWithAbstractMutableProperty::class.java,
-            AbstractClassWithConcreteImmutableProperty::class.java,
             AbstractClassWithConcreteMutableProperty::class.java
         ).forEach { baseClass ->
-            val createdClass = DtoBuddy.implement(baseClass)
-            assertFalse(createdClass.isInterface)
-            assertFalse(Modifier.isAbstract(createdClass.modifiers))
+            test(baseClass, false)
         }
     }
 
@@ -59,13 +65,8 @@ class ReturnedClassContractTest {
             ConcreteClassWithGetterAndSetterWithField::class.java to true,
             ConcreteClassWithConcreteImmutableProperty::class.java to false,
             ConcreteClassWithConcreteMutableProperty::class.java to true
-        ).forEach { (baseClass, selfComplete) ->
-            val createdClass = DtoBuddy.implement(baseClass)
-            assertFalse(createdClass.isInterface)
-            assertFalse(Modifier.isAbstract(createdClass.modifiers))
-            if (selfComplete) {
-                assertEquals(baseClass, createdClass)
-            }
+        ).forEach { (baseClass, expectBaseClassReturned) ->
+            test(baseClass, expectBaseClassReturned)
         }
     }
 

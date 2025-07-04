@@ -1,28 +1,36 @@
 package com.running.dto.buddy.test.java.cases.contract;
 
 import com.runninglane.dto.buddy.DtoBuddy;
+import com.runninglane.dto.buddy.test.cases.contract.*;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Modifier;
-import java.util.AbstractMap;
 import java.util.Arrays;
+import java.util.Map;
 
-import static com.running.dto.buddy.test.java.cases.contract.BaseClasses.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * The rule is the returned class must be a concrete class
  */
-public class ReturnedClassContractTest {
+public class GetterSetterBehaviorContractTest {
 
-    private void test(Class<?> baseClass, boolean expectBaseClassReturned) {
+    private void test(Class<?> baseClass, boolean expectBaseClassReturned, boolean testGetSet) {
         try {
             Class<?> createdClass = DtoBuddy.implementor(baseClass).implement();
             assertFalse(createdClass.isInterface());
             assertFalse(Modifier.isAbstract(createdClass.getModifiers()));
             if (expectBaseClassReturned) {
                 assertEquals(baseClass, createdClass);
+            }
+            if (testGetSet) {
+                Object dto = DtoBuddy.create(createdClass, Map.of("name", "Test"));
+                var getName = createdClass.getMethod("getName");
+                var setName = createdClass.getMethod("setName", String.class);
+                assertEquals("Test", getName.invoke(dto));
+                setName.invoke(dto, "Test2");
+                assertEquals("Test2", getName.invoke(dto));
             }
         } catch (Throwable e) {
             throw new RuntimeException("Failed to test " + baseClass.getSimpleName(), e);
@@ -39,7 +47,10 @@ public class ReturnedClassContractTest {
             InterfaceWithDefaultGetterAndAbstractSetter.class,
             InterfaceWithAbstractProperty.class,
             InterfaceWithAbstractPropertyAndDefaultGetter.class
-        ).forEach(baseClass -> test(baseClass, false));
+        ).forEach(baseClass -> {
+            boolean testGetSet = baseClass != InterfaceWithNoMember.class;
+            test(baseClass, false, testGetSet);
+        });
     }
 
     @Test
@@ -53,20 +64,20 @@ public class ReturnedClassContractTest {
             AbstractClassWithAbstractImmutableProperty.class,
             AbstractClassWithAbstractMutableProperty.class,
             AbstractClassWithConcreteMutableProperty.class
-        ).forEach(baseClass -> test(baseClass, false));
+        ).forEach(baseClass -> {
+            boolean testGetSet = !baseClass.getSimpleName().matches(".*(NoMember|Concrete).*");
+            test(baseClass, false, testGetSet);
+        });
     }
 
     @Test
     public void testConcreteClass() {
         Arrays.asList(
-            new AbstractMap.SimpleEntry<>(ConcreteClassWithNoMember.class, true),
-            new AbstractMap.SimpleEntry<>(ConcreteClassWithGetter.class, false),
-            new AbstractMap.SimpleEntry<>(ConcreteClassWithSetter.class, false),
-            new AbstractMap.SimpleEntry<>(ConcreteClassWithGetterAndSetterWithoutField.class, true),
-            new AbstractMap.SimpleEntry<>(ConcreteClassWithGetterAndSetterWithField.class, true),
-            new AbstractMap.SimpleEntry<>(ConcreteClassWithConcreteImmutableProperty.class, false),
-            new AbstractMap.SimpleEntry<>(ConcreteClassWithConcreteMutableProperty.class, true)
-        ).forEach(entry -> test(entry.getKey(), entry.getValue()));
+            ConcreteClassWithNoMember.class,
+            ConcreteClassWithGetterAndSetterWithoutField.class,
+            ConcreteClassWithGetterAndSetterWithField.class,
+            ConcreteClassWithConcreteMutableProperty.class
+        ).forEach(baseClass -> test(baseClass, true, false));
     }
 
 }

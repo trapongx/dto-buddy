@@ -33,8 +33,8 @@ internal data class PropertyDescriptor(
         fun build(): PropertyDescriptor {
             val type = getter?.returnType ?: setter?.parameterTypes?.get(0)
             val genericType = getter?.genericReturnType ?: setter?.genericParameterTypes?.get(0)
-            val hasConcreteGetter = getter != null && Modifier.isAbstract(getter!!.modifiers).not()
-            val hasConcreteSetter = setter != null && Modifier.isAbstract(setter!!.modifiers).not()
+            val hasConcreteGetter = !baseClass.isInterface && getter != null && Modifier.isAbstract(getter!!.modifiers).not()
+            val hasConcreteSetter = !baseClass.isInterface && setter != null && Modifier.isAbstract(setter!!.modifiers).not()
 
             // Extract generic structure information
             val genericStructure = if (genericType != null) {
