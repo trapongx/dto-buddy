@@ -14,16 +14,16 @@ class GetterSetterBehaviorContractTest {
 
     private fun test(baseClass: Class<*>, expectBaseClassReturned: Boolean, testGetSet: Boolean) {
         try {
-            val createdClass = dtoBuddy.implement(baseClass)
-            assertFalse(createdClass.isInterface)
-            assertFalse(Modifier.isAbstract(createdClass.modifiers))
+            val concreteClass = dtoBuddy.implement(baseClass)
+            assertFalse(concreteClass.isInterface)
+            assertFalse(Modifier.isAbstract(concreteClass.modifiers))
             if (expectBaseClassReturned) {
-                assertEquals(baseClass, createdClass)
+                assertEquals(baseClass, concreteClass)
             }
             if (testGetSet) {
-                val dto = dtoBuddy.create<Any>(createdClass, mapOf("name" to "Test"))
-                val getName = createdClass.getMethod("getName")
-                val setName = createdClass.getMethod("setName", String::class.java)
+                val dto = dtoBuddy.create<Any>(concreteClass, mapOf("name" to "Test"))
+                val getName = concreteClass.getMethod("getName")
+                val setName = concreteClass.getMethod("setName", String::class.java)
                 assertEquals("Test", getName.invoke(dto))
                 setName.invoke(dto, "Test2")
                 assertEquals("Test2", getName.invoke(dto))

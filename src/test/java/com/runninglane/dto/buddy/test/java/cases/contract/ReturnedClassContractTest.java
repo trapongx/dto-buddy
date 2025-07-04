@@ -20,11 +20,11 @@ public class ReturnedClassContractTest {
 
     private void test(Class<?> baseClass, boolean expectBaseClassReturned) {
         try {
-            Class<?> createdClass = dtoBuddy.implementor(baseClass).implement();
-            assertFalse(createdClass.isInterface());
-            assertFalse(Modifier.isAbstract(createdClass.getModifiers()));
+            Class<?> concreteClass = dtoBuddy.implementor(baseClass).implement();
+            assertFalse(concreteClass.isInterface());
+            assertFalse(Modifier.isAbstract(concreteClass.getModifiers()));
             if (expectBaseClassReturned) {
-                assertEquals(baseClass, createdClass);
+                assertEquals(baseClass, concreteClass);
             }
         } catch (Throwable e) {
             throw new RuntimeException("Failed to test " + baseClass.getSimpleName(), e);

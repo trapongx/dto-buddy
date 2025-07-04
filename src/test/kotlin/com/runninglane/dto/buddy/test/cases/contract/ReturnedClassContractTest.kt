@@ -14,11 +14,11 @@ class ReturnedClassContractTest {
 
     private fun test(baseClass: Class<*>, expectBaseClassReturned: Boolean) {
         try {
-            val createdClass = dtoBuddy.implement(baseClass)
-            assertFalse(createdClass.isInterface)
-            assertFalse(Modifier.isAbstract(createdClass.modifiers))
+            val concreteClass = dtoBuddy.implement(baseClass)
+            assertFalse(concreteClass.isInterface)
+            assertFalse(Modifier.isAbstract(concreteClass.modifiers))
             if (expectBaseClassReturned) {
-                assertEquals(baseClass, createdClass)
+                assertEquals(baseClass, concreteClass)
             }
         } catch (e: Throwable) {
             throw RuntimeException("Failed to test ${baseClass.simpleName}", e)

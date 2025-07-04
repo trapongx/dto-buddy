@@ -19,16 +19,16 @@ public class GetterSetterBehaviorContractTest {
     
     private void test(Class<?> baseClass, boolean expectBaseClassReturned, boolean testGetSet) {
         try {
-            Class<?> createdClass = dtoBuddy.implementor(baseClass).implement();
-            assertFalse(createdClass.isInterface());
-            assertFalse(Modifier.isAbstract(createdClass.getModifiers()));
+            Class<?> concreteClass = dtoBuddy.implementor(baseClass).implement();
+            assertFalse(concreteClass.isInterface());
+            assertFalse(Modifier.isAbstract(concreteClass.getModifiers()));
             if (expectBaseClassReturned) {
-                assertEquals(baseClass, createdClass);
+                assertEquals(baseClass, concreteClass);
             }
             if (testGetSet) {
-                Object dto = dtoBuddy.create(createdClass, Map.of("name", "Test"));
-                var getName = createdClass.getMethod("getName");
-                var setName = createdClass.getMethod("setName", String.class);
+                Object dto = dtoBuddy.create(concreteClass, Map.of("name", "Test"));
+                var getName = concreteClass.getMethod("getName");
+                var setName = concreteClass.getMethod("setName", String.class);
                 assertEquals("Test", getName.invoke(dto));
                 setName.invoke(dto, "Test2");
                 assertEquals("Test2", getName.invoke(dto));
