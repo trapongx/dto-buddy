@@ -3,13 +3,10 @@ package com.running.dto.buddy.test.java.cases.generic.single;
 import com.runninglane.dto.buddy.DtoBuddy;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.reflect.Method;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SingleTypeParameterTest {
     private static int nameSuffix = 0;
@@ -22,15 +19,24 @@ public class SingleTypeParameterTest {
 
         assertNotNull(concreteClass);
         assertTrue(DtoInterfaceWithSingleTypeParameter.class.isAssignableFrom(concreteClass));
-        assertEquals(String.class, Arrays.stream(concreteClass.getMethods())
+        
+        Optional<Method> getName = Arrays.stream(concreteClass.getMethods())
             .filter(m -> m.getName().equals("getName"))
-            .findFirst().get().getReturnType());
-        assertEquals(Integer.class, Arrays.stream(concreteClass.getMethods())
+            .findFirst();
+        assertTrue(getName.isPresent());
+        assertEquals(String.class, getName.get().getReturnType());
+
+        Optional<Method> getAge = Arrays.stream(concreteClass.getMethods())
             .filter(m -> m.getName().equals("getAge"))
-            .findFirst().get().getReturnType());
-        assertEquals(String.class, Arrays.stream(concreteClass.getMethods())
+            .findFirst();
+        assertTrue(getAge.isPresent());
+        assertEquals(Integer.class, getAge.get().getReturnType());
+
+        Optional<Method> getEmail = Arrays.stream(concreteClass.getMethods())
             .filter(m -> m.getName().equals("getEmail"))
-            .findFirst().get().getReturnType());
+            .findFirst();
+        assertTrue(getEmail.isPresent());
+        assertEquals(String.class, getEmail.get().getReturnType());
     }
 
     @Test
