@@ -52,47 +52,47 @@ public class BaseClassAccessibilityContractTest {
     @Test
     public void shouldFailWhenClassIsPrivate() {
         assertThrows(DtoBuddyBadInputException.class, () ->
-            dtoBuddy.implementor(PrivateInterface.class).implement()
+            dtoBuddy.implement(PrivateInterface.class)
         );
     }
 
     @Test
     public void shouldFailWhenClassIsProtected() {
         assertThrows(DtoBuddyBadInputException.class, () ->
-            dtoBuddy.implementor(ProtectedInterface.class).implement()
+            dtoBuddy.implement(ProtectedInterface.class)
         );
     }
 
     @Test
     public void shouldFailWhenClassIsFinalAndIsNotCompleteAndMutable() {
         assertThrows(DtoBuddyBadInputException.class, () ->
-            dtoBuddy.implementor(FinalClassWithImmutableProperties.class).implement()
+            dtoBuddy.implement(FinalClassWithImmutableProperties.class)
         );
     }
 
     @Test
     public void shouldFailWhenClassIsFinalAndIsCompleteAndMutable() {
         assertDoesNotThrow(() ->
-            dtoBuddy.implementor(FinalClassWithNoProperties.class).implement()
+            dtoBuddy.implement(FinalClassWithNoProperties.class)
         );
         assertDoesNotThrow(() ->
-            dtoBuddy.implementor(FinalClassWithMutableProperties.class).implement()
+            dtoBuddy.implement(FinalClassWithMutableProperties.class)
         );
     }
 
     @Test
     public void shouldSuccessWhenClassIsOpenAndPublic() {
         assertDoesNotThrow(() ->
-            dtoBuddy.implementor(OpenClass.class).implement()
+            dtoBuddy.implement(OpenClass.class)
         );
 
         assertDoesNotThrow(() ->
-            dtoBuddy.implementor(PublicInterface.class).implement()
+            dtoBuddy.implement(PublicInterface.class)
         );
 
         assertDoesNotThrow(() -> {
             // Public internal
-            dtoBuddy.implementor(InternalInterface.class).implement();
+            dtoBuddy.implement(InternalInterface.class);
         });
     }
 

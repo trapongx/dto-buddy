@@ -15,9 +15,10 @@ public class MultipleTypeParametersTest {
 
     @Test
     public void testImplement() {
-        Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithMultipleTypeParameters.class)
-            .withTypeParams(List.of(String.class, Integer.class, String.class, Long.class))
-            .implement();
+        Class<?> concreteClass = dtoBuddy.implement(
+            DtoInterfaceWithMultipleTypeParameters.class,
+            List.of(String.class, Integer.class, String.class, Long.class)
+        );
 
         assertNotNull(concreteClass);
         assertTrue(DtoInterfaceWithMultipleTypeParameters.class.isAssignableFrom(concreteClass));
@@ -45,9 +46,10 @@ public class MultipleTypeParametersTest {
         mapParam.put("key3", 3L);
         params.put("map", mapParam);
 
-        Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithMultipleTypeParameters.class)
-            .withTypeParams(List.of(String.class, Integer.class, String.class, Long.class))
-            .implement();
+        Class<?> concreteClass = dtoBuddy.implement(
+            DtoInterfaceWithMultipleTypeParameters.class,
+            List.of(String.class, Integer.class, String.class, Long.class)
+        );
         DtoInterfaceWithMultipleTypeParameters<String, Integer, String, Long> dto = dtoBuddy.create(concreteClass, params);
 
         assertNotNull(dto);
@@ -65,9 +67,10 @@ public class MultipleTypeParametersTest {
         mapParam.put("key5", 5L);
         params.put("map", mapParam);
 
-        Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithMultipleTypeParameters.class)
-            .withTypeParams(List.of(String.class, Integer.class, String.class, Long.class))
-            .implement();
+        Class<?> concreteClass = dtoBuddy.implement(
+            DtoInterfaceWithMultipleTypeParameters.class,
+            List.of(String.class, Integer.class, String.class, Long.class)
+        );
 
         Map<String, Object> createParams = new HashMap<>();
         createParams.put("simple", "Initial String");
@@ -91,9 +94,10 @@ public class MultipleTypeParametersTest {
             params.put("list", List.of(10, 20, 30));
             params.put("map", null);
 
-            Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithMultipleTypeParameters.class)
-                .withTypeParams(List.of(String.class, Integer.class, String.class, Long.class))
-                .implement();
+            Class<?> concreteClass = dtoBuddy.implement(
+                DtoInterfaceWithMultipleTypeParameters.class,
+                List.of(String.class, Integer.class, String.class, Long.class)
+            );
 
             DtoInterfaceWithMultipleTypeParameters<String, Integer, String, Long> dto = dtoBuddy.create(concreteClass, params);
 
@@ -113,9 +117,10 @@ public class MultipleTypeParametersTest {
             mapParam.put("keyB", 20L);
             params.put("map", mapParam);
 
-            Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithMultipleTypeParameters.class)
-                .withTypeParams(List.of(String.class, Integer.class, String.class, Long.class))
-                .implement();
+            Class<?> concreteClass = dtoBuddy.implement(
+                DtoInterfaceWithMultipleTypeParameters.class,
+                List.of(String.class, Integer.class, String.class, Long.class)
+            );
 
             Map<String, Object> createParams = new HashMap<>();
             createParams.put("simple", "Original String");

@@ -15,13 +15,11 @@ class SimpleDtoInterfaceTest {
 
     @Test
     public void testImplement() {
-        Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class).implement();
+        Class<?> concreteClass = dtoBuddy.implement(SimpleDtoInterface.class);
         assertNotNull(concreteClass);
         assertTrue(SimpleDtoInterface.class.isAssignableFrom(concreteClass));
         assertEquals(List.of(SimpleDtoInterface.class), List.of(concreteClass.getInterfaces()));
         assertEquals(Object.class, concreteClass.getSuperclass());
-
-        assertThrows(IllegalArgumentException.class, () -> dtoBuddy.implementor().implement());
     }
 
     @Test
@@ -32,7 +30,7 @@ class SimpleDtoInterfaceTest {
             "email", "john.doe@example.com"
         );
 
-        Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class).implement();
+        Class<?> concreteClass = dtoBuddy.implement(SimpleDtoInterface.class);
         SimpleDtoInterface dto = dtoBuddy.create(concreteClass, params);
         assertNotNull(dto);
         assertEquals("John Doe", dto.getName());
@@ -46,7 +44,7 @@ class SimpleDtoInterfaceTest {
             "email", "john.doe@example.com"
         );
 
-        Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class).implement();
+        Class<?> concreteClass = dtoBuddy.implement(SimpleDtoInterface.class);
         Map<String, Object> initialParams = new HashMap<>();
         initialParams.put("name", "John Doe");
         initialParams.put("age", 30);
@@ -66,7 +64,7 @@ class SimpleDtoInterfaceTest {
         params.put("age", 25);
         params.put("email", null);
 
-        Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class).implement();
+        Class<?> concreteClass = dtoBuddy.implement(SimpleDtoInterface.class);
         SimpleDtoInterface dto = dtoBuddy.create(concreteClass, params);
         assertNotNull(dto);
         assertEquals("Jane Doe", dto.getName());
@@ -81,7 +79,7 @@ class SimpleDtoInterfaceTest {
             "email", "john.doe@example.com"
         );
 
-        Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class).implement();
+        Class<?> concreteClass = dtoBuddy.implement(SimpleDtoInterface.class);
         Map<String, Object> initialParams = new HashMap<>();
         initialParams.put("name", "John Doe");
         initialParams.put("age", 10);

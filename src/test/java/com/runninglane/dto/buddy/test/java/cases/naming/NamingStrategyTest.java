@@ -26,7 +26,7 @@ public class NamingStrategyTest {
     @Test
     public void shouldCustomizeNameCorrectly() {
         DtoBuddy dtoBuddy = new DtoBuddy(new TestNamingStrategy());
-        Class<?> concreteClass = dtoBuddy.implementor(AnyInterface.class).implement();
+        Class<?> concreteClass = dtoBuddy.implement(AnyInterface.class);
         assert concreteClass.getSimpleName().equals("CustomName");
         assert concreteClass.getPackage().getName().equals("com.example.jlp123456789.dto.customized");
     }

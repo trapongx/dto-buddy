@@ -1,6 +1,5 @@
 package com.runninglane.dto.buddy
 
-import com.runninglane.dto.buddy.builder.ImplementationBuilder
 import com.runninglane.dto.buddy.bytecode.ByteBuddyWrapper
 import com.runninglane.dto.buddy.bytecode.PropertyDescriptor
 import com.runninglane.dto.buddy.bytecode.PropertyDescriptorList
@@ -205,9 +204,7 @@ class DtoBuddy() {
         }
     }
 
-    fun implementor() = ImplementationBuilder(this)
-
-    fun implementor(baseClass: Class<*>) = ImplementationBuilder(this, baseClass)
+    fun implement(baseClass: Class<*>) = implement(baseClass, null)
 
     /**
      * Creates a new instance of a DTO class and populates it with the provided parameters

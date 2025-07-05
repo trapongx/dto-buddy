@@ -95,7 +95,7 @@ public class BasePropertyConditionContractTest {
     
     private void assertSucceed(Class<?> baseClass) {
         try {
-            Class<?> concreteClass = dtoBuddy.implementor(baseClass).implement();
+            Class<?> concreteClass = dtoBuddy.implement(baseClass);
             Object dto = dtoBuddy.create(concreteClass, Map.of("name", "Test"));
             var getName = concreteClass.getMethod("getName");
             assertEquals("Test", getName.invoke(dto));
@@ -130,19 +130,19 @@ public class BasePropertyConditionContractTest {
     @Test
     public void shouldSucceedWithoutPropertyImplementationWhenBaseClassIsAbstractClassHavingEitherConcreteGetterOrConcreteSetter() {
         {
-            Class<?> concreteClass = dtoBuddy.implementor(AbstractClassWithConcreteGetter.class).implement();
+            Class<?> concreteClass = dtoBuddy.implement(AbstractClassWithConcreteGetter.class);
             assertTrue(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("getName")));
             assertFalse(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("setName")));
         }
 
         {
-            Class<?> concreteClass = dtoBuddy.implementor(AbstractClassWithConcreteSetter.class).implement();
+            Class<?> concreteClass = dtoBuddy.implement(AbstractClassWithConcreteSetter.class);
             assertFalse(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("getName")));
             assertTrue(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("setName")));
         }
 
         {
-            Class<?> concreteClass = dtoBuddy.implementor(AbstractClassWithConcreteImmutableProperty.class).implement();
+            Class<?> concreteClass = dtoBuddy.implement(AbstractClassWithConcreteImmutableProperty.class);
             assertTrue(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("getName")));
             assertFalse(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("setName")));
         }
@@ -156,7 +156,7 @@ public class BasePropertyConditionContractTest {
         ).forEach(baseClass -> {
             try {
                 assertThrows(DtoBuddyBadInputException.class, () ->
-                    dtoBuddy.implementor(baseClass).implement()
+                    dtoBuddy.implement(baseClass)
                 );
             } catch (Throwable e) {
                 throw new RuntimeException("Failed to test " + baseClass.getSimpleName(), e);

@@ -14,7 +14,7 @@ class SimpleAbstractDtoTest {
 
     @Test
     public void testImplement() {
-        Class<?> concreteClass = dtoBuddy.implementor(SimpleAbstractDto.class).implement();
+        Class<?> concreteClass = dtoBuddy.implement(SimpleAbstractDto.class);
 
         assertNotNull(concreteClass);
         assertTrue(SimpleAbstractDto.class.isAssignableFrom(concreteClass));
@@ -28,7 +28,7 @@ class SimpleAbstractDtoTest {
         params.put("age", 30);
         params.put("email", "john.doe@example.com");
 
-        Class<?> concreteClass = dtoBuddy.implementor(SimpleAbstractDto.class).implement();
+        Class<?> concreteClass = dtoBuddy.implement(SimpleAbstractDto.class);
         SimpleAbstractDto dto = dtoBuddy.create(concreteClass, params);
 
         assertNotNull(dto);
@@ -43,7 +43,7 @@ class SimpleAbstractDtoTest {
         Map<String, Object> params = new HashMap<>();
         params.put("email", "john.doe@example.com");
 
-        Class<?> concreteClass = dtoBuddy.implementor(SimpleAbstractDto.class).implement();
+        Class<?> concreteClass = dtoBuddy.implement(SimpleAbstractDto.class);
         Map<String, Object> initialParams = new HashMap<>();
         initialParams.put("name", "John Doe");
         initialParams.put("age", 30);
@@ -65,7 +65,7 @@ class SimpleAbstractDtoTest {
         params.put("age", 25);
         params.put("email", null);
 
-        Class<?> concreteClass = dtoBuddy.implementor(SimpleAbstractDto.class).implement();
+        Class<?> concreteClass = dtoBuddy.implement(SimpleAbstractDto.class);
         SimpleAbstractDto dto = dtoBuddy.create(concreteClass, params);
 
         assertNotNull(dto);
@@ -81,7 +81,7 @@ class SimpleAbstractDtoTest {
         params.put("age", 30);
         params.put("email", "john.doe@example.com");
 
-        Class<?> concreteClass = dtoBuddy.implementor(SimpleAbstractDto.class).implement();
+        Class<?> concreteClass = dtoBuddy.implement(SimpleAbstractDto.class);
         Map<String, Object> initialParams = new HashMap<>();
         initialParams.put("name", "John Doe");
         initialParams.put("age", 10);

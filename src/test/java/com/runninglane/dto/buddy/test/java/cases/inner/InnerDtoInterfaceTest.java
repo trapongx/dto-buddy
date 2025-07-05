@@ -13,9 +13,7 @@ public class InnerDtoInterfaceTest {
     @Test
     public void testImplement()
     {
-        Class<?> concreteClass = dtoBuddy.implementor()
-            .withBaseClass(InnerDtoInterfaceEncloser.InnerDtoInterface.class)
-            .implement();
+        Class<?> concreteClass = dtoBuddy.implement(InnerDtoInterfaceEncloser.InnerDtoInterface.class);
         assertNotNull(concreteClass);
         assertTrue(InnerDtoInterfaceEncloser.InnerDtoInterface.class. isAssignableFrom (concreteClass));
     }

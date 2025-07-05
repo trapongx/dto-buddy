@@ -13,9 +13,10 @@ public class SingleTypeParameterTest {
 
     @Test
     public void testImplement() {
-        Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
-            .withTypeParams(Collections.singletonList(String.class))
-            .implement();
+        Class<?> concreteClass = dtoBuddy.implement(
+            DtoInterfaceWithSingleTypeParameter.class,
+            Collections.singletonList(String.class)
+        );
 
         assertNotNull(concreteClass);
         assertTrue(DtoInterfaceWithSingleTypeParameter.class.isAssignableFrom(concreteClass));
@@ -47,9 +48,10 @@ public class SingleTypeParameterTest {
         params.put("age", 30);
         params.put("email", "john.doe@example.com");
 
-        Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
-            .withTypeParams(Collections.singletonList(String.class))
-            .implement();
+        Class<?> concreteClass = dtoBuddy.implement(
+            DtoInterfaceWithSingleTypeParameter.class,
+            Collections.singletonList(String.class)
+        );
         DtoInterfaceWithSingleTypeParameter<String> dto = dtoBuddy.create(concreteClass, params);
 
         assertNotNull(dto);
@@ -64,9 +66,10 @@ public class SingleTypeParameterTest {
         Map<String, Object> params = new HashMap<>();
         params.put("email", "john.doe@example.com");
 
-        Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
-            .withTypeParams(Collections.singletonList(String.class))
-            .implement();
+        Class<?> concreteClass = dtoBuddy.implement(
+            DtoInterfaceWithSingleTypeParameter.class,
+            Collections.singletonList(String.class)
+        );
 
         Map<String, Object> initialParams = new HashMap<>();
         initialParams.put("name", "John Doe");
@@ -90,9 +93,10 @@ public class SingleTypeParameterTest {
         params.put("age", 25);
         params.put("email", null);
 
-        Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
-            .withTypeParams(Collections.singletonList(String.class))
-            .implement();
+        Class<?> concreteClass = dtoBuddy.implement(
+            DtoInterfaceWithSingleTypeParameter.class,
+            Collections.singletonList(String.class)
+        );
         DtoInterfaceWithSingleTypeParameter<String> dto = dtoBuddy.create(concreteClass, params);
 
         assertNotNull(dto);
@@ -107,9 +111,10 @@ public class SingleTypeParameterTest {
         params.put("age", 30);
         params.put("email", "john.doe@example.com");
 
-        Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
-            .withTypeParams(Collections.singletonList(String.class))
-            .implement();
+        Class<?> concreteClass = dtoBuddy.implement(
+            DtoInterfaceWithSingleTypeParameter.class,
+            Collections.singletonList(String.class)
+        );
 
         Map<String, Object> initialParams = new HashMap<>();
         initialParams.put("name", "John Doe");

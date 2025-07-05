@@ -20,7 +20,7 @@ public class ReturnedClassContractTest {
 
     private void test(Class<?> baseClass, boolean expectBaseClassReturned) {
         try {
-            Class<?> concreteClass = dtoBuddy.implementor(baseClass).implement();
+            Class<?> concreteClass = dtoBuddy.implement(baseClass);
             assertFalse(concreteClass.isInterface());
             assertFalse(Modifier.isAbstract(concreteClass.getModifiers()));
             if (expectBaseClassReturned) {

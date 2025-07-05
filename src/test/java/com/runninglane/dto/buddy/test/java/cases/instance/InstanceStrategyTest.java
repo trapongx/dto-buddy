@@ -52,7 +52,7 @@ class InstanceStrategyTest {
     @Test
     public void shouldCustomizeInstanceStrategyCorrectly() {
         DtoBuddy dtoBuddy = new DtoBuddy(new TestInstanceStrategy());
-        Class<?> concreteClass = dtoBuddy.implementor(TestDto.class).implement();
+        Class<?> concreteClass = dtoBuddy.implement(TestDto.class);
         TestDto dto = dtoBuddy.create(concreteClass, java.util.Map.of("name", "hello"));
         assertTrue(dto.getFlag());
         assertEquals("HELLO", dto.getName());
