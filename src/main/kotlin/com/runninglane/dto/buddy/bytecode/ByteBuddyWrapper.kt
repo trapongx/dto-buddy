@@ -154,59 +154,6 @@ internal class ByteBuddyWrapper {
     }
 
     /**
-     * Creates a new instance of the specified class
-     */
-    fun <T> createInstance(clazz: Class<*>): T {
-        try {
-            @Suppress("UNCHECKED_CAST")
-            return clazz.getDeclaredConstructor().newInstance() as T
-        } catch (e: Exception) {
-            throw DtoBuddySystemException("Failed to create instance: ${e.message}")
-        }
-    }
-
-    /**
-     * Populates object properties with values from a map
-     */
-    fun populate(instance: Any, properties: List<PropertyDescriptor>, params: Map<String, Any?>) {
-        for ((propertyName, value) in params) {
-            val property = properties.find { it.name == propertyName } ?: continue
-            if (property.setter != null) {
-                try {
-                    // Check if value type is compatible with property type
-                    val convertedValue = convertValueIfNeeded(value, property.type!!)
-                    property.setter.invoke(instance, convertedValue)
-                } catch (e: Exception) {
-                    throw DtoBuddySystemException("Failed to set property $propertyName: ${e.message}")
-                }
-            }
-        }
-    }
-
-    /**
-     * Attempt to convert a value to the target type if needed
-     */
-    private fun convertValueIfNeeded(value: Any?, targetType: Class<*>): Any? {
-        if (value == null) return null
-
-        // If value is already of the correct type, return it
-        if (value::class.java == targetType || targetType.isAssignableFrom(value::class.java)) {
-            return value
-        }
-
-        // Handle primitive conversions
-        return when (targetType) {
-            Int::class.java, Integer::class.java -> (value as? Number)?.toInt() ?: value.toString().toInt()
-            Long::class.java -> (value as? Number)?.toLong() ?: value.toString().toLong()
-            Double::class.java -> (value as? Number)?.toDouble() ?: value.toString().toDouble()
-            Float::class.java -> (value as? Number)?.toFloat() ?: value.toString().toFloat()
-            Boolean::class.java -> (value as? Boolean) ?: value.toString().toBoolean()
-            String::class.java -> value.toString()
-            else -> throw DtoBuddySystemException("Cannot convert ${value::class.java} to $targetType")
-        }
-    }
-
-    /**
      * Validates that a base class meets the requirements:
      * - Must be public
      * - If class (not interface), must be open/abstract

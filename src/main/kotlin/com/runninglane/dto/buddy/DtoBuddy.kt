@@ -4,10 +4,12 @@ import com.runninglane.dto.buddy.builder.ImplementationBuilder
 import com.runninglane.dto.buddy.bytecode.ByteBuddyWrapper
 import com.runninglane.dto.buddy.bytecode.PropertyDescriptor
 import com.runninglane.dto.buddy.bytecode.PropertyDescriptorList
-import com.runninglane.dto.buddy.naming.DefaultNamingStrategy
-import com.runninglane.dto.buddy.naming.NamingStrategy
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
 import com.runninglane.dto.buddy.exception.DtoBuddySystemException
+import com.runninglane.dto.buddy.instance.DefaultInstanceStrategy
+import com.runninglane.dto.buddy.instance.InstanceStrategy
+import com.runninglane.dto.buddy.naming.DefaultNamingStrategy
+import com.runninglane.dto.buddy.naming.NamingStrategy
 import java.lang.reflect.Modifier
 
 /**
@@ -20,7 +22,13 @@ class DtoBuddy() {
         this.namingStrategy = namingStrategy
     }
 
+    constructor(instanceStrategy: InstanceStrategy) : this() {
+        this.instanceStrategy = instanceStrategy
+    }
+
     var namingStrategy: NamingStrategy = DefaultNamingStrategy()
+
+    var instanceStrategy: InstanceStrategy = DefaultInstanceStrategy()
 
     private val byteBuddyWrapper = ByteBuddyWrapper()
 
@@ -212,15 +220,10 @@ class DtoBuddy() {
     fun <DTO> create(concrete: Class<*>, params: Map<String, Any?>): DTO {
         try {
             // Create a new instance
-            val instance = byteBuddyWrapper.createInstance<Any>(concrete)
-
-            // Use the cached property info or analyze if not cached
-            val properties = propertiesCache.getOrPut(concrete) {
-                PropertyDescriptorList.from(concrete)
-            }
+            val instance = instanceStrategy.create(concrete)
 
             // Populate the properties
-            byteBuddyWrapper.populate(instance, properties, params)
+            instanceStrategy.populate(instance, params)
 
             return instance as DTO
         } catch (e: Exception) {
@@ -237,18 +240,10 @@ class DtoBuddy() {
      * @param dto The DTO instance to populate
      * @param params Map of property names to values
      */
-    fun <DTO> populate(dto: DTO, params: Map<String, Any?>) {
+    fun populate(dto: Any, params: Map<String, Any?>) {
         try {
-            val dtoClass = dto!!::class.java
-
-            // For population, we need ALL properties, not just those to implement
-            // Use the all-properties cache for population
-            val properties = propertiesCache.getOrPut(dtoClass) {
-                PropertyDescriptorList.from(dtoClass)
-            }
-
             // Populate the properties
-            byteBuddyWrapper.populate(dto, properties, params)
+            instanceStrategy.populate(dto, params)
         } catch (e: Exception) {
             when (e) {
                 is DtoBuddyBadInputException, is DtoBuddySystemException -> throw e
