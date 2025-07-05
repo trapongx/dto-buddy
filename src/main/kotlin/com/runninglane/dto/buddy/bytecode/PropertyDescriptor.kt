@@ -7,7 +7,7 @@ import java.lang.reflect.Type
 /**
  * Helper class to track property metadata during analysis
  */
-internal data class PropertyDescriptor(
+data class PropertyDescriptor(
     val baseClass: Class<*>,
     val name: String,
     val type: Class<*>?,

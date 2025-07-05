@@ -7,7 +7,7 @@ import java.lang.reflect.TypeVariable
 /**
  * Represents the structure of a generic type
  */
-internal class GenericStructure private constructor(
+class GenericStructure private constructor(
     val rawType: Class<*>,
     val typeParameters: List<TypeParameter> = emptyList()
 ) {

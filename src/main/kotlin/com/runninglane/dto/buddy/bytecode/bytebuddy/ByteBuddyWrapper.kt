@@ -1,6 +1,9 @@
-package com.runninglane.dto.buddy.bytecode
+package com.runninglane.dto.buddy.bytecode.bytebuddy
 
 import com.runninglane.dto.buddy.annotation.DtoBuddyGenerated
+import com.runninglane.dto.buddy.bytecode.GenericTypeHandler
+import com.runninglane.dto.buddy.bytecode.PropertyDescriptor
+import com.runninglane.dto.buddy.bytecode.validateContractCompliance
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
 import com.runninglane.dto.buddy.exception.DtoBuddySystemException
 import com.runninglane.dto.buddy.util.capitalize
@@ -17,7 +20,7 @@ import java.lang.reflect.TypeVariable
 /**
  * A wrapper around ByteBuddy to simplify its usage for DTO generation
  */
-internal class ByteBuddyWrapper {
+open class ByteBuddyWrapper {
     private val byteBuddy = ByteBuddy()
     private val genericTypeHandler = GenericTypeHandler()
 
@@ -27,7 +30,7 @@ internal class ByteBuddyWrapper {
      * - For abstract classes: creates a subclass of the abstract class
      * - For concrete classes: creates a subclass with all properties made mutable
      */
-    fun createDynamicType(
+    open fun createDynamicType(
         baseClass: Class<*>,
         typeParams: List<Class<*>>?,
         packageName: String,
@@ -74,7 +77,7 @@ internal class ByteBuddyWrapper {
      * Adds fields and accessors for all the properties
      * @param typeParamsMapByName Optional map of type parameter names to their actual types for generic classes
      */
-    fun implementProperties(
+    open fun implementProperties(
         builder: DynamicType.Builder<*>,
         properties: List<PropertyDescriptor>,
         typeParamsMapByName: Map<String, Class<*>>? = null
@@ -115,7 +118,7 @@ internal class ByteBuddyWrapper {
             if (property.setter != null) {
                 if (property.genericType is TypeVariable<*> || 
                     (property.genericType is ParameterizedType && genericTypeHandler.containsTypeVariable(property.genericType))) {
-                    // For all generic types (simple or complex), define a new method with correctly resolved parameter type
+                    // For all generic types (simple or complex), define a new method with the correctly resolved parameter type
                     val setterName = property.setter.name
                     resultBuilder = resultBuilder.defineMethod(setterName, Void.TYPE, Visibility.PUBLIC)
                         .withParameter(resolvedType)
@@ -143,7 +146,7 @@ internal class ByteBuddyWrapper {
     /**
      * Loads the generated class
      */
-    fun loadClass(builder: DynamicType.Builder<*>): Class<*> {
+    open fun loadClass(builder: DynamicType.Builder<*>): Class<*> {
         try {
             return builder.make()
                 .load(javaClass.classLoader)

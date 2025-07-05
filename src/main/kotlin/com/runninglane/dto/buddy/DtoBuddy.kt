@@ -1,15 +1,13 @@
 package com.runninglane.dto.buddy
 
-import com.runninglane.dto.buddy.bytecode.ByteBuddyWrapper
-import com.runninglane.dto.buddy.bytecode.PropertyDescriptor
-import com.runninglane.dto.buddy.bytecode.PropertyDescriptorList
+import com.runninglane.dto.buddy.bytecode.ByteCodeStrategy
+import com.runninglane.dto.buddy.bytecode.DefaultByteCodeStrategy
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
 import com.runninglane.dto.buddy.exception.DtoBuddySystemException
 import com.runninglane.dto.buddy.instance.DefaultInstanceStrategy
 import com.runninglane.dto.buddy.instance.InstanceStrategy
 import com.runninglane.dto.buddy.naming.DefaultNamingStrategy
 import com.runninglane.dto.buddy.naming.NamingStrategy
-import java.lang.reflect.Modifier
 
 /**
  * DtoBuddy provides utilities for working with Data Transfer Objects (DTOs).
@@ -21,22 +19,22 @@ class DtoBuddy() {
         this.namingStrategy = namingStrategy
     }
 
+    constructor(byteCodeStrategy: ByteCodeStrategy) : this() {
+        this.byteCodeStrategy = byteCodeStrategy
+    }
+
     constructor(instanceStrategy: InstanceStrategy) : this() {
         this.instanceStrategy = instanceStrategy
     }
 
     var namingStrategy: NamingStrategy = DefaultNamingStrategy()
 
+    var byteCodeStrategy: ByteCodeStrategy = DefaultByteCodeStrategy()
+
     var instanceStrategy: InstanceStrategy = DefaultInstanceStrategy()
 
-    private val byteBuddyWrapper = ByteBuddyWrapper()
-
     // Cache for generated classes to avoid regenerating the same class
-    private val classCache = mutableMapOf<String, Class<*>>()
-
-    // Cache for property info to avoid reanalyzing classes (for implementation)
-    private val propertiesCache = mutableMapOf<Class<*>, List<PropertyDescriptor>>()
-
+    private val classCache = mutableMapOf<String, Pair<Class<*>, Class<*>>>()
 
     /**
      * Return a new generated class that implements base class but have all fields provided with getter and setter.
@@ -155,47 +153,20 @@ class DtoBuddy() {
         val cacheKey = "$packageName.$className"
 
         // Check cache first
-        classCache[cacheKey]?.let { return it }
+        classCache[cacheKey]?.also { (prevBaseClass, prevGenClass) ->
+            if (prevBaseClass != baseClass) {
+                throw DtoBuddySystemException("Class $cacheKey is already implemented for ${prevGenClass.name}")
+            }
+            return prevGenClass
+        }
 
         if((typeParams?.size ?: 0) != baseClass.typeParameters.size) {
             throw DtoBuddyBadInputException("Type parameter count mismatch: ${typeParams?.size} != ${baseClass.typeParameters.size}")
         }
 
-        // Though cacheKey is not in classCache, it does not mean that the base class has never been analyzed before.
-        // It's possible that the same baseClass passed in with different other parameters.
-        val properties = propertiesCache.getOrPut(baseClass) {
-            PropertyDescriptorList.from(baseClass)
-        }
-
-        val isConcreteClass = !baseClass.isInterface && !Modifier.isAbstract(baseClass.modifiers)
-        val isCompleteAndMutable = properties.all { it.isAlreadyCompleteAndMutable() }
-        if (isConcreteClass && isCompleteAndMutable) {
-            // All properties are already mutable and it's not an interface, return the original class
-            classCache[cacheKey] = baseClass
-            return baseClass
-        }
-
-        try {
-            // Create dynamic type builder
-            val builder = byteBuddyWrapper.createDynamicType(baseClass, typeParams, packageName, className)
-
-            // Create a map of type parameter names to actual types
-            val typeParamsMapByName = typeParams?.takeIf { it.isNotEmpty() }
-                ?.let { typeParams ->
-                    val typeParameterNames = baseClass.typeParameters.map { it.name }
-                        typeParameterNames.zip(typeParams).toMap()
-                } ?: emptyMap()
-
-            // Implement properties
-            val implementedBuilder = byteBuddyWrapper.implementProperties(builder, properties, typeParamsMapByName)
-
-            // Load the generated class
-            val generatedClass = byteBuddyWrapper.loadClass(implementedBuilder)
-
-            // Cache the result
-            classCache[cacheKey] = generatedClass
-
-            return generatedClass
+        return try {
+            byteCodeStrategy.implement(baseClass, typeParams, packageName, className)
+                .also { generatedClass -> classCache[cacheKey] = baseClass to generatedClass }
         } catch (e: Exception) {
             when (e) {
                 is DtoBuddyBadInputException, is DtoBuddySystemException -> throw e
