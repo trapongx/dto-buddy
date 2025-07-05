@@ -1,6 +1,7 @@
 package com.runninglane.dto.buddy.test.java.cases.simple;
 
 import com.runninglane.dto.buddy.DtoBuddy;
+import com.runninglane.dto.buddy.test.NamingStrategyWithCountUpSuffix;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -10,60 +11,15 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SimpleDtoInterfaceTest {
-    private final DtoBuddy dtoBuddy = new DtoBuddy();
-    private static int nameSuffix = 0;
+    private final DtoBuddy dtoBuddy = new DtoBuddy(new NamingStrategyWithCountUpSuffix());
 
     @Test
     public void testImplement() {
-        {
-            Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class)
-                .withNameSuffix(String.valueOf(++nameSuffix))
-                .implement();
-            assertNotNull(concreteClass);
-            assertTrue(SimpleDtoInterface.class.isAssignableFrom(concreteClass));
-            assertEquals("SimpleDtoInterface$Dto" + nameSuffix, concreteClass.getSimpleName());
-            assertEquals(concreteClass.getPackageName(), SimpleDtoInterface.class.getPackageName());
-            assertEquals(List.of(SimpleDtoInterface.class), List.of(concreteClass.getInterfaces()));
-            assertEquals(Object.class, concreteClass.getSuperclass());
-        }
-
-        {
-            Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class)
-                .implement();
-            assertNotNull(concreteClass);
-            assertTrue(SimpleDtoInterface.class.isAssignableFrom(concreteClass));
-            assertEquals("SimpleDtoInterface$Dto", concreteClass.getSimpleName());
-            assertEquals(concreteClass.getPackageName(), SimpleDtoInterface.class.getPackageName());
-            assertEquals(List.of(SimpleDtoInterface.class), List.of(concreteClass.getInterfaces()));
-            assertEquals(Object.class, concreteClass.getSuperclass());
-        }
-
-        {
-            String customPackage = "com.example.test.java";
-            Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class)
-                .withPackageName(customPackage)
-                .implement();
-            assertNotNull(concreteClass);
-            assertTrue(SimpleDtoInterface.class.isAssignableFrom(concreteClass));
-            assertEquals("SimpleDtoInterface$Dto", concreteClass.getSimpleName());
-            assertEquals(customPackage, concreteClass.getPackageName());
-            assertEquals(List.of(SimpleDtoInterface.class), List.of(concreteClass.getInterfaces()));
-            assertEquals(Object.class, concreteClass.getSuperclass());
-        }
-
-        {
-            String customPackage = "com.example.test.java";
-            Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class)
-                .withPackageName(customPackage)
-                .withNameSuffix(String.valueOf(++nameSuffix))
-                .implement();
-            assertNotNull(concreteClass);
-            assertTrue(SimpleDtoInterface.class.isAssignableFrom(concreteClass));
-            assertEquals("SimpleDtoInterface$Dto" + nameSuffix, concreteClass.getSimpleName());
-            assertEquals(customPackage, concreteClass.getPackageName());
-            assertEquals(List.of(SimpleDtoInterface.class), List.of(concreteClass.getInterfaces()));
-            assertEquals(Object.class, concreteClass.getSuperclass());
-        }
+        Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class).implement();
+        assertNotNull(concreteClass);
+        assertTrue(SimpleDtoInterface.class.isAssignableFrom(concreteClass));
+        assertEquals(List.of(SimpleDtoInterface.class), List.of(concreteClass.getInterfaces()));
+        assertEquals(Object.class, concreteClass.getSuperclass());
 
         assertThrows(IllegalArgumentException.class, () -> dtoBuddy.implementor().implement());
     }
@@ -76,9 +32,7 @@ class SimpleDtoInterfaceTest {
             "email", "john.doe@example.com"
         );
 
-        Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class)
-            .withNameSuffix(String.valueOf(++nameSuffix))
-            .implement();
+        Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class).implement();
         SimpleDtoInterface dto = dtoBuddy.create(concreteClass, params);
         assertNotNull(dto);
         assertEquals("John Doe", dto.getName());
@@ -92,9 +46,7 @@ class SimpleDtoInterfaceTest {
             "email", "john.doe@example.com"
         );
 
-        Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class)
-            .withNameSuffix(String.valueOf(++nameSuffix))
-            .implement();
+        Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class).implement();
         Map<String, Object> initialParams = new HashMap<>();
         initialParams.put("name", "John Doe");
         initialParams.put("age", 30);
@@ -114,9 +66,7 @@ class SimpleDtoInterfaceTest {
         params.put("age", 25);
         params.put("email", null);
 
-        Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class)
-            .withNameSuffix(String.valueOf(++nameSuffix))
-            .implement();
+        Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class).implement();
         SimpleDtoInterface dto = dtoBuddy.create(concreteClass, params);
         assertNotNull(dto);
         assertEquals("Jane Doe", dto.getName());
@@ -131,9 +81,7 @@ class SimpleDtoInterfaceTest {
             "email", "john.doe@example.com"
         );
 
-        Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class)
-            .withNameSuffix(String.valueOf(++nameSuffix))
-            .implement();
+        Class<?> concreteClass = dtoBuddy.implementor(SimpleDtoInterface.class).implement();
         Map<String, Object> initialParams = new HashMap<>();
         initialParams.put("name", "John Doe");
         initialParams.put("age", 10);

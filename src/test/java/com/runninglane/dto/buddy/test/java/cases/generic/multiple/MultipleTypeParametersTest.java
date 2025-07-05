@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class MultipleTypeParametersTest {
     private final DtoBuddy dtoBuddy = new DtoBuddy();
-    private static int nameSuffix = 0;
 
     @Test
     public void testImplement() {
@@ -48,7 +47,6 @@ public class MultipleTypeParametersTest {
 
         Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithMultipleTypeParameters.class)
             .withTypeParams(List.of(String.class, Integer.class, String.class, Long.class))
-            .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
         DtoInterfaceWithMultipleTypeParameters<String, Integer, String, Long> dto = dtoBuddy.create(concreteClass, params);
 
@@ -69,7 +67,6 @@ public class MultipleTypeParametersTest {
 
         Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithMultipleTypeParameters.class)
             .withTypeParams(List.of(String.class, Integer.class, String.class, Long.class))
-            .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
 
         Map<String, Object> createParams = new HashMap<>();
@@ -96,7 +93,6 @@ public class MultipleTypeParametersTest {
 
             Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithMultipleTypeParameters.class)
                 .withTypeParams(List.of(String.class, Integer.class, String.class, Long.class))
-                .withNameSuffix(String.valueOf(++nameSuffix))
                 .implement();
 
             DtoInterfaceWithMultipleTypeParameters<String, Integer, String, Long> dto = dtoBuddy.create(concreteClass, params);
@@ -119,7 +115,6 @@ public class MultipleTypeParametersTest {
 
             Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithMultipleTypeParameters.class)
                 .withTypeParams(List.of(String.class, Integer.class, String.class, Long.class))
-                .withNameSuffix(String.valueOf(++nameSuffix))
                 .implement();
 
             Map<String, Object> createParams = new HashMap<>();

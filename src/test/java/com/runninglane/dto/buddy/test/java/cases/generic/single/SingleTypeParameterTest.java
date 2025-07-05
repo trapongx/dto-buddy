@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class SingleTypeParameterTest {
     private final DtoBuddy dtoBuddy = new DtoBuddy();
-    private static int nameSuffix = 0;
 
     @Test
     public void testImplement() {
@@ -50,7 +49,6 @@ public class SingleTypeParameterTest {
 
         Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
             .withTypeParams(Collections.singletonList(String.class))
-            .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
         DtoInterfaceWithSingleTypeParameter<String> dto = dtoBuddy.create(concreteClass, params);
 
@@ -68,7 +66,6 @@ public class SingleTypeParameterTest {
 
         Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
             .withTypeParams(Collections.singletonList(String.class))
-            .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
 
         Map<String, Object> initialParams = new HashMap<>();
@@ -95,7 +92,6 @@ public class SingleTypeParameterTest {
 
         Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
             .withTypeParams(Collections.singletonList(String.class))
-            .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
         DtoInterfaceWithSingleTypeParameter<String> dto = dtoBuddy.create(concreteClass, params);
 
@@ -113,7 +109,6 @@ public class SingleTypeParameterTest {
 
         Class<?> concreteClass = dtoBuddy.implementor(DtoInterfaceWithSingleTypeParameter.class)
             .withTypeParams(Collections.singletonList(String.class))
-            .withNameSuffix(String.valueOf(++nameSuffix))
             .implement();
 
         Map<String, Object> initialParams = new HashMap<>();

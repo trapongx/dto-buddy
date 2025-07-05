@@ -1,14 +1,14 @@
 package com.runninglane.dto.buddy.test.cases.generic.multiple
 
 import com.runninglane.dto.buddy.DtoBuddy
+import com.runninglane.dto.buddy.test.NamingStrategyWithCountUpSuffix
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class MultipleTypeParametersTest {
-    private val dtoBuddy = DtoBuddy()
-    private var nameSuffix: Int = 0
+    private val dtoBuddy = DtoBuddy(NamingStrategyWithCountUpSuffix())
 
     @Test
     fun testImplement() {
@@ -37,8 +37,7 @@ class MultipleTypeParametersTest {
 
         val concreteClass = dtoBuddy.implement(
             DtoInterfaceWithMultipleTypeParameters::class.java,
-            typeParams = listOf(String::class.java, Int::class.java, String::class.java, Long::class.java),
-            nameSuffix = "${++nameSuffix}"
+            typeParams = listOf(String::class.java, Int::class.java, String::class.java, Long::class.java)
         )
         val dto: DtoInterfaceWithMultipleTypeParameters<String, Int, String, Long> = dtoBuddy.create(concreteClass, params)
 
@@ -57,8 +56,7 @@ class MultipleTypeParametersTest {
 
         val concreteClass = dtoBuddy.implement(
             DtoInterfaceWithMultipleTypeParameters::class.java,
-            typeParams = listOf(String::class.java, Int::class.java, String::class.java, Long::class.java),
-            nameSuffix = "${++nameSuffix}"
+            typeParams = listOf(String::class.java, Int::class.java, String::class.java, Long::class.java)
         )
         val dto: DtoInterfaceWithMultipleTypeParameters<String, Int, String, Long> = dtoBuddy.create(
             concreteClass,
@@ -83,8 +81,7 @@ class MultipleTypeParametersTest {
 
         val concreteClass = dtoBuddy.implement(
             DtoInterfaceWithMultipleTypeParameters::class.java,
-            typeParams = listOf(String::class.java, Int::class.java, String::class.java, Long::class.java),
-            nameSuffix = "${++nameSuffix}"
+            typeParams = listOf(String::class.java, Int::class.java, String::class.java, Long::class.java)
         )
         val dto: DtoInterfaceWithMultipleTypeParameters<String, Int, String, Long> = dtoBuddy.create(concreteClass, params)
 
@@ -105,8 +102,7 @@ class MultipleTypeParametersTest {
 
         val concreteClass = dtoBuddy.implement(
             DtoInterfaceWithMultipleTypeParameters::class.java,
-            typeParams = listOf(String::class.java, Int::class.java, String::class.java, Long::class.java),
-            nameSuffix = "${++nameSuffix}"
+            typeParams = listOf(String::class.java, Int::class.java, String::class.java, Long::class.java)
         )
         val dto: DtoInterfaceWithMultipleTypeParameters<String, Int, String, Long> = dtoBuddy.create(
             concreteClass,

@@ -1,6 +1,7 @@
 package com.runninglane.dto.buddy.test.java.cases.abstracts;
 
 import com.runninglane.dto.buddy.DtoBuddy;
+import com.runninglane.dto.buddy.test.NamingStrategyWithCountUpSuffix;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -9,8 +10,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SimpleAbstractDtoTest {
-    private final DtoBuddy dtoBuddy = new DtoBuddy();
-    private static int nameSuffix = 0;
+    private final DtoBuddy dtoBuddy = new DtoBuddy(new NamingStrategyWithCountUpSuffix());
 
     @Test
     public void testImplement() {
@@ -28,9 +28,7 @@ class SimpleAbstractDtoTest {
         params.put("age", 30);
         params.put("email", "john.doe@example.com");
 
-        Class<?> concreteClass = dtoBuddy.implementor(SimpleAbstractDto.class)
-            .withNameSuffix(String.valueOf(++nameSuffix))
-            .implement();
+        Class<?> concreteClass = dtoBuddy.implementor(SimpleAbstractDto.class).implement();
         SimpleAbstractDto dto = dtoBuddy.create(concreteClass, params);
 
         assertNotNull(dto);
@@ -45,9 +43,7 @@ class SimpleAbstractDtoTest {
         Map<String, Object> params = new HashMap<>();
         params.put("email", "john.doe@example.com");
 
-        Class<?> concreteClass = dtoBuddy.implementor(SimpleAbstractDto.class)
-            .withNameSuffix(String.valueOf(++nameSuffix))
-            .implement();
+        Class<?> concreteClass = dtoBuddy.implementor(SimpleAbstractDto.class).implement();
         Map<String, Object> initialParams = new HashMap<>();
         initialParams.put("name", "John Doe");
         initialParams.put("age", 30);
@@ -69,9 +65,7 @@ class SimpleAbstractDtoTest {
         params.put("age", 25);
         params.put("email", null);
 
-        Class<?> concreteClass = dtoBuddy.implementor(SimpleAbstractDto.class)
-            .withNameSuffix(String.valueOf(++nameSuffix))
-            .implement();
+        Class<?> concreteClass = dtoBuddy.implementor(SimpleAbstractDto.class).implement();
         SimpleAbstractDto dto = dtoBuddy.create(concreteClass, params);
 
         assertNotNull(dto);
@@ -87,9 +81,7 @@ class SimpleAbstractDtoTest {
         params.put("age", 30);
         params.put("email", "john.doe@example.com");
 
-        Class<?> concreteClass = dtoBuddy.implementor(SimpleAbstractDto.class)
-            .withNameSuffix(String.valueOf(++nameSuffix))
-            .implement();
+        Class<?> concreteClass = dtoBuddy.implementor(SimpleAbstractDto.class).implement();
         Map<String, Object> initialParams = new HashMap<>();
         initialParams.put("name", "John Doe");
         initialParams.put("age", 10);

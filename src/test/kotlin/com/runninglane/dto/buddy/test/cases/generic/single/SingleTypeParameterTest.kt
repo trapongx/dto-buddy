@@ -1,17 +1,14 @@
 package com.runninglane.dto.buddy.test.cases.generic.single
 
 import com.runninglane.dto.buddy.DtoBuddy
+import com.runninglane.dto.buddy.test.NamingStrategyWithCountUpSuffix
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class SingleTypeParameterTest {
-    companion object {
-        private var nameSuffix: Int = 0
-    }
-
-    private val dtoBuddy = DtoBuddy()
+    private val dtoBuddy = DtoBuddy(NamingStrategyWithCountUpSuffix())
 
     @Test
     fun testImplement() {
@@ -40,8 +37,7 @@ class SingleTypeParameterTest {
 
         val concreteClass = dtoBuddy.implement(
             DtoInterfaceWithSingleTypeParameter::class.java,
-            typeParams = listOf(String::class.java),
-            nameSuffix = "${++nameSuffix}"
+            typeParams = listOf(String::class.java)
         )
         val dto: DtoInterfaceWithSingleTypeParameter<String> = dtoBuddy.create(concreteClass, params)
 
@@ -60,8 +56,7 @@ class SingleTypeParameterTest {
 
         val concreteClass = dtoBuddy.implement(
             DtoInterfaceWithSingleTypeParameter::class.java,
-            typeParams = listOf(String::class.java),
-            nameSuffix = "${++nameSuffix}"
+            typeParams = listOf(String::class.java)
         )
         val dto: DtoInterfaceWithSingleTypeParameter<String> = dtoBuddy.create(
             concreteClass,
@@ -86,8 +81,7 @@ class SingleTypeParameterTest {
 
         val concreteClass = dtoBuddy.implement(
             DtoInterfaceWithSingleTypeParameter::class.java,
-            typeParams = listOf(String::class.java),
-            nameSuffix = "${++nameSuffix}"
+            typeParams = listOf(String::class.java)
         )
         val dto: DtoInterfaceWithSingleTypeParameter<String> = dtoBuddy.create(concreteClass, params)
 
@@ -107,8 +101,7 @@ class SingleTypeParameterTest {
 
         val concreteClass = dtoBuddy.implement(
             DtoInterfaceWithSingleTypeParameter::class.java,
-            typeParams = listOf(String::class.java),
-            nameSuffix = "${++nameSuffix}"
+            typeParams = listOf(String::class.java)
         )
         val dto: DtoInterfaceWithSingleTypeParameter<String> = dtoBuddy.create(
             concreteClass,

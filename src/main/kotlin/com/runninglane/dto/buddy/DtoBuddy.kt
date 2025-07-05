@@ -4,6 +4,8 @@ import com.runninglane.dto.buddy.builder.ImplementationBuilder
 import com.runninglane.dto.buddy.bytecode.ByteBuddyWrapper
 import com.runninglane.dto.buddy.bytecode.PropertyDescriptor
 import com.runninglane.dto.buddy.bytecode.PropertyDescriptorList
+import com.runninglane.dto.buddy.naming.DefaultNamingStrategy
+import com.runninglane.dto.buddy.naming.NamingStrategy
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
 import com.runninglane.dto.buddy.exception.DtoBuddySystemException
 import java.lang.reflect.Modifier
@@ -13,7 +15,13 @@ import java.lang.reflect.Modifier
  * It can dynamically create concrete implementations of interfaces or abstract classes,
  * instantiate those implementations, and populate their properties.
  */
-class DtoBuddy {
+class DtoBuddy() {
+    constructor(namingStrategy: NamingStrategy) : this() {
+        this.namingStrategy = namingStrategy
+    }
+
+    var namingStrategy: NamingStrategy = DefaultNamingStrategy()
+
     private val byteBuddyWrapper = ByteBuddyWrapper()
 
     // Cache for generated classes to avoid regenerating the same class
@@ -126,27 +134,18 @@ class DtoBuddy {
      * ```
      *
      * @param baseClass
-     * @param packageName, default value is the same package name as of the base class
-     * @param name, default value is the name of the base class with "$Dto" added at the end
-     * @param nameSuffix, there might be some scenario to generate classes for the same interface single time,
-     * nameSuffix will be added at the very end of their name to avoid name collision. For this project, the test cases
-     * make use of this parameter a lot.
-     * @return generated class of type Class<*>
+     * @param typeParams when base class is generic type
+     * @return generated class
      */
     fun implement(
         baseClass: Class<*>,
-        typeParams: List<Class<*>>? = null,
-        packageName: String? = null,
-        name: String? = null,
-        nameSuffix: String? = null
+        typeParams: List<Class<*>>? = null
     ): Class<*> {
-        val packageName = packageName ?: baseClass.packageName
-        val name = name ?: "${baseClass.simpleName}\$Dto"
-        val nameSuffix = nameSuffix ?: ""
+        val packageName = namingStrategy.buildPackageName(baseClass)
+        val className = namingStrategy.buildClassName(baseClass)
 
-        // Generate full class name
-        val fullClassName = "$name$nameSuffix"
-        val cacheKey = "$packageName.$fullClassName"
+        // Generate cache key
+        val cacheKey = "$packageName.$className"
 
         // Check cache first
         classCache[cacheKey]?.let { return it }
@@ -171,7 +170,7 @@ class DtoBuddy {
 
         try {
             // Create dynamic type builder
-            val builder = byteBuddyWrapper.createDynamicType(baseClass, typeParams, packageName, fullClassName)
+            val builder = byteBuddyWrapper.createDynamicType(baseClass, typeParams, packageName, className)
 
             // Create a map of type parameter names to actual types
             val typeParamsMapByName = typeParams?.takeIf { it.isNotEmpty() }
