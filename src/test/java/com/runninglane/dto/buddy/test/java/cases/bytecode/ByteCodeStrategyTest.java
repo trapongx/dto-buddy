@@ -2,7 +2,6 @@ package com.runninglane.dto.buddy.test.java.cases.bytecode;
 
 import com.runninglane.dto.buddy.DtoBuddy;
 import com.runninglane.dto.buddy.bytecode.bytebuddy.ByteBuddyByteCodeStrategy;
-import com.runninglane.dto.buddy.bytecode.bytebuddy.ByteBuddyWrapper;
 import net.bytebuddy.dynamic.DynamicType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,15 +23,15 @@ class ByteCodeStrategyTest {
         String value();
     }
 
-    static class TestByteBuddyWrapper extends ByteBuddyWrapper {
+    static class TestByteBuddyByteCodeStrategy extends ByteBuddyByteCodeStrategy {
         @Override
-        public @NotNull DynamicType.Builder<?> createDynamicType(
+        public @NotNull DynamicType.Builder<?> defineClass(
             @NotNull Class<?> baseClass,
             @Nullable List<? extends Class<?>> typeParams,
             @NotNull String packageName,
             @NotNull String className
         ) {
-            return super.createDynamicType(baseClass, typeParams, packageName, className)
+            return super.defineClass(baseClass, typeParams, packageName, className)
                 .annotateType(new TestAnnotation() {
                     @Override
                     public String value() {
@@ -49,7 +48,7 @@ class ByteCodeStrategyTest {
 
     @Test
     public void testAddSecondaryConstructor() {
-        DtoBuddy dtoBuddy = new DtoBuddy(new ByteBuddyByteCodeStrategy(new TestByteBuddyWrapper()));
+        DtoBuddy dtoBuddy = new DtoBuddy(new TestByteBuddyByteCodeStrategy());
         Class<?> concreteClass = dtoBuddy.implement(TestDto.class);
         TestAnnotation annotation = concreteClass.getAnnotation(TestAnnotation.class);
         assertNotNull(annotation);
