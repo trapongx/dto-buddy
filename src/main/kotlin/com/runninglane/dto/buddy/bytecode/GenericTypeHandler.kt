@@ -1,6 +1,5 @@
 package com.runninglane.dto.buddy.bytecode
 
-import net.bytebuddy.description.type.TypeDescription
 import java.lang.reflect.GenericArrayType
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
@@ -44,7 +43,7 @@ internal class GenericTypeHandler {
 
         // Handle direct type variable (T)
         if (property.genericType is TypeVariable<*>) {
-            val typeVar = property.genericType as TypeVariable<*>
+            val typeVar = property.genericType
             return typeParamsMapByName[typeVar.name] ?: property.type!!
         }
 
@@ -58,57 +57,4 @@ internal class GenericTypeHandler {
         return property.type!!
     }
 
-    /**
-     * Creates a TypeDescription.Generic for a complex generic type with resolved type variables
-     * This is needed for ByteBuddy when defining methods with generic return types or parameters
-     */
-    fun createGenericTypeDescription(type: Type, typeParamsMap: Map<String, Class<*>>?): TypeDescription.Generic {
-        if (typeParamsMap == null || typeParamsMap.isEmpty()) {
-            // If no type parameters are provided, just use the raw type
-            return TypeDescription.Generic.OfNonGenericType.ForLoadedType.of(type as Class<*>)
-        }
-
-        return when (type) {
-            is Class<*> -> {
-                TypeDescription.Generic.OfNonGenericType.ForLoadedType.of(type)
-            }
-            is TypeVariable<*> -> {
-                // Resolve the type variable to its concrete type
-                val resolvedType = typeParamsMap[type.name] ?: type
-                if (resolvedType is Class<*>) {
-                    TypeDescription.Generic.OfNonGenericType.ForLoadedType.of(resolvedType)
-                } else {
-                    // If not resolved to a class, use Object as fallback
-                    TypeDescription.Generic.OfNonGenericType.ForLoadedType.of(Any::class.java)
-                }
-            }
-            is ParameterizedType -> {
-                // For parameterized types, convert to a simpler approach
-                val rawType = type.rawType as Class<*>
-
-                // Extract actual type arguments and resolve type variables
-                val resolvedTypeArgs = type.actualTypeArguments.map { argType ->
-                    when (argType) {
-                        is TypeVariable<*> -> {
-                            // For type variables, use the concrete type from the map
-                            typeParamsMap[argType.name] ?: Any::class.java
-                        }
-                        is Class<*> -> argType
-                        is ParameterizedType -> {
-                            // For nested parameterized types, use their raw type as fallback
-                            argType.rawType as Class<*>
-                        }
-                        else -> Any::class.java
-                    }
-                }.toTypedArray()
-
-                // Create a parameterized type description with proper Class<?> types
-                TypeDescription.Generic.Builder.parameterizedType(rawType, *resolvedTypeArgs).build()
-            }
-            else -> {
-                // For unknown types, default to Object
-                TypeDescription.Generic.OfNonGenericType.ForLoadedType.of(Any::class.java)
-            }
-        }
-    }
 }

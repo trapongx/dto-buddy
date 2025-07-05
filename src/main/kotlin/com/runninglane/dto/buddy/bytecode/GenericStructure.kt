@@ -32,19 +32,6 @@ internal class GenericStructure private constructor(
     }
 
     /**
-     * Resolves type variables in this generic structure using the provided type map
-     */
-    fun resolveTypeVariables(typeParamsMap: Map<String, Class<*>>): GenericStructure {
-        if (typeParameters.isEmpty()) return this
-
-        val resolvedParams = typeParameters.map { param ->
-            TypeParameter(resolveType(param.type, typeParamsMap), param.position)
-        }
-
-        return GenericStructure(rawType, resolvedParams)
-    }
-
-    /**
      * Recursively resolves a type, replacing type variables with their concrete types
      */
     private fun resolveType(type: Type, typeParamsMap: Map<String, Class<*>>): Type {
