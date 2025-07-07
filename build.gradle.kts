@@ -7,6 +7,7 @@ val junitJupiterVersion: String by project
 
 plugins {
     kotlin("jvm")
+    `maven-publish`
 }
 
 group = "com.runninglane"
@@ -21,6 +22,15 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
+}
+
+// Add publishing configuration
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+        }
+    }
 }
 
 tasks.test {
