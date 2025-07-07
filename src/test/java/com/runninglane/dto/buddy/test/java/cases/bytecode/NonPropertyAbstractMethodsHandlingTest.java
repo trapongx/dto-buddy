@@ -70,7 +70,7 @@ public class NonPropertyAbstractMethodsHandlingTest {
             .findFirst()
             .orElseThrow();
         assert !Modifier.isAbstract(shoutMethod.getModifiers());
-        TestBaseClass dto = dtoBuddy.create(concreteClass, java.util.Collections.emptyMap());
+        TestBaseClass dto = dtoBuddy.create(concreteClass);
         dto.setGreeting("Hello");
         assert "Hello John!".equals(dto.shout("John"));
 

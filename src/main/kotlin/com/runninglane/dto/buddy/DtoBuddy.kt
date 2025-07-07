@@ -203,6 +203,18 @@ class DtoBuddy() {
     }
 
     /**
+     * Creates a new instance of a DTO class with empty parameters.
+     * This is a convenience method that delegates to {@link #create(Class, Map)}
+     * with an empty parameter map.
+     *
+     * @param concrete The class to instantiate
+     * @return A new instance of the DTO class
+     */
+    fun <DTO> create(concrete: Class<*>): DTO {
+        return create(concrete, emptyMap())
+    }
+
+    /**
      * Populates an existing DTO instance with values from the provided parameter map
      *
      * @param dto The DTO instance to populate

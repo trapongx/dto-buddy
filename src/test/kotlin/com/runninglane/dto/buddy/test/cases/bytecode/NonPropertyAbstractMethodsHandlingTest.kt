@@ -44,7 +44,7 @@ class NonPropertyAbstractMethodsHandlingTest {
         val concreteClass = dtoBuddy.implement(TestBaseClass::class.java)
         val shoutMethod = concreteClass.methods.first { it.name == "shout" }
         assert(!Modifier.isAbstract(shoutMethod.modifiers))
-        val dto = dtoBuddy.create<TestBaseClass>(concreteClass, emptyMap())
+        val dto = dtoBuddy.create<TestBaseClass>(concreteClass)
         dto.greeting = "Hello"
         assert(dto.shout("John") == "Hello John!")
 
