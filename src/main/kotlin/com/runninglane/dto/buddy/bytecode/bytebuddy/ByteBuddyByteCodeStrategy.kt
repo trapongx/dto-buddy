@@ -93,9 +93,14 @@ open class ByteBuddyByteCodeStrategy : ThreeStepsByteCodeStrategy<DynamicType.Bu
             // Resolve the property type based on its generic structure
             val resolvedType = genericTypeHandler.resolvePropertyType(property, typeParamsMapByName)
 
-            // Define field
+            val fieldName = property.name
+            if (isReservedWord(fieldName)) {
+                throw DtoBuddyBadInputException(
+                   "Property $fieldName in ${property.baseClass.name} is a reserved word and cannot be used as a field name."
+                )
+            }
             resultBuilder = resultBuilder.defineField(
-                property.name, resolvedType, Visibility.PRIVATE
+                fieldName, resolvedType, Visibility.PRIVATE
             )
 
             // Implement getter if needed
@@ -105,12 +110,12 @@ open class ByteBuddyByteCodeStrategy : ThreeStepsByteCodeStrategy<DynamicType.Bu
                     // For all generic types (simple or complex), define a new method with the correctly resolved return type
                     val getterName = property.getter.name
                     resultBuilder = resultBuilder.defineMethod(getterName, resolvedType, Visibility.PUBLIC)
-                        .intercept(FieldAccessor.ofField(property.name))
+                        .intercept(FieldAccessor.ofField(fieldName))
                         .annotateMethod(Override())
                 } else {
                     // For non-generic types, we can just intercept the existing method
                     resultBuilder = resultBuilder.method(ElementMatchers.`is`(property.getter))
-                        .intercept(FieldAccessor.ofField(property.name))
+                        .intercept(FieldAccessor.ofField(fieldName))
                         .annotateMethod(Override())
                 }
             }
@@ -123,12 +128,12 @@ open class ByteBuddyByteCodeStrategy : ThreeStepsByteCodeStrategy<DynamicType.Bu
                     val setterName = property.setter.name
                     resultBuilder = resultBuilder.defineMethod(setterName, Void.TYPE, Visibility.PUBLIC)
                         .withParameter(resolvedType)
-                        .intercept(FieldAccessor.ofField(property.name))
+                        .intercept(FieldAccessor.ofField(fieldName))
                         .annotateMethod(Override())
                 } else {
                     // For non-generic types, we can just intercept the existing method
                     resultBuilder = resultBuilder.method(ElementMatchers.`is`(property.setter))
-                        .intercept(FieldAccessor.ofField(property.name))
+                        .intercept(FieldAccessor.ofField(fieldName))
                         .annotateMethod(Override())
                 }
             } else {
@@ -137,7 +142,7 @@ open class ByteBuddyByteCodeStrategy : ThreeStepsByteCodeStrategy<DynamicType.Bu
                 val setterName = "set" + property.name.capitalize()
                 resultBuilder = resultBuilder.defineMethod(setterName, Void.TYPE, Visibility.PUBLIC)
                     .withParameter(resolvedType)
-                    .intercept(FieldAccessor.ofField(property.name))
+                    .intercept(FieldAccessor.ofField(fieldName))
             }
         }
 
@@ -174,6 +179,21 @@ open class ByteBuddyByteCodeStrategy : ThreeStepsByteCodeStrategy<DynamicType.Bu
             throw DtoBuddyBadInputException(
                 "Base class ${baseClass.name} must not be final class."
             )
+        }
+    }
+
+    companion object {
+        private val javaReservedKeywords = setOf(
+            "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class", "const",
+            "continue", "default", "do", "double", "else", "enum", "extends", "false", "final", "finally",
+            "float", "for", "goto", "if", "implements", "import", "instanceof", "int", "interface",
+            "long", "native", "new", "null", "package", "private", "protected", "public", "return",
+            "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw", "throws",
+            "transient", "true", "try", "void", "volatile", "while"
+        )
+
+        private fun isReservedWord(name: String): Boolean {
+            return name in javaReservedKeywords
         }
     }
 }
