@@ -8,6 +8,7 @@ import com.runninglane.dto.buddy.instance.DefaultInstanceStrategy
 import com.runninglane.dto.buddy.instance.InstanceStrategy
 import com.runninglane.dto.buddy.naming.DefaultNamingStrategy
 import com.runninglane.dto.buddy.naming.NamingStrategy
+import kotlin.reflect.KClass
 
 /**
  * DtoBuddy provides utilities for working with Data Transfer Objects (DTOs).
@@ -34,7 +35,7 @@ class DtoBuddy() {
     var instanceStrategy: InstanceStrategy = DefaultInstanceStrategy()
 
     // Cache for generated classes to avoid regenerating the same class
-    private val classCache = mutableMapOf<String, Pair<Class<*>, Class<*>>>()
+    private val classCache = mutableMapOf<String, Pair<KClass<*>, KClass<*>>>()
 
     /**
      * Return a new generated class that implements base class but have all fields provided with getter and setter.
@@ -143,9 +144,9 @@ class DtoBuddy() {
      * @return generated class
      */
     fun implement(
-        baseClass: Class<*>,
-        typeParams: List<Class<*>>? = null
-    ): Class<*> {
+        baseClass: KClass<*>,
+        typeParams: List<KClass<*>>? = null
+    ): KClass<*> {
         val packageName = namingStrategy.buildPackageName(baseClass)
         val className = namingStrategy.buildClassName(baseClass)
 
@@ -155,7 +156,7 @@ class DtoBuddy() {
         // Check cache first
         classCache[cacheKey]?.also { (prevBaseClass, prevGenClass) ->
             if (prevBaseClass != baseClass) {
-                throw DtoBuddySystemException("Class $cacheKey is already implemented for ${prevGenClass.name}")
+                throw DtoBuddySystemException("Class $cacheKey is already implemented for ${prevGenClass.qualifiedName}")
             }
             return prevGenClass
         }
@@ -175,7 +176,7 @@ class DtoBuddy() {
         }
     }
 
-    fun implement(baseClass: Class<*>) = implement(baseClass, null)
+    fun implement(baseClass: KClass<*>) = implement(baseClass, null)
 
     /**
      * Creates a new instance of a DTO class and populates it with the provided parameters
@@ -185,7 +186,7 @@ class DtoBuddy() {
      * @return A new instance of the DTO class with populated properties
      */
     @Suppress("UNCHECKED_CAST")
-    fun <DTO> create(concrete: Class<*>, params: Map<String, Any?>): DTO {
+    fun <DTO> create(concrete: KClass<*>, params: Map<String, Any?>): DTO {
         try {
             // Create a new instance
             val instance = instanceStrategy.create(concrete)
@@ -197,20 +198,20 @@ class DtoBuddy() {
         } catch (e: Exception) {
             when (e) {
                 is DtoBuddyBadInputException, is DtoBuddySystemException -> throw e
-                else -> throw DtoBuddySystemException("Failed to create DTO instance: ${e.message}")
+                else -> throw DtoBuddySystemException("Failed to create DTO instance: ${e.message}", e)
             }
         }
     }
 
     /**
      * Creates a new instance of a DTO class with empty parameters.
-     * This is a convenience method that delegates to {@link #create(Class, Map)}
+     * This is a convenience function that delegates to {@link #create(Class, Map)}
      * with an empty parameter map.
      *
      * @param concrete The class to instantiate
      * @return A new instance of the DTO class
      */
-    fun <DTO> create(concrete: Class<*>): DTO {
+    fun <DTO> create(concrete: KClass<*>): DTO {
         return create(concrete, emptyMap())
     }
 

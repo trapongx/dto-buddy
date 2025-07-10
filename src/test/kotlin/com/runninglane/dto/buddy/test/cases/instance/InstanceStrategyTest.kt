@@ -2,6 +2,7 @@ package com.runninglane.dto.buddy.test.cases.instance
 
 import com.runninglane.dto.buddy.DtoBuddy
 import com.runninglane.dto.buddy.instance.DefaultInstanceStrategy
+import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -12,7 +13,7 @@ class InstanceStrategyTest {
     }
 
     class TestInstanceStrategy : DefaultInstanceStrategy() {
-        override fun create(concrete: Class<*>): Any {
+        override fun create(concrete: KClass<*>): Any {
             return super.create(concrete).also {
                 (it as TestDto).flag = true
             }
@@ -26,7 +27,7 @@ class InstanceStrategyTest {
     @Test
     fun shouldCustomizeInstanceStrategyCorrectly() {
         val dtoBuddy = DtoBuddy(TestInstanceStrategy())
-        val concreteClass = dtoBuddy.implement(TestDto::class.java)
+        val concreteClass = dtoBuddy.implement(TestDto::class)
         val dto = dtoBuddy.create<TestDto>(concreteClass, mapOf("name" to "hello"))
         assertEquals(true, dto.flag)
         assertEquals("HELLO", dto.name)

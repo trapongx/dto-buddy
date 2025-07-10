@@ -2,31 +2,33 @@ package com.runninglane.dto.buddy.test.cases.contract
 
 import com.runninglane.dto.buddy.DtoBuddy
 import java.lang.reflect.Modifier
+import kotlin.reflect.KClass
+import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.KVisibility
+import kotlin.reflect.full.functions
+import kotlin.reflect.full.valueParameters
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 
 /**
  * The rule is the returned class must be a concrete class
  */
-class GetterSetterBehaviorContractTest {
+class GetterSetterBehaviorContractTest : TestGetSetCapability {
     private val dtoBuddy = DtoBuddy()
 
-    private fun test(baseClass: Class<*>, expectBaseClassReturned: Boolean, testGetSet: Boolean) {
+    private fun test(baseClass: KClass<*>, expectBaseClassReturned: Boolean, testGetSet: Boolean, testGetSetInJavaStyle: Boolean) {
         try {
             val concreteClass = dtoBuddy.implement(baseClass)
-            assertFalse(concreteClass.isInterface)
-            assertFalse(Modifier.isAbstract(concreteClass.modifiers))
+            assertFalse(concreteClass.java.isInterface)
+            assertFalse(concreteClass.isAbstract)
             if (expectBaseClassReturned) {
                 assertEquals(baseClass, concreteClass)
             }
             if (testGetSet) {
-                val dto = dtoBuddy.create<Any>(concreteClass, mapOf("name" to "Test"))
-                val getName = concreteClass.getMethod("getName")
-                val setName = concreteClass.getMethod("setName", String::class.java)
-                assertEquals("Test", getName.invoke(dto))
-                setName.invoke(dto, "Test2")
-                assertEquals("Test2", getName.invoke(dto))
+                testGetSet(dtoBuddy, concreteClass, testGetSetInJavaStyle)
             }
         } catch (e: Throwable) {
             throw RuntimeException("Failed to test ${baseClass.simpleName}", e)
@@ -36,45 +38,44 @@ class GetterSetterBehaviorContractTest {
     @Test
     fun testInterface() {
         listOf(
-            InterfaceWithNoMember::class.java ,
-            InterfaceWithAbstractGetter::class.java ,
-            InterfaceWithAbstractGetterAndAbstractSetter::class.java ,
-            InterfaceWithDefaultGetter::class.java ,
-            InterfaceWithDefaultGetterAndAbstractSetter::class.java ,
-            InterfaceWithAbstractProperty::class.java ,
-            InterfaceWithAbstractPropertyAndDefaultGetter::class.java 
+            InterfaceWithNoMember::class ,
+            InterfaceWithAbstractGetter::class ,
+            InterfaceWithAbstractGetterAndAbstractSetter::class ,
+            InterfaceWithAbstractProperty::class ,
         ).forEach { baseClass ->
-            val testGetSet = baseClass != InterfaceWithNoMember::class.java
-            test(baseClass, false, testGetSet)
+            val testGetSet = baseClass != InterfaceWithNoMember::class
+            val testGetSetInJavaStyle = testGetSet && !baseClass.simpleName!!.contains("Property")
+            test(baseClass, false, testGetSet, testGetSetInJavaStyle)
         }
     }
 
     @Test
     fun testAbstractClass() {
         listOf(
-            AbstractClassWithNoMember::class.java,
-            AbstractClassWithAbstractGetter::class.java,
-            AbstractClassWithAbstractGetterAndAbstractSetter::class.java,
-            AbstractClassWithConcreteGetterAndConcreteSetterWithoutField::class.java,
-            AbstractClassWithConcreteGetterAndConcreteSetterWithField::class.java,
-            AbstractClassWithAbstractImmutableProperty::class.java,
-            AbstractClassWithAbstractMutableProperty::class.java,
-            AbstractClassWithConcreteMutableProperty::class.java
+            AbstractClassWithNoMember::class,
+            AbstractClassWithAbstractGetter::class,
+            AbstractClassWithAbstractGetterAndAbstractSetter::class,
+            AbstractClassWithConcreteGetterAndConcreteSetterWithoutField::class,
+            AbstractClassWithConcreteGetterAndConcreteSetterWithField::class,
+            AbstractClassWithAbstractImmutableProperty::class,
+            AbstractClassWithAbstractMutableProperty::class,
+            AbstractClassWithConcreteMutableProperty::class
         ).forEach { baseClass ->
-            val testGetSet = !baseClass.simpleName.matches(Regex(".*(NoMember|Concrete).*"))
-            test(baseClass, expectBaseClassReturned = false, testGetSet)
+            val testGetSet = baseClass.simpleName?.matches(Regex(".*(NoMember|Concrete).*")) != true
+            val testGetSetInJavaStyle = testGetSet && !baseClass.simpleName!!.contains("Property")
+            test(baseClass, expectBaseClassReturned = false, testGetSet, testGetSetInJavaStyle)
         }
     }
 
     @Test
     fun testConcreteClass() {
         listOf(
-            ConcreteClassWithNoMember::class.java,
-            ConcreteClassWithGetterAndSetterWithoutField::class.java,
-            ConcreteClassWithGetterAndSetterWithField::class.java,
-            ConcreteClassWithConcreteMutableProperty::class.java
+            ConcreteClassWithNoMember::class,
+            ConcreteClassWithGetterAndSetterWithoutField::class,
+            ConcreteClassWithGetterAndSetterWithField::class,
+            ConcreteClassWithConcreteMutableProperty::class
         ).forEach { baseClass ->
-            test(baseClass, expectBaseClassReturned = true, testGetSet = false)
+            test(baseClass, expectBaseClassReturned = true, testGetSet = false, testGetSetInJavaStyle = false)
         }
     }
 

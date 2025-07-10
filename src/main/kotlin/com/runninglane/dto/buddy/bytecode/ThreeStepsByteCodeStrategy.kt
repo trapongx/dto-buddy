@@ -2,13 +2,14 @@ package com.runninglane.dto.buddy.bytecode
 
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
 import com.runninglane.dto.buddy.exception.DtoBuddySystemException
-import java.lang.reflect.Method
-import java.lang.reflect.Modifier
+import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
+import kotlin.reflect.full.functions
 
 /**
  * Implements the three-step bytecode generation strategy:
  * 1. Define class structure with package name, class name, modifiers, and annotations
- * 2. Implement properties by adding concrete getters and setters and handles non-property abstract methods
+ * 2. Implement properties by adding concrete getters and setters and handles non-property abstract functions
  * 3. Generate and load the bytecode into the runtime
  *
  * This strategy provides a structured approach to generate bytecode for DTO implementations.
@@ -16,21 +17,21 @@ import java.lang.reflect.Modifier
  */
 abstract class ThreeStepsByteCodeStrategy<B> : ByteCodeStrategy {
     // Cache for property info to avoid reanalyzing classes (for implementation)
-    private val propertiesCache = mutableMapOf<Class<*>, List<PropertyDescriptor>>()
+    private val propertiesCache = mutableMapOf<KClass<*>, List<PropertyDescriptor>>()
 
     final override fun implement(
-        baseClass: Class<*>,
-        typeParams: List<Class<*>>?,
+        baseClass: KClass<*>,
+        typeParams: List<KClass<*>>?,
         packageName: String,
         className: String
-    ): Class<*> {
+    ): KClass<*> {
         // Though cacheKey is not in classCache, it does not mean that the base class has never been analyzed before.
         // It's possible that the same baseClass passed in with different other parameters.
         val properties = propertiesCache.getOrPut(baseClass) {
             PropertyDescriptorList.from(baseClass)
         }
 
-        val isConcreteClass = !baseClass.isInterface && !Modifier.isAbstract(baseClass.modifiers)
+        val isConcreteClass = !baseClass.java.isInterface && !baseClass.isAbstract
         val isCompleteAndMutable = properties.all { it.isAlreadyCompleteAndMutable() }
         if (isConcreteClass && isCompleteAndMutable) {
             // All properties are already mutable, and it's not an interface, return the original class
@@ -51,19 +52,19 @@ abstract class ThreeStepsByteCodeStrategy<B> : ByteCodeStrategy {
             // Implement properties
             val implementedBuilder = implementProperties(builder, properties, typeParamsMapByName)
 
-            val nonPropertyAbstractMethods = baseClass.methods.toList()
+            val nonPropertyAbstractFunctions = baseClass.functions.toList()
                 .minus(properties.flatMap { listOfNotNull(it.getter, it.setter) })
-                .filter { Modifier.isAbstract(it.modifiers) || it.declaringClass.isInterface }
+                .filter { it.isAbstract }
 
-            val builderWithNonPropertyAbstractMethodsHandled = when {
-                nonPropertyAbstractMethods.isNotEmpty() ->
-                    handleNonPropertyAbstractMethods(implementedBuilder, nonPropertyAbstractMethods)
+            val builderWithNonPropertyAbstractFunctionsHandled = when {
+                nonPropertyAbstractFunctions.isNotEmpty() ->
+                    handleNonPropertyAbstractFunctions(implementedBuilder, nonPropertyAbstractFunctions)
 
                 else -> implementedBuilder
             }
 
             // Load the generated class
-            val generatedClass = loadClass(builderWithNonPropertyAbstractMethodsHandled)
+            val generatedClass = loadClass(builderWithNonPropertyAbstractFunctionsHandled, packageName, className)
 
             return generatedClass
         } catch (e: Exception) {
@@ -85,8 +86,8 @@ abstract class ThreeStepsByteCodeStrategy<B> : ByteCodeStrategy {
      * @return Builder object for the next step
      */
     abstract fun defineClass(
-        baseClass: Class<*>,
-        typeParams: List<Class<*>>?,
+        baseClass: KClass<*>,
+        typeParams: List<KClass<*>>?,
         packageName: String,
         className: String
     ): B
@@ -103,14 +104,14 @@ abstract class ThreeStepsByteCodeStrategy<B> : ByteCodeStrategy {
     abstract fun implementProperties(
         builder: B,
         properties: List<PropertyDescriptor>,
-        typeParamsMapByName: Map<String, Class<*>>? = null
+        typeParamsMapByName: Map<String, KClass<*>>? = null
     ): B
 
-    open fun handleNonPropertyAbstractMethods(builder: B, methods: List<Method>): B {
-        if (methods.isEmpty()) return builder
+    open fun handleNonPropertyAbstractFunctions(builder: B, functions: List<KFunction<*>>): B {
+        if (functions.isEmpty()) return builder
 
         throw DtoBuddyBadInputException(
-            "The following methods are not implemented properly: ${methods.map { it.name }}"
+            "The following functions are not implemented properly: ${functions.map { it.name }}"
         )
     }
 
@@ -118,7 +119,13 @@ abstract class ThreeStepsByteCodeStrategy<B> : ByteCodeStrategy {
      * Finalizes the class definition, generates the bytecode and loads it into the runtime.
      *
      * @param builder Builder object from implementProperties step
+     * @param packageName Target package name for the generated class
+     * @param className Name for the generated class
      * @return Generated concrete class
      */
-    abstract fun loadClass(builder: B): Class<*>
+    abstract fun loadClass(
+        builder: B,
+        packageName: String,
+        className: String
+    ): KClass<*>
 }

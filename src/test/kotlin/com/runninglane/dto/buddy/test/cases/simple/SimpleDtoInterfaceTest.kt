@@ -2,6 +2,8 @@ package com.runninglane.dto.buddy.test.cases.simple
 
 import com.runninglane.dto.buddy.DtoBuddy
 import com.runninglane.dto.buddy.test.NamingStrategyWithCountUpSuffix
+import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.jvm.jvmErasure
 import kotlin.test.*
 
 class SimpleDtoInterfaceTest {
@@ -9,11 +11,10 @@ class SimpleDtoInterfaceTest {
 
     @Test
     fun testImplement() {
-        val concreteClass = dtoBuddy.implement(SimpleDtoInterface::class.java)
+        val concreteClass = dtoBuddy.implement(SimpleDtoInterface::class)
         assertNotNull(concreteClass)
-        assertTrue(SimpleDtoInterface::class.java.isAssignableFrom(concreteClass))
-        assertEquals(listOf(SimpleDtoInterface::class.java), concreteClass.interfaces.toList())
-        assertEquals(Any::class.java, concreteClass.superclass)
+        assertTrue(concreteClass.isSubclassOf(SimpleDtoInterface::class))
+        assertEquals(setOf(SimpleDtoInterface::class, Any::class), concreteClass.supertypes.map { it.jvmErasure }.toSet())
     }
 
     @Test
@@ -24,7 +25,7 @@ class SimpleDtoInterfaceTest {
             "email" to "john.doe@example.com"
         )
 
-        val concreteClass = dtoBuddy.implement(SimpleDtoInterface::class.java)
+        val concreteClass = dtoBuddy.implement(SimpleDtoInterface::class)
         val dto: SimpleDtoInterface = dtoBuddy.create(concreteClass, params)
         assertNotNull(dto)
         assertEquals("John Doe", dto.name)
@@ -38,7 +39,7 @@ class SimpleDtoInterfaceTest {
             "email" to "john.doe@example.com"
         )
 
-        val concreteClass = dtoBuddy.implement(SimpleDtoInterface::class.java)
+        val concreteClass = dtoBuddy.implement(SimpleDtoInterface::class)
         val dto: SimpleDtoInterface = dtoBuddy.create(
             concreteClass,
             mapOf("name" to "John Doe", "age" to 30, "email" to null)
@@ -58,7 +59,7 @@ class SimpleDtoInterfaceTest {
             "email" to null
         )
 
-        val concreteClass = dtoBuddy.implement(SimpleDtoInterface::class.java)
+        val concreteClass = dtoBuddy.implement(SimpleDtoInterface::class)
         val dto: SimpleDtoInterface = dtoBuddy.create(concreteClass, params)
         assertNotNull(dto)
         assertEquals("Jane Doe", dto.name)
@@ -73,7 +74,7 @@ class SimpleDtoInterfaceTest {
             "email" to "john.doe@example.com"
         )
 
-        val concreteClass = dtoBuddy.implement(SimpleDtoInterface::class.java)
+        val concreteClass = dtoBuddy.implement(SimpleDtoInterface::class)
         val dto: SimpleDtoInterface = dtoBuddy.create(
             concreteClass,
             mapOf("name" to "John Doe", "age" to 10, "email" to null)

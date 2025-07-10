@@ -1,5 +1,7 @@
 package com.runninglane.dto.buddy.bytecode
 
+import kotlin.reflect.KClass
+
 interface ByteCodeStrategy {
     /**
      * Generate a concrete mutable DTO class based on the base class
@@ -9,9 +11,9 @@ interface ByteCodeStrategy {
      * - For concrete classes having no immutable properties: return the baseClass itself
      */
     fun implement(
-        baseClass: Class<*>,
-        typeParams: List<Class<*>>?,
+        baseClass: KClass<*>,
+        typeParams: List<KClass<*>>?,
         packageName: String,
         className: String
-    ): Class<*>
+    ): KClass<*>
 }

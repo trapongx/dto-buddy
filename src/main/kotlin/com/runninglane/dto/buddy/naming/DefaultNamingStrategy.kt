@@ -1,5 +1,7 @@
 package com.runninglane.dto.buddy.naming
 
+import kotlin.reflect.KClass
+
 /**
  * Default implementation of DtoBuddyCustomizer
  * Uses the standard DtoBuddy contract rules
@@ -11,8 +13,8 @@ open class DefaultNamingStrategy : NamingStrategy {
      * @param baseClass The base class being implemented
      * @return The name for the generated class
      */
-    override fun buildPackageName(baseClass: Class<*>): String {
-        return baseClass.`package`?.name ?: ""
+    override fun buildPackageName(baseClass: KClass<*>): String {
+        return baseClass.java.`package`?.name ?: ""
     }
 
     /**
@@ -21,7 +23,7 @@ open class DefaultNamingStrategy : NamingStrategy {
      * @param baseClass The base class being implemented
      * @return The name for the generated class
      */
-    override fun buildClassName(baseClass: Class<*>): String {
+    override fun buildClassName(baseClass: KClass<*>): String {
         return "${baseClass.simpleName}\$Dto"
     }
 }

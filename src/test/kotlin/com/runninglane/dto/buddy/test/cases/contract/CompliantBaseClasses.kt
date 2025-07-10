@@ -11,22 +11,8 @@ interface InterfaceWithAbstractGetterAndAbstractSetter {
     fun setName(name: String)
 }
 
-interface InterfaceWithDefaultGetter {
-    fun getName(): String = "John Doe"
-}
-
-interface InterfaceWithDefaultGetterAndAbstractSetter {
-    fun getName(): String = "John Doe"
-    fun setName(name: String)
-}
-
 interface InterfaceWithAbstractProperty {
     val name: String
-}
-
-interface InterfaceWithAbstractPropertyAndDefaultGetter {
-    val name: String
-        get() = "John Doe"
 }
 
 abstract class AbstractClassWithNoMember

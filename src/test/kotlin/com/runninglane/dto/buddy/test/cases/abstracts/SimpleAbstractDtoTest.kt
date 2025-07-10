@@ -2,6 +2,7 @@ package com.runninglane.dto.buddy.test.cases.abstracts
 
 import com.runninglane.dto.buddy.DtoBuddy
 import com.runninglane.dto.buddy.test.NamingStrategyWithCountUpSuffix
+import kotlin.reflect.full.isSubclassOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -12,10 +13,10 @@ class SimpleAbstractDtoTest {
 
     @Test
     fun testImplement() {
-         val concreteClass = dtoBuddy.implement(SimpleAbstractDto::class.java)
+         val concreteClass = dtoBuddy.implement(SimpleAbstractDto::class)
 
          assertNotNull(concreteClass)
-         assertTrue(SimpleAbstractDto::class.java.isAssignableFrom(concreteClass))
+         assertTrue(concreteClass.isSubclassOf(SimpleAbstractDto::class))
     }
 
     @Test
@@ -27,7 +28,7 @@ class SimpleAbstractDtoTest {
             "email" to "john.doe@example.com"
         )
 
-        val concreteClass = dtoBuddy.implement(SimpleAbstractDto::class.java)
+        val concreteClass = dtoBuddy.implement(SimpleAbstractDto::class)
         val dto: SimpleAbstractDto = dtoBuddy.create(concreteClass, params)
 
         assertNotNull(dto)
@@ -43,7 +44,7 @@ class SimpleAbstractDtoTest {
             "email" to "john.doe@example.com"
         )
 
-        val concreteClass = dtoBuddy.implement(SimpleAbstractDto::class.java)
+        val concreteClass = dtoBuddy.implement(SimpleAbstractDto::class)
         val dto: SimpleAbstractDto = dtoBuddy.create(
             concreteClass,
             mapOf("name" to "John Doe", "age" to 30, "email" to null)
@@ -65,7 +66,7 @@ class SimpleAbstractDtoTest {
             "email" to null
         )
 
-        val concreteClass = dtoBuddy.implement(SimpleAbstractDto::class.java)
+        val concreteClass = dtoBuddy.implement(SimpleAbstractDto::class)
         val dto: SimpleAbstractDto = dtoBuddy.create(concreteClass, params)
 
         assertNotNull(dto)
@@ -82,7 +83,7 @@ class SimpleAbstractDtoTest {
             "email" to "john.doe@example.com"
         )
 
-        val concreteClass = dtoBuddy.implement(SimpleAbstractDto::class.java)
+        val concreteClass = dtoBuddy.implement(SimpleAbstractDto::class)
         val dto: SimpleAbstractDto = dtoBuddy.create(
             concreteClass,
             mapOf("name" to "John Doe", "age" to 10, "email" to null)

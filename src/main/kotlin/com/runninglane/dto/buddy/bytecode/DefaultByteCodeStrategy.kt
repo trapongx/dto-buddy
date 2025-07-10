@@ -1,5 +1,5 @@
 package com.runninglane.dto.buddy.bytecode
 
-import com.runninglane.dto.buddy.bytecode.bytebuddy.ByteBuddyByteCodeStrategy
+import com.runninglane.dto.buddy.bytecode.k2jvm.EmbeddedCompilerByteCodeStrategy
 
-class DefaultByteCodeStrategy : ByteCodeStrategy by ByteBuddyByteCodeStrategy()
+open class DefaultByteCodeStrategy : ByteCodeStrategy by EmbeddedCompilerByteCodeStrategy()

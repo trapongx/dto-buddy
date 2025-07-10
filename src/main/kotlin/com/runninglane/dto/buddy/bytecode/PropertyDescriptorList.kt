@@ -1,111 +1,107 @@
 package com.runninglane.dto.buddy.bytecode
 
-import java.lang.reflect.Method
-import java.lang.reflect.Modifier
-import kotlin.collections.iterator
+import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
+import kotlin.reflect.full.createType
+import kotlin.reflect.full.functions
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.valueParameters
 
 internal object PropertyDescriptorList {
     /**
      * Analyzes a source class and returns information about properties to implement
      */
-    fun from(baseClass: Class<*>): List<PropertyDescriptor> {
-        val methods = getAllMethods(baseClass)
-        val gettersByProperty = mutableMapOf<String, MutableList<Method>>()
-        val settersByProperty = mutableMapOf<String, MutableList<Method>>()
+    fun from(baseClass: KClass<*>): List<PropertyDescriptor> {
+        val gettersByProperty = mutableMapOf<String, MutableList<KFunction<*>>>()
+        val settersByProperty = mutableMapOf<String, MutableList<KFunction<*>>>()
 
-        // Organize methods by property name and method type
-        for (method in methods) {
-            val methodName = method.name
+        // Organize functions by property name and function type
+        for (function in baseClass.functions) {
+            val functionName = function.name
 
             when {
-                isGetter(method) -> {
-                    val propertyName = extractPropertyName(methodName, "get", "is")
-                    gettersByProperty.getOrPut(propertyName) { mutableListOf() }.add(method)
+                isGetter(function) -> {
+                    val propertyName = extractPropertyName(functionName, "get", "is")
+                    gettersByProperty.getOrPut(propertyName) { mutableListOf() }.add(function)
                 }
-                isSetter(method) -> {
-                    val propertyName = extractPropertyName(methodName, "set")
-                    settersByProperty.getOrPut(propertyName) { mutableListOf() }.add(method)
+                isSetter(function) -> {
+                    val propertyName = extractPropertyName(functionName, "set")
+                    settersByProperty.getOrPut(propertyName) { mutableListOf() }.add(function)
                 }
             }
         }
 
-        // Create builders with prioritized methods
+        // Create builders with prioritized functions
         val builders = mutableMapOf<String, PropertyDescriptor.Builder>()
 
-        // Prioritize concrete getters over abstract ones
         for ((propertyName, getters) in gettersByProperty) {
-            val concreteGetter = getters.find { !Modifier.isAbstract(it.modifiers) } ?: getters.firstOrNull()
-            if (concreteGetter != null) {
+            // Prioritize concrete getters over abstract ones
+            val getter = getters.find { !it.isAbstract } ?: getters.firstOrNull()
+            if (getter != null) {
                 val builder = builders.getOrPut(propertyName) {
                     PropertyDescriptor.Builder(baseClass, propertyName)
                 }
-                builder.getter = concreteGetter
+                builder.getter = getter
             }
         }
 
-        // Prioritize concrete setters over abstract ones
         for ((propertyName, setters) in settersByProperty) {
-            val concreteSetter = setters.find { !Modifier.isAbstract(it.modifiers) } ?: setters.firstOrNull()
-            if (concreteSetter != null) {
+            // Prioritize concrete setters over abstract ones
+            val setter = setters.find { !it.isAbstract } ?: setters.firstOrNull()
+            if (setter != null) {
                 val builder = builders.getOrPut(propertyName) {
                     PropertyDescriptor.Builder(baseClass, propertyName)
                 }
-                builder.setter = concreteSetter
+                builder.setter = setter
             }
+        }
+
+        baseClass.memberProperties.forEach { kProperty ->
+            val propertyName = kProperty.name
+            val builder = builders.getOrPut(propertyName) {
+                PropertyDescriptor.Builder(baseClass, propertyName)
+            }
+            builder.kProperty = kProperty
         }
 
         return builders.map { it.value.build() }
     }
 
-    /**
-     * Gets all methods from a class and its superclasses/interfaces
-     */
-    private fun getAllMethods(clazz: Class<*>): List<Method> {
-        val methods = mutableListOf<Method>()
+    private fun isGetter(function: KFunction<*>): Boolean {
+        if (function.valueParameters.isNotEmpty()) return false
 
-        // Add methods from the class itself
-        methods.addAll(clazz.declaredMethods)
+        if (function.returnType == Unit::class.createType()) return false
 
-        // Add methods from interfaces
-        for (`interface` in clazz.interfaces) {
-            methods.addAll(getAllMethods(`interface`))
+        val functionName = function.name
+
+        if (functionName.startsWith("get") && functionName.length > 3)
+            return true
+
+        if (functionName.startsWith("is") && functionName.length > 2) {
+            val returnType = function.returnType
+            return returnType == Boolean::class.java || returnType == Boolean::class.javaPrimitiveType
         }
 
-        // Add methods from superclass if exists
-        val superclass = clazz.superclass
-        if (superclass != null && superclass != Any::class.java) {
-            methods.addAll(getAllMethods(superclass))
-        }
-
-        return methods
+        return false
     }
 
-    private fun isGetter(method: Method): Boolean {
-        val methodName = method.name
-        val paramCount = method.parameterCount
-        val returnType = method.returnType
+    private fun isSetter(function: KFunction<*>): Boolean {
+        if (function.valueParameters.size != 1) return false
 
-        return (methodName.startsWith("get") && methodName.length > 3 && paramCount == 0 && returnType != Void.TYPE) ||
-                (methodName.startsWith("is") && methodName.length > 2 && paramCount == 0 &&
-                        (returnType == Boolean::class.java || returnType == Boolean::class.javaPrimitiveType))
+        if (function.returnType != Unit::class.createType()) return false
+
+        val functionName = function.name
+
+        return functionName.startsWith("set") && functionName.length > 3
     }
 
-    private fun isSetter(method: Method): Boolean {
-        val methodName = method.name
-        val paramCount = method.parameterCount
-        val returnType = method.returnType
-
-        return methodName.startsWith("set") && methodName.length > 3 && paramCount == 1 &&
-                (returnType == Void.TYPE || returnType == Void::class.java)
-    }
-
-    private fun extractPropertyName(methodName: String, vararg prefixes: String): String {
+    private fun extractPropertyName(functionName: String, vararg prefixes: String): String {
         for (prefix in prefixes) {
-            if (methodName.startsWith(prefix) && methodName.length > prefix.length) {
-                val propertyName = methodName.substring(prefix.length)
-                return propertyName.first().lowercase() + propertyName.substring(1)
+            if (functionName.startsWith(prefix) && functionName.length > prefix.length) {
+                return functionName.substring(prefix.length)
+                    .replaceFirstChar { it.lowercase() }
             }
         }
-        return methodName
+        return functionName
     }
 }

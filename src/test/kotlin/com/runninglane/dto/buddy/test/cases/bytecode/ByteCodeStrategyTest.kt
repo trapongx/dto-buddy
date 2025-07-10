@@ -1,8 +1,11 @@
 package com.runninglane.dto.buddy.test.cases.bytecode
 
 import com.runninglane.dto.buddy.DtoBuddy
-import com.runninglane.dto.buddy.bytecode.bytebuddy.ByteBuddyByteCodeStrategy
-import net.bytebuddy.dynamic.DynamicType
+import com.runninglane.dto.buddy.bytecode.k2jvm.EmbeddedCompilerByteCodeStrategy
+import com.squareup.kotlinpoet.AnnotationSpec
+import com.squareup.kotlinpoet.TypeSpec
+import kotlin.reflect.KClass
+import kotlin.reflect.full.findAnnotation
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -12,23 +15,27 @@ class ByteCodeStrategyTest {
 
     annotation class TestAnnotation(val value: String)
 
-    class TestByteBuddyByteCodeStrategy : ByteBuddyByteCodeStrategy() {
+    class TestByteBuddyByteCodeStrategy : EmbeddedCompilerByteCodeStrategy() {
+
         override fun defineClass(
-            baseClass: Class<*>,
-            typeParams: List<Class<*>>?,
+            baseClass: KClass<*>,
+            typeParams: List<KClass<*>>?,
             packageName: String,
             className: String
-        ): DynamicType.Builder<*> {
+        ): TypeSpec.Builder {
+            val testAnnotationSpec = AnnotationSpec.builder(TestAnnotation::class)
+                .addMember("value = %S", "test123")
+                .build()
             return super.defineClass(baseClass, typeParams, packageName, className)
-                .annotateType(TestAnnotation("test123"))
+                .addAnnotation(testAnnotationSpec)
         }
     }
 
     @Test
-    fun testAddSecondaryConstructor() {
+    fun testAddCustomAnnotation() {
         val dtoBuddy = DtoBuddy(TestByteBuddyByteCodeStrategy())
-        val concreteClass = dtoBuddy.implement(TestDto::class.java)
-        val annotation = concreteClass.getAnnotation(TestAnnotation::class.java)
+        val concreteClass = dtoBuddy.implement(TestDto::class)
+        val annotation = concreteClass.findAnnotation<TestAnnotation>()
         assertNotNull(annotation)
         assertEquals("test123", annotation.value)
     }

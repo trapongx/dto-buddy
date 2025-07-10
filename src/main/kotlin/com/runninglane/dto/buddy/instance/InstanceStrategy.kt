@@ -1,5 +1,7 @@
 package com.runninglane.dto.buddy.instance
 
+import kotlin.reflect.KClass
+
 interface InstanceStrategy {
     /**
      * Creates a new instance of a DTO class and populates it with the provided parameters
@@ -8,7 +10,7 @@ interface InstanceStrategy {
      * @return A new instance of the DTO class
      */
     @Suppress("UNCHECKED_CAST")
-    fun create(concrete: Class<*>): Any
+    fun create(concrete: KClass<*>): Any
 
     /**
      * Populates an existing DTO instance with values from the provided parameter map

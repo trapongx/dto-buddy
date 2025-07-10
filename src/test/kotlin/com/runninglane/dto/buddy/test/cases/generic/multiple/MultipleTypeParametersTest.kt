@@ -2,6 +2,9 @@ package com.runninglane.dto.buddy.test.cases.generic.multiple
 
 import com.runninglane.dto.buddy.DtoBuddy
 import com.runninglane.dto.buddy.test.NamingStrategyWithCountUpSuffix
+import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.jvmErasure
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -14,15 +17,15 @@ class MultipleTypeParametersTest {
     fun testImplement() {
         run {
             val concreteClass = dtoBuddy.implement(
-                DtoInterfaceWithMultipleTypeParameters::class.java,
-                listOf(String::class.java, Int::class.java, String::class.java, Long::class.java)
+                DtoInterfaceWithMultipleTypeParameters::class,
+                listOf(String::class, Int::class, String::class, Long::class)
             )
 
             assertNotNull(concreteClass)
-            assertTrue(DtoInterfaceWithMultipleTypeParameters::class.java.isAssignableFrom(concreteClass))
-            assertEquals(String::class.java, concreteClass.methods.first { it.name == "getSimple" }.returnType)
-            assertEquals(List::class.java, concreteClass.methods.first { it.name == "getList" }.returnType)
-            assertEquals(Map::class.java, concreteClass.methods.first { it.name == "getMap" }.returnType)
+            assertTrue(concreteClass.isSubclassOf(DtoInterfaceWithMultipleTypeParameters::class))
+            assertEquals(String::class, concreteClass.memberProperties.single { it.name == "simple" }.returnType.jvmErasure)
+            assertEquals(List::class, concreteClass.memberProperties.single { it.name == "list" }.returnType.jvmErasure)
+            assertEquals(Map::class, concreteClass.memberProperties.single { it.name == "map" }.returnType.jvmErasure)
         }
     }
 
@@ -36,8 +39,8 @@ class MultipleTypeParametersTest {
         )
 
         val concreteClass = dtoBuddy.implement(
-            DtoInterfaceWithMultipleTypeParameters::class.java,
-            typeParams = listOf(String::class.java, Int::class.java, String::class.java, Long::class.java)
+            DtoInterfaceWithMultipleTypeParameters::class,
+            typeParams = listOf(String::class, Int::class, String::class, Long::class)
         )
         val dto: DtoInterfaceWithMultipleTypeParameters<String, Int, String, Long> = dtoBuddy.create(concreteClass, params)
 
@@ -55,8 +58,8 @@ class MultipleTypeParametersTest {
         )
 
         val concreteClass = dtoBuddy.implement(
-            DtoInterfaceWithMultipleTypeParameters::class.java,
-            typeParams = listOf(String::class.java, Int::class.java, String::class.java, Long::class.java)
+            DtoInterfaceWithMultipleTypeParameters::class,
+            typeParams = listOf(String::class, Int::class, String::class, Long::class)
         )
         val dto: DtoInterfaceWithMultipleTypeParameters<String, Int, String, Long> = dtoBuddy.create(
             concreteClass,
@@ -80,8 +83,8 @@ class MultipleTypeParametersTest {
         )
 
         val concreteClass = dtoBuddy.implement(
-            DtoInterfaceWithMultipleTypeParameters::class.java,
-            typeParams = listOf(String::class.java, Int::class.java, String::class.java, Long::class.java)
+            DtoInterfaceWithMultipleTypeParameters::class,
+            typeParams = listOf(String::class, Int::class, String::class, Long::class)
         )
         val dto: DtoInterfaceWithMultipleTypeParameters<String, Int, String, Long> = dtoBuddy.create(concreteClass, params)
 
@@ -101,8 +104,8 @@ class MultipleTypeParametersTest {
         )
 
         val concreteClass = dtoBuddy.implement(
-            DtoInterfaceWithMultipleTypeParameters::class.java,
-            typeParams = listOf(String::class.java, Int::class.java, String::class.java, Long::class.java)
+            DtoInterfaceWithMultipleTypeParameters::class,
+            typeParams = listOf(String::class, Int::class, String::class, Long::class)
         )
         val dto: DtoInterfaceWithMultipleTypeParameters<String, Int, String, Long> = dtoBuddy.create(
             concreteClass,

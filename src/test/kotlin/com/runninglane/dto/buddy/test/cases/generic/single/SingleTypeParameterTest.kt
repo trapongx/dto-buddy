@@ -2,6 +2,9 @@ package com.runninglane.dto.buddy.test.cases.generic.single
 
 import com.runninglane.dto.buddy.DtoBuddy
 import com.runninglane.dto.buddy.test.NamingStrategyWithCountUpSuffix
+import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.jvmErasure
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -14,15 +17,15 @@ class SingleTypeParameterTest {
     fun testImplement() {
         run {
             val concreteClass = dtoBuddy.implement(
-                DtoInterfaceWithSingleTypeParameter::class.java,
-                listOf(String::class.java)
+                DtoInterfaceWithSingleTypeParameter::class,
+                listOf(String::class)
             )
 
             assertNotNull(concreteClass)
-            assertTrue(DtoInterfaceWithSingleTypeParameter::class.java.isAssignableFrom(concreteClass))
-            assertEquals(String::class.java, concreteClass.methods.first { it.name == "getName" }.returnType)
-            assertEquals(Int::class.java, concreteClass.methods.first { it.name == "getAge" }.returnType)
-            assertEquals(String::class.java, concreteClass.methods.first { it.name == "getEmail" }.returnType)
+            assertTrue(concreteClass.isSubclassOf(DtoInterfaceWithSingleTypeParameter::class))
+            assertEquals(String::class, concreteClass.memberProperties.single { it.name == "name" }.returnType.jvmErasure)
+            assertEquals(Int::class, concreteClass.memberProperties.single { it.name == "age" }.returnType.jvmErasure)
+            assertEquals(String::class, concreteClass.memberProperties.single { it.name == "email" }.returnType.jvmErasure)
         }
     }
 
@@ -36,8 +39,8 @@ class SingleTypeParameterTest {
         )
 
         val concreteClass = dtoBuddy.implement(
-            DtoInterfaceWithSingleTypeParameter::class.java,
-            typeParams = listOf(String::class.java)
+            DtoInterfaceWithSingleTypeParameter::class,
+            typeParams = listOf(String::class)
         )
         val dto: DtoInterfaceWithSingleTypeParameter<String> = dtoBuddy.create(concreteClass, params)
 
@@ -55,8 +58,8 @@ class SingleTypeParameterTest {
         )
 
         val concreteClass = dtoBuddy.implement(
-            DtoInterfaceWithSingleTypeParameter::class.java,
-            typeParams = listOf(String::class.java)
+            DtoInterfaceWithSingleTypeParameter::class,
+            typeParams = listOf(String::class)
         )
         val dto: DtoInterfaceWithSingleTypeParameter<String> = dtoBuddy.create(
             concreteClass,
@@ -80,8 +83,8 @@ class SingleTypeParameterTest {
         )
 
         val concreteClass = dtoBuddy.implement(
-            DtoInterfaceWithSingleTypeParameter::class.java,
-            typeParams = listOf(String::class.java)
+            DtoInterfaceWithSingleTypeParameter::class,
+            typeParams = listOf(String::class)
         )
         val dto: DtoInterfaceWithSingleTypeParameter<String> = dtoBuddy.create(concreteClass, params)
 
@@ -100,8 +103,8 @@ class SingleTypeParameterTest {
         )
 
         val concreteClass = dtoBuddy.implement(
-            DtoInterfaceWithSingleTypeParameter::class.java,
-            typeParams = listOf(String::class.java)
+            DtoInterfaceWithSingleTypeParameter::class,
+            typeParams = listOf(String::class)
         )
         val dto: DtoInterfaceWithSingleTypeParameter<String> = dtoBuddy.create(
             concreteClass,

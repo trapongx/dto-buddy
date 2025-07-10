@@ -2,15 +2,16 @@ package com.runninglane.dto.buddy.test.cases.naming
 
 import com.runninglane.dto.buddy.DtoBuddy
 import com.runninglane.dto.buddy.naming.NamingStrategy
+import kotlin.reflect.KClass
 import kotlin.test.Test
 
 class NamingStrategyTest {
     class TestNamingStrategy : NamingStrategy {
-        override fun buildPackageName(baseClass: Class<*>): String {
+        override fun buildPackageName(baseClass: KClass<*>): String {
             return "com.example.jlp123456789.dto.customized"
         }
 
-        override fun buildClassName(baseClass: Class<*>): String {
+        override fun buildClassName(baseClass: KClass<*>): String {
             return "CustomName"
         }
     }
@@ -20,8 +21,8 @@ class NamingStrategyTest {
     @Test
     fun shouldCustomizeNameCorrectly() {
         val dtoBuddy = DtoBuddy(TestNamingStrategy())
-        val concreteClass = dtoBuddy.implement(AnyInterface::class.java)
+        val concreteClass = dtoBuddy.implement(AnyInterface::class)
         assert(concreteClass.simpleName == "CustomName")
-        assert(concreteClass.`package`.name == "com.example.jlp123456789.dto.customized")
+        assert(concreteClass.java.`package`.name == "com.example.jlp123456789.dto.customized")
     }
 }

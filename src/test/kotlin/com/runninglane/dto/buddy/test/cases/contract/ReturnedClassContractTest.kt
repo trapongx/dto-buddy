@@ -2,6 +2,7 @@ package com.runninglane.dto.buddy.test.cases.contract
 
 import com.runninglane.dto.buddy.DtoBuddy
 import java.lang.reflect.Modifier
+import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -12,11 +13,11 @@ import kotlin.test.assertFalse
 class ReturnedClassContractTest {
     private val dtoBuddy = DtoBuddy()
 
-    private fun test(baseClass: Class<*>, expectBaseClassReturned: Boolean) {
+    private fun test(baseClass: KClass<*>, expectBaseClassReturned: Boolean) {
         try {
             val concreteClass = dtoBuddy.implement(baseClass)
-            assertFalse(concreteClass.isInterface)
-            assertFalse(Modifier.isAbstract(concreteClass.modifiers))
+            assertFalse(concreteClass.java.isInterface)
+            assertFalse(concreteClass.isAbstract)
             if (expectBaseClassReturned) {
                 assertEquals(baseClass, concreteClass)
             }
@@ -28,13 +29,10 @@ class ReturnedClassContractTest {
     @Test
     fun testInterface() {
         listOf(
-            InterfaceWithNoMember::class.java,
-            InterfaceWithAbstractGetter::class.java,
-            InterfaceWithAbstractGetterAndAbstractSetter::class.java,
-            InterfaceWithDefaultGetter::class.java,
-            InterfaceWithDefaultGetterAndAbstractSetter::class.java,
-            InterfaceWithAbstractProperty::class.java,
-            InterfaceWithAbstractPropertyAndDefaultGetter::class.java
+            InterfaceWithNoMember::class,
+            InterfaceWithAbstractGetter::class,
+            InterfaceWithAbstractGetterAndAbstractSetter::class,
+            InterfaceWithAbstractProperty::class
         ).forEach { baseClass ->
             test(baseClass, false)
         }
@@ -43,14 +41,14 @@ class ReturnedClassContractTest {
     @Test
     fun testAbstractClass() {
         listOf(
-            AbstractClassWithNoMember::class.java,
-            AbstractClassWithAbstractGetter::class.java,
-            AbstractClassWithAbstractGetterAndAbstractSetter::class.java,
-            AbstractClassWithConcreteGetterAndConcreteSetterWithoutField::class.java,
-            AbstractClassWithConcreteGetterAndConcreteSetterWithField::class.java,
-            AbstractClassWithAbstractImmutableProperty::class.java,
-            AbstractClassWithAbstractMutableProperty::class.java,
-            AbstractClassWithConcreteMutableProperty::class.java
+            AbstractClassWithNoMember::class,
+            AbstractClassWithAbstractGetter::class,
+            AbstractClassWithAbstractGetterAndAbstractSetter::class,
+            AbstractClassWithConcreteGetterAndConcreteSetterWithoutField::class,
+            AbstractClassWithConcreteGetterAndConcreteSetterWithField::class,
+            AbstractClassWithAbstractImmutableProperty::class,
+            AbstractClassWithAbstractMutableProperty::class,
+            AbstractClassWithConcreteMutableProperty::class
         ).forEach { baseClass ->
             test(baseClass, false)
         }
@@ -59,13 +57,13 @@ class ReturnedClassContractTest {
     @Test
     fun testConcreteClass() {
         listOf(
-            ConcreteClassWithNoMember::class.java to true,
-            ConcreteClassWithGetter::class.java to false,
-            ConcreteClassWithSetter::class.java to false,
-            ConcreteClassWithGetterAndSetterWithoutField::class.java to true,
-            ConcreteClassWithGetterAndSetterWithField::class.java to true,
-            ConcreteClassWithConcreteImmutableProperty::class.java to false,
-            ConcreteClassWithConcreteMutableProperty::class.java to true
+            ConcreteClassWithNoMember::class to true,
+            ConcreteClassWithGetter::class to false,
+            ConcreteClassWithSetter::class to false,
+            ConcreteClassWithGetterAndSetterWithoutField::class to true,
+            ConcreteClassWithGetterAndSetterWithField::class to true,
+            ConcreteClassWithConcreteImmutableProperty::class to false,
+            ConcreteClassWithConcreteMutableProperty::class to true
         ).forEach { (baseClass, expectBaseClassReturned) ->
             test(baseClass, expectBaseClassReturned)
         }

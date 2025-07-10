@@ -1,52 +1,62 @@
 package com.runninglane.dto.buddy.bytecode
 
-import java.lang.reflect.Method
-import java.lang.reflect.Modifier
-import java.lang.reflect.Type
+import com.runninglane.dto.buddy.exception.DtoBuddySystemException
+import org.jetbrains.annotations.NotNull
+import kotlin.reflect.*
+import kotlin.reflect.full.functions
+import kotlin.reflect.full.hasAnnotation
 
 /**
  * Helper class to track property metadata during analysis
  */
 data class PropertyDescriptor(
-    val baseClass: Class<*>,
+    val baseClass: KClass<*>,
     val name: String,
-    val type: Class<*>?,
-    val genericType: Type?,
-    val getter: Method?,
-    val setter: Method?,
+    val type: KType,
+    val isNullable: Boolean,
+    val kProperty: KProperty<*>?,
+    val getter: KFunction<*>?,
+    val setter: KFunction<*>?,
     val hasConcreteGetter: Boolean,
     val hasConcreteSetter: Boolean,
-    val genericStructure: GenericStructure? = null
 ) {
     fun isAlreadyCompleteAndMutable(): Boolean {
-        return getter != null && setter != null && hasConcreteGetter && hasConcreteSetter
+        return when {
+            kProperty != null -> !kProperty.isAbstract && kProperty is KMutableProperty1<*, *>
+            else -> getter != null && setter != null && hasConcreteGetter && hasConcreteSetter
+        }
     }
 
     fun shouldImplement(): Boolean {
-        return getter != null && !hasConcreteGetter
+        return when {
+            kProperty != null -> kProperty.isAbstract
+            else -> getter != null && !hasConcreteGetter
+        }
     }
 
-    class Builder(val baseClass: Class<*>, val name: String) {
-        var getter: Method? = null
-        var setter: Method? = null
+    class Builder(val baseClass: KClass<*>, val name: String) {
+        var kProperty: KProperty<*>? = null
+        var getter: KFunction<*>? = null
+        var setter: KFunction<*>? = null
 
         fun build(): PropertyDescriptor {
-            val type = getter?.returnType ?: setter?.parameterTypes?.get(0)
-            val genericType = getter?.genericReturnType ?: setter?.genericParameterTypes?.get(0)
-            val hasConcreteGetter = !baseClass.isInterface && getter != null && Modifier.isAbstract(getter!!.modifiers).not()
-            val hasConcreteSetter = !baseClass.isInterface && setter != null && Modifier.isAbstract(setter!!.modifiers).not()
+            val type = kProperty?.returnType
+                ?: getter?.returnType
+                ?: setter?.parameters?.get(0)?.type
+                ?: throw DtoBuddySystemException("Failed to determine property type for `$name` in ${baseClass.qualifiedName}")
 
-            // Extract generic structure information
-            val genericStructure = if (genericType != null) {
-                GenericStructure.from(genericType)
-            } else null
+            val isNullable: Boolean =  type.isMarkedNullable
+
+            val hasConcreteGetter = getter?.isAbstract == false
+            val hasConcreteSetter = setter?.isAbstract == false
 
             return PropertyDescriptor(
                 baseClass, name,
-                type, genericType,
+                type,
+                isNullable,
+                kProperty,
                 getter, setter,
-                hasConcreteGetter, hasConcreteSetter,
-                genericStructure
+                hasConcreteGetter, hasConcreteSetter
             )
         }
     }

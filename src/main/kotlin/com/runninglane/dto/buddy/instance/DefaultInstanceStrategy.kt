@@ -1,75 +1,81 @@
 package com.runninglane.dto.buddy.instance
 
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
-import com.runninglane.dto.buddy.exception.DtoBuddySystemException
-import java.lang.reflect.Method
+import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
+import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.full.*
 
 open class DefaultInstanceStrategy : InstanceStrategy {
-    private val setterCache = mutableMapOf<Class<*>, Map<String, Method>>()
+    private val setterCache = mutableMapOf<KClass<*>, Map<String, KFunction<*>>>()
 
-    private fun getSetters(clazz: Class<*>): Map<String, Method> {
+    private fun getSetters(clazz: KClass<*>): Map<String, KFunction<*>> {
         return setterCache.getOrPut(clazz) {
-            val setters = mutableMapOf<String, Method>()
-            clazz.methods.filter { it.name.startsWith("set") && it.parameterCount == 1 }.groupBy {
-                it.name.substring(3).replaceFirstChar { it.lowercase() }
-            }.forEach { (propertyName, settersWithSameName) ->
-                if (settersWithSameName.size == 1) {
-                    setters.put(propertyName, settersWithSameName.first())
-                } else {
-                    val getterName = "get" + propertyName.replaceFirstChar { it.uppercase() }
-                    val getter = clazz.methods.find { it.name == getterName && it.parameterCount == 0 }
-                    if (getter != null) {
-                        val setter = settersWithSameName.find { it.parameterTypes.first() == getter.returnType }
-                        if (setter != null) {
-                            setters.put(propertyName, setter)
-                        }
-                    }
+            val setters = mutableMapOf<String, KFunction<*>>()
+
+            setters.putAll(
+                clazz.memberProperties.filterIsInstance<KMutableProperty1<*, *>>()
+                    .map { it.name to it.setter }
+            )
+
+            val getterFunctions: Map<String, KFunction<*>> = clazz.functions
+                .filter { func ->
+                    func.valueParameters.isEmpty() && func.returnType != Unit::class.createType()
                 }
-            }
-            setters
+                .mapNotNull { func ->
+                    val propertyName = when {
+                        func.name.startsWith("get") && func.name.length > 3 ->
+                            func.name.substring(3)
+
+                        func.name.startsWith("is") && func.name.length > 2 ->
+                            func.name.substring(2)
+
+                        else -> null
+                    }?.replaceFirstChar { it.lowercase() }
+
+                    propertyName?.let { it to func }
+                }
+                .filterNot { (propertyName, _) -> propertyName in setters.keys }
+                .toMap()
+
+            val setterFunctions: Map<String, KFunction<*>> = clazz.functions
+                .filter { func ->
+                    func.valueParameters.size == 1 && func.returnType == Unit::class.createType()
+                            && func.name.startsWith("set") && func.name.length > 3
+                }
+                .mapNotNull { func ->
+                    val propertyName = func.name.substring(3).replaceFirstChar { it.lowercase() }
+                    // Only count setter having consistent param type with getter
+                    val getterFunction = getterFunctions[propertyName]
+                    if (func.valueParameters[0].type == getterFunction?.returnType) {
+                        propertyName to func
+                    } else null
+                }
+                .toMap()
+
+            setters.putAll(setterFunctions)
+
+            setters.toMap()
         }
     }
 
-    override fun create(concrete: Class<*>): Any {
-        return concrete.getDeclaredConstructor().newInstance()
+    override fun create(concrete: KClass<*>): Any {
+        return concrete.createInstance()
     }
 
     override fun populate(dto: Any, params: Map<String, Any?>) {
         if (params.isEmpty()) return
 
-        val setters = getSetters(dto.javaClass)
+        val setters = getSetters(dto::class)
 
         for ((propertyName, value) in params) {
             try {
                 val setter = setters[propertyName] ?: error("No setter found")
-                val convertedValue = convertValueIfNeeded(value, setter.parameterTypes.first())
-                setter.invoke(dto, convertedValue)
+                setter.call(dto, value)
             } catch (e: Exception) {
-                throw DtoBuddyBadInputException("Failed to set property $propertyName: ${e.message}")
+                throw DtoBuddyBadInputException("Failed to set property `$propertyName` on object of type ${dto::class.qualifiedName}: ${e.message}")
             }
         }
     }
 
-    /**
-     * Attempt to convert a value to the target type if needed
-     */
-    protected fun convertValueIfNeeded(value: Any?, targetType: Class<*>): Any? {
-        if (value == null) return null
-
-        // If value is already of the correct type, return it
-        if (value::class.java == targetType || targetType.isAssignableFrom(value::class.java)) {
-            return value
-        }
-
-        // Handle primitive conversions
-        return when (targetType) {
-            Int::class.java, Integer::class.java -> (value as? Number)?.toInt() ?: value.toString().toInt()
-            Long::class.java -> (value as? Number)?.toLong() ?: value.toString().toLong()
-            Double::class.java -> (value as? Number)?.toDouble() ?: value.toString().toDouble()
-            Float::class.java -> (value as? Number)?.toFloat() ?: value.toString().toFloat()
-            Boolean::class.java -> (value as? Boolean) ?: value.toString().toBoolean()
-            String::class.java -> value.toString()
-            else -> throw DtoBuddySystemException("Cannot convert ${value::class.java} to $targetType")
-        }
-    }
 }

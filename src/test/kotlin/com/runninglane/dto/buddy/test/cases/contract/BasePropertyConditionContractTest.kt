@@ -3,137 +3,102 @@ package com.runninglane.dto.buddy.test.cases.contract
 import com.runninglane.dto.buddy.DtoBuddy
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
 import org.junit.jupiter.api.assertThrows
+import kotlin.reflect.KClass
+import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.full.functions
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.jvmErasure
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
+import kotlin.test.assertIsNot
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class BasePropertyConditionContractTest {
-
-    interface InterfaceWithAbstractGetter {
-        fun getName(): String
-    }
-
-    interface InterfaceWithAbstractGetterAndAbstractSetter {
-        fun getName(): String
-        fun setName(name: String)
-    }
-
-    interface InterfaceWithDefaultGetter {
-        fun getName(): String = "John Doe"
-    }
-
-    interface InterfaceWithDefaultGetterAndAbstractSetter {
-        fun getName(): String = "John Doe"
-        fun setName(name: String)
-    }
-
-    interface InterfaceWithAbstractProperty {
-        val name: String
-    }
-
-    interface InterfaceWithAbstractPropertyAndDefaultGetter {
-        val name: String
-            get() = "John Doe"
-    }
-
-    abstract class AbstractClassWithAbstractGetter {
-        abstract fun getName(): String
-    }
-
-    abstract class AbstractClassWithAbstractGetterAndAbstractSetter {
-        abstract fun getName(): String
-        abstract fun setName(name: String)
-    }
-
-    abstract class AbstractClassWithConcreteGetterAndAbstractSetter {
-        fun getName(): String = "John"
-        abstract fun setName(name: String)
-    }
-
-    abstract class AbstractClassWithAbstractGetterAndConcreteSetter {
-        abstract fun getName(): String
-        fun setName(name: String) { TODO("Not yet implemented") }
-    }
-
-    abstract class AbstractClassWithConcreteGetter {
-        fun getName(): String = "John Doe"
-    }
-
-    abstract class AbstractClassWithConcreteSetter {
-        fun setName(name: String) { TODO("Not yet implemented") }
-    }
-
-    abstract class AbstractClassWithConcreteImmutableProperty {
-        val name: String = "John Doe"
-    }
-
+class BasePropertyConditionContractTest : TestGetSetCapability {
     private val dtoBuddy = DtoBuddy()
 
-    private fun assertSucceed(baseClass: Class<*>) {
+    private fun assertSucceed(baseClass: KClass<*>, testGetSetInJavaStyle: Boolean) {
         try {
             val concreteClass = dtoBuddy.implement(baseClass)
-            val dto = dtoBuddy.create<Any>(concreteClass, mapOf("name" to "Test"))
-            val getName = concreteClass.getMethod("getName")
-            assertEquals("Test", getName.invoke(dto))
-            val setName = concreteClass.getMethod("setName", String::class.java)
-            setName.invoke(dto, "Test2")
-            assertEquals("Test2", getName.invoke(dto))
+            testGetSet(dtoBuddy, concreteClass, testGetSetInJavaStyle)
         } catch (e: Throwable) {
             throw RuntimeException("Failed to test ${baseClass.simpleName}", e)
         }
     }
 
     @Test
-    fun shouldSucceedWithInterfaceHavingGetterAndOptionallySetter() {
+    fun shouldSucceedWithInterfaceHavingAbstractGetterAndOptionallySetter() {
         listOf(
-            InterfaceWithAbstractGetter::class.java,
-            InterfaceWithAbstractGetterAndAbstractSetter::class.java,
-            InterfaceWithDefaultGetter::class.java,
-            InterfaceWithDefaultGetterAndAbstractSetter::class.java,
-            InterfaceWithAbstractProperty::class.java,
-            InterfaceWithAbstractPropertyAndDefaultGetter::class.java
+            InterfaceWithAbstractGetter::class,
+            InterfaceWithAbstractGetterAndAbstractSetter::class,
+            InterfaceWithAbstractProperty::class
         ).forEach { baseClass ->
-            assertSucceed(baseClass)
+            val testGetSetInJavaStyle = !baseClass.simpleName!!.contains("Property")
+            assertSucceed(baseClass, testGetSetInJavaStyle)
         }
     }
 
     @Test
     fun shouldSucceedWithAbstractClassHavingAbstractGetterAndOptionallyAbstractSetter() {
         listOf(
-            AbstractClassWithAbstractGetter::class.java,
-            AbstractClassWithAbstractGetterAndAbstractSetter::class.java
+            AbstractClassWithAbstractGetter::class,
+            AbstractClassWithAbstractGetterAndAbstractSetter::class
         ).forEach { baseClass ->
-            assertSucceed(baseClass)
+            assertSucceed(baseClass, testGetSetInJavaStyle = true)
         }
     }
 
     @Test
-    fun shouldSucceedWithoutPropertyImplementationWhenBaseClassIsAbstractClassHavingEitherConcreteGetterOrConcreteSetter() {
+    fun shouldSucceedWithoutPropertyImplementationWhenBaseClassIsInterfaceOrAbstractClassHavingEitherConcreteGetterOrConcreteSetter() {
         run {
-            val concreteClass = dtoBuddy.implement(AbstractClassWithConcreteGetter::class.java)
-            assertTrue(concreteClass.methods.any { it.name == "getName" })
-            assertFalse(concreteClass.methods.any { it.name == "setName" })
+            val concreteClass = dtoBuddy.implement(InterfaceWithDefaultGetter::class)
+            assertFalse(concreteClass.memberProperties.any { it.name == "name" })
+            assertTrue(concreteClass.functions.any { it.name == "getName" })
+            assertFalse(concreteClass.functions.any { it.name == "setName" })
         }
 
         run {
-            val concreteClass = dtoBuddy.implement(AbstractClassWithConcreteSetter::class.java)
-            assertFalse(concreteClass.methods.any { it.name == "getName" })
-            assertTrue(concreteClass.methods.any { it.name == "setName" })
+            val concreteClass = dtoBuddy.implement(InterfaceWithAbstractPropertyAndDefaultGetter::class)
+            val property = concreteClass.memberProperties.find { it.name == "name" }
+            assertNotNull(property)
+            assertIsNot<KMutableProperty1<*, *>>(property)
+            assertFalse(concreteClass.functions.any { it.name == "getName" })
+            assertFalse(concreteClass.functions.any { it.name == "setName" })
         }
 
         run {
-            val concreteClass = dtoBuddy.implement(AbstractClassWithConcreteImmutableProperty::class.java)
-            assertTrue(concreteClass.methods.any { it.name == "getName" })
-            assertFalse(concreteClass.methods.any { it.name == "setName" })
+            val concreteClass = dtoBuddy.implement(AbstractClassWithConcreteGetter::class)
+            assertFalse(concreteClass.memberProperties.any { it.name == "name" })
+            assertTrue(concreteClass.functions.any { it.name == "getName" })
+            assertFalse(concreteClass.functions.any { it.name == "setName" })
+        }
+
+        run {
+            val concreteClass = dtoBuddy.implement(AbstractClassWithConcreteSetter::class)
+            assertFalse(concreteClass.memberProperties.any { it.name == "name" })
+            assertFalse(concreteClass.functions.any { it.name == "getName" })
+            assertTrue(concreteClass.functions.any { it.name == "setName" })
+        }
+
+        run {
+            val concreteClass = dtoBuddy.implement(AbstractClassWithConcreteImmutableProperty::class)
+            val property = concreteClass.memberProperties.find { it.name == "name" }
+            assertNotNull(property)
+            assertIsNot<KMutableProperty1<*, *>>(property)
+            assertFalse(concreteClass.functions.any { it.name == "getName" })
+            assertFalse(concreteClass.functions.any { it.name == "setName" })
         }
     }
 
     @Test
     fun shouldFailWithAbstractClassHavingAPairOfDifferentConcretenessOfGetterAndSetter() {
         listOf(
-            AbstractClassWithConcreteGetterAndAbstractSetter::class.java,
-            AbstractClassWithAbstractGetterAndConcreteSetter::class.java,
+            InterfaceWithDefaultGetterAndAbstractSetter::class ,
+            InterfaceWithAbstractGetterAndDefaultSetter::class ,
+            AbstractClassWithConcreteGetterAndAbstractSetter::class,
+            AbstractClassWithAbstractGetterAndConcreteSetter::class,
         ).forEach { baseClass ->
             try {
                 assertThrows<DtoBuddyBadInputException> {
@@ -144,4 +109,5 @@ class BasePropertyConditionContractTest {
             }
         }
     }
+
 }
