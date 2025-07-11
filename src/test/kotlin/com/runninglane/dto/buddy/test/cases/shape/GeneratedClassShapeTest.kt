@@ -6,7 +6,10 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.functions
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class GeneratedClassShapeTest {
     private val dtoBuddy = DtoBuddy(NamingStrategyWithCountUpSuffix())

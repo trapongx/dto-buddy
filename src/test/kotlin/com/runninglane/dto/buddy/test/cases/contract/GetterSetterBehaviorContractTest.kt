@@ -1,17 +1,10 @@
 package com.runninglane.dto.buddy.test.cases.contract
 
 import com.runninglane.dto.buddy.DtoBuddy
-import java.lang.reflect.Modifier
 import kotlin.reflect.KClass
-import kotlin.reflect.KMutableProperty1
-import kotlin.reflect.KVisibility
-import kotlin.reflect.full.functions
-import kotlin.reflect.full.valueParameters
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertIs
-import kotlin.test.assertNotNull
 
 /**
  * The rule is the returned class must be a concrete class

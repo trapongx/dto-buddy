@@ -1,7 +1,6 @@
 package com.runninglane.dto.buddy.test.cases.contract
 
 import com.runninglane.dto.buddy.DtoBuddy
-import java.lang.reflect.Modifier
 import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertEquals

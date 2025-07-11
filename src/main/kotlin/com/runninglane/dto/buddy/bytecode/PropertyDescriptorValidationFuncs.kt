@@ -1,10 +1,7 @@
 package com.runninglane.dto.buddy.bytecode
 
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
-import java.lang.reflect.Modifier
-import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KVisibility
-import kotlin.reflect.jvm.javaField
 
 /**
  * Validates that a property has consistent getter and setter

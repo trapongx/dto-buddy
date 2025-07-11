@@ -5,7 +5,6 @@ import com.runninglane.dto.buddy.bytecode.k2jvm.EmbeddedCompilerByteCodeStrategy
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.TypeSpec
 import org.junit.jupiter.api.Assertions.assertFalse
-import java.lang.reflect.Modifier
 import kotlin.reflect.KFunction
 import kotlin.reflect.full.functions
 import kotlin.test.Test
