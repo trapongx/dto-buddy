@@ -1,4 +1,4 @@
-package com.runninglane.dto.buddy.bytecode.k2jvm
+package com.runninglane.dto.buddy.bytecode.compile
 
 import com.runninglane.dto.buddy.annotation.DtoBuddyGenerated
 import com.runninglane.dto.buddy.bytecode.PropertyDescriptor
@@ -16,7 +16,7 @@ import kotlin.reflect.full.valueParameters
  * Implementation of ByteCodeStrategy that uses KotlinPoet to generate source code
  * and then compiles it using the embedded Kotlin compiler.
  */
-open class EmbeddedCompilerByteCodeStrategy : ThreeStepsByteCodeStrategy<TypeSpec.Builder>() {
+open class CompileKotlinByteCodeStrategy : ThreeStepsByteCodeStrategy<TypeSpec.Builder>() {
     private val compilationSession = CompilationSession()
 
     /**

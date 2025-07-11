@@ -1,4 +1,4 @@
-package com.runninglane.dto.buddy.bytecode.k2jvm
+package com.runninglane.dto.buddy.bytecode.compile
 
 import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer

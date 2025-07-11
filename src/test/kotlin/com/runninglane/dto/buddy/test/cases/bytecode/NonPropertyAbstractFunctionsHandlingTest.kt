@@ -1,7 +1,7 @@
 package com.runninglane.dto.buddy.test.cases.bytecode
 
 import com.runninglane.dto.buddy.DtoBuddy
-import com.runninglane.dto.buddy.bytecode.k2jvm.EmbeddedCompilerByteCodeStrategy
+import com.runninglane.dto.buddy.bytecode.compile.CompileKotlinByteCodeStrategy
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.TypeSpec
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -9,13 +9,13 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.full.functions
 import kotlin.test.Test
 
-class NonPropertyAbstractMethodsHandlingTest {
+class NonPropertyAbstractFunctionsHandlingTest {
     abstract class TestBaseClass {
         open var greeting: String = "Hello"
         abstract fun shout(name: String): String
     }
 
-    class TestByteCodeStrategy : EmbeddedCompilerByteCodeStrategy() {
+    class TestByteCodeStrategy : CompileKotlinByteCodeStrategy() {
         override fun handleNonPropertyAbstractFunctions(
             builder: TypeSpec.Builder,
             functions: List<KFunction<*>>
@@ -28,13 +28,13 @@ class NonPropertyAbstractMethodsHandlingTest {
                     .addStatement("return \"\${greeting} \$name!\"")
                     .build()
             )
-            val unhandledMethods = functions.filter { it.name != "shout" }
-            return super.handleNonPropertyAbstractFunctions(updatedBuilder, unhandledMethods)
+            val unhandledFunctions = functions.filter { it.name != "shout" }
+            return super.handleNonPropertyAbstractFunctions(updatedBuilder, unhandledFunctions)
         }
     }
 
     @Test
-    fun testHandleNonPropertyAbstractMethods() {
+    fun testHandleNonPropertyAbstractFunctions() {
         val dtoBuddy = DtoBuddy(TestByteCodeStrategy())
         val concreteClass = dtoBuddy.implement(TestBaseClass::class)
         val shoutFunction = concreteClass.functions.first { it.name == "shout" }
