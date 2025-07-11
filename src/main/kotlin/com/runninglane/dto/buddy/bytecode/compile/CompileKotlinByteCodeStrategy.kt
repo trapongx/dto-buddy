@@ -152,7 +152,7 @@ open class CompileKotlinByteCodeStrategy : ThreeStepsByteCodeStrategy<TypeSpec.B
             val sourceCode = fileSpec.toString()
 
             // Compile and load the generated class with the known class name
-            return compilationSession.compileAndLoad(sourceCode, className, packageName)
+            return compilationSession.compileAndLoad(sourceCode, className, packageName).kotlin
         } catch (e: Exception) {
             throw DtoBuddySystemException("Failed to compile and load generated class: ${e.message}", e)
         }

@@ -47,7 +47,7 @@ class CompilationSession(
      * @param language Source language, either "kotlin" or "java"
      * @return The loaded class
      */
-    fun compileAndLoad(src: String, className: String, packageName: String, language: String = "kotlin"): KClass<*> {
+    fun compileAndLoad(src: String, className: String, packageName: String, language: String = "kotlin"): Class<*> {
         return when (language.lowercase()) {
             "kotlin" -> when (inMemory) {
                 true -> compileAndLoadKotlinInMemory(src, className, packageName)
@@ -58,7 +58,7 @@ class CompilationSession(
                 false -> compileAndLoadJava(src, className, packageName)
             }
             else -> throw IllegalArgumentException("Unsupported language: $language. Only 'kotlin' and 'java' are supported.")
-        }
+        }.java
     }
 
     /**
@@ -204,7 +204,7 @@ class CompilationSession(
      * @param packageName Package of the class
      * @return The loaded class
      */
-    fun compileAndLoadKotlinInMemory(src: String, className: String, packageName: String): KClass<*> {
+    private fun compileAndLoadKotlinInMemory(src: String, className: String, packageName: String): KClass<*> {
         val fullClassName = "$packageName.$className"
 
         // Create a dedicated temporary directory for this compilation
@@ -258,7 +258,7 @@ class CompilationSession(
      * Compile and load Java source directly from a string (without creating files).
      * Useful for simple cases where file persistence is not needed.
      */
-    fun compileAndLoadJavaInMemory(src: String, className: String, packageName: String): KClass<*> {
+    private fun compileAndLoadJavaInMemory(src: String, className: String, packageName: String): KClass<*> {
         val fullClassName = "$packageName.$className"
         val outputDir = File(sessionDir, "out-memory").apply { mkdirs() }
 
