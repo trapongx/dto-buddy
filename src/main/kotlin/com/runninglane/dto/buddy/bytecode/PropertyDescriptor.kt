@@ -45,7 +45,7 @@ data class PropertyDescriptor(
                 ?: setter?.parameters?.get(0)?.type
                 ?: throw DtoBuddySystemException("Failed to determine property type for `$name` in ${baseClass.qualifiedName}")
 
-            val isNullable: Boolean =  type.isMarkedNullable
+            val isNullable: Boolean =  type.isMarkedNullable || type.toString().endsWith("!")
 
             val hasConcreteGetter = getter?.isAbstract == false
             val hasConcreteSetter = setter?.isAbstract == false

@@ -272,8 +272,7 @@ open class EmbeddedCompilerByteCodeStrategy : ThreeStepsByteCodeStrategy<TypeSpe
                     ?: throw DtoBuddyBadInputException(">$classifier< is not mapped to a concrete type. Please provide a mapping for it.")
 
                 // Create a TypeName from the concrete type, preserving nullability
-                val concreteTypeName = concreteType.asTypeName()
-                if (type.isMarkedNullable) concreteTypeName.copy(nullable = true) else concreteTypeName
+                concreteType.asTypeName().considerJavaNullability(type)
             }
 
             // Case 2: Generic class with type arguments (e.g., List<T>)
@@ -294,13 +293,16 @@ open class EmbeddedCompilerByteCodeStrategy : ThreeStepsByteCodeStrategy<TypeSpe
                 }
 
                 // Create a parameterized type name
-                val parameterizedTypeName = rawTypeName.parameterizedBy(typeArguments)
-                if (type.isMarkedNullable) parameterizedTypeName.copy(nullable = true) else parameterizedTypeName
+                rawTypeName.parameterizedBy(typeArguments).considerJavaNullability(type)
             }
 
             // For regular types without type arguments, just use the standard asTypeName
-            else -> type.asTypeName()
+            else -> type.asTypeName().considerJavaNullability(type)
         }
     }
 
+    private fun TypeName.considerJavaNullability(type: KType): TypeName = when {
+        type.isMarkedNullable || type.toString().endsWith("!") -> copy(nullable = true)
+        else -> this
+    }
 }
