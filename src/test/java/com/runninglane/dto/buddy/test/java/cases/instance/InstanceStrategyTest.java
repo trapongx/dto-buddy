@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class InstanceStrategyTest {
+public class InstanceStrategyTest {
     public abstract static class TestDto {
         private boolean flag = false;
 
@@ -43,7 +43,7 @@ class InstanceStrategyTest {
             Map<String, ?> upperParams = params.entrySet().stream()
                 .collect(Collectors.toMap(
                     Map.Entry::getKey,
-                    e -> e.getValue() != null ? e.getValue().toString().toUpperCase() : null
+                    e -> e.getValue() instanceof String ? ((String) e.getValue()).toUpperCase() : e.getValue()
                 ));
             super.populate(dto, upperParams);
         }
@@ -53,7 +53,7 @@ class InstanceStrategyTest {
     public void shouldCustomizeInstanceStrategyCorrectly() {
         DtoBuddy dtoBuddy = new DtoBuddy(new TestInstanceStrategy());
         Class<?> concreteClass = dtoBuddy.implement(TestDto.class);
-        TestDto dto = dtoBuddy.create(concreteClass, java.util.Map.of("name", "hello"));
+        TestDto dto = dtoBuddy.create(concreteClass, java.util.Map.of("flag", true, "name", "hello"));
         assertTrue(dto.getFlag());
         assertEquals("HELLO", dto.getName());
         dtoBuddy.populate(dto, java.util.Map.of("name", "world"));
