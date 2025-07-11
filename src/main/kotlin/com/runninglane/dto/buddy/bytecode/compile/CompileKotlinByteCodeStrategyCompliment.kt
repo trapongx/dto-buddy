@@ -2,7 +2,7 @@ package com.runninglane.dto.buddy.bytecode.compile
 
 import com.runninglane.dto.buddy.annotation.DtoBuddyGenerated
 import com.runninglane.dto.buddy.bytecode.PropertyDescriptor
-import com.runninglane.dto.buddy.bytecode.ThreeStepsByteCodeStrategy
+import com.runninglane.dto.buddy.bytecode.ThreeStepsByteCodeStrategyCompliment
 import com.runninglane.dto.buddy.bytecode.validateContractCompliance
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
 import com.runninglane.dto.buddy.exception.DtoBuddySystemException
@@ -16,7 +16,7 @@ import kotlin.reflect.full.valueParameters
  * Implementation of ByteCodeStrategy that uses KotlinPoet to generate source code
  * and then compiles it using the embedded Kotlin compiler.
  */
-open class CompileKotlinByteCodeStrategy : ThreeStepsByteCodeStrategy<TypeSpec.Builder>() {
+open class CompileKotlinByteCodeStrategyCompliment : ThreeStepsByteCodeStrategyCompliment<TypeSpec.Builder> {
     private val compilationSession = CompilationSession()
 
     /**

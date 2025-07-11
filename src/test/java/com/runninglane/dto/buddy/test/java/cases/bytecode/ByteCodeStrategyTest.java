@@ -1,8 +1,11 @@
 package com.runninglane.dto.buddy.test.java.cases.bytecode;
 
 import com.runninglane.dto.buddy.DtoBuddy;
-import com.runninglane.dto.buddy.bytecode.bytebuddy.ByteBuddyByteCodeStrategy;
-import net.bytebuddy.dynamic.DynamicType;
+import com.runninglane.dto.buddy.javainterop.bytecode.ByteCodeStrategy;
+import com.runninglane.dto.buddy.javainterop.bytecode.ThreeStepsByteCodeStrategy;
+import com.runninglane.dto.buddy.javainterop.bytecode.compile.CompileJavaByteCodeStrategyCompliment;
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.TypeSpec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -23,32 +26,28 @@ class ByteCodeStrategyTest {
         String value();
     }
 
-    static class TestByteBuddyByteCodeStrategy extends ByteBuddyByteCodeStrategy {
+    static class TestByteBuddyByteCodeStrategyCompliment extends CompileJavaByteCodeStrategyCompliment {
         @Override
-        public @NotNull DynamicType.Builder<?> defineClass(
+        public @NotNull TypeSpec.Builder defineClass(
             @NotNull Class<?> baseClass,
             @Nullable List<? extends Class<?>> typeParams,
             @NotNull String packageName,
             @NotNull String className
         ) {
             return super.defineClass(baseClass, typeParams, packageName, className)
-                .annotateType(new TestAnnotation() {
-                    @Override
-                    public String value() {
-                        return "test123";
-                    }
-
-                    @Override
-                    public Class<? extends java.lang.annotation.Annotation> annotationType() {
-                        return TestAnnotation.class;
-                    }
-                });
+                .addAnnotation(AnnotationSpec.builder(TestAnnotation.class)
+                    .addMember("value", "$S", "test123")
+                    .build());
         }
+        
     }
 
     @Test
     public void testAddSecondaryConstructor() {
-        DtoBuddy dtoBuddy = new DtoBuddy(new TestByteBuddyByteCodeStrategy());
+        ByteCodeStrategy byteCodeStrategy = new ThreeStepsByteCodeStrategy<>(
+            new TestByteBuddyByteCodeStrategyCompliment()
+        );
+        DtoBuddy dtoBuddy = new DtoBuddy(byteCodeStrategy);
         Class<?> concreteClass = dtoBuddy.implement(TestDto.class);
         TestAnnotation annotation = concreteClass.getAnnotation(TestAnnotation.class);
         assertNotNull(annotation);

@@ -3,7 +3,6 @@ package com.runninglane.dto.buddy.bytecode
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
 import com.runninglane.dto.buddy.exception.DtoBuddySystemException
 import kotlin.reflect.KClass
-import kotlin.reflect.KFunction
 import kotlin.reflect.full.functions
 
 /**
@@ -15,11 +14,11 @@ import kotlin.reflect.full.functions
  * This strategy provides a structured approach to generate bytecode for DTO implementations.
  * It handles inheritance, interfaces, abstract classes and mutable/immutable properties.
  */
-abstract class ThreeStepsByteCodeStrategy<B> : ByteCodeStrategy {
+open class ThreeStepsByteCodeStrategy<B>(private val compliment: ThreeStepsByteCodeStrategyCompliment<B>) : ByteCodeStrategy {
     // Cache for property info to avoid reanalyzing classes (for implementation)
     private val propertiesCache = mutableMapOf<KClass<*>, List<PropertyDescriptor>>()
 
-    final override fun implement(
+    override fun implement(
         baseClass: KClass<*>,
         typeParams: List<KClass<*>>?,
         packageName: String,
@@ -40,7 +39,7 @@ abstract class ThreeStepsByteCodeStrategy<B> : ByteCodeStrategy {
 
         try {
             // Create the dynamic type builder
-            val builder = defineClass(baseClass, typeParams, packageName, className)
+            val builder = compliment.defineClass(baseClass, typeParams, packageName, className)
 
             // Create a map of type parameter names to actual types
             val typeParamsMapByName = typeParams?.takeIf { it.isNotEmpty() }
@@ -50,7 +49,7 @@ abstract class ThreeStepsByteCodeStrategy<B> : ByteCodeStrategy {
                 } ?: emptyMap()
 
             // Implement properties
-            val implementedBuilder = implementProperties(builder, properties, typeParamsMapByName)
+            val implementedBuilder = compliment.implementProperties(builder, properties, typeParamsMapByName)
 
             val nonPropertyAbstractFunctions = baseClass.functions.toList()
                 .minus(properties.flatMap { listOfNotNull(it.getter, it.setter) })
@@ -58,13 +57,13 @@ abstract class ThreeStepsByteCodeStrategy<B> : ByteCodeStrategy {
 
             val builderWithNonPropertyAbstractFunctionsHandled = when {
                 nonPropertyAbstractFunctions.isNotEmpty() ->
-                    handleNonPropertyAbstractFunctions(implementedBuilder, nonPropertyAbstractFunctions)
+                    compliment.handleNonPropertyAbstractFunctions(implementedBuilder, nonPropertyAbstractFunctions)
 
                 else -> implementedBuilder
             }
 
             // Load the generated class
-            val generatedClass = loadClass(builderWithNonPropertyAbstractFunctionsHandled, packageName, className)
+            val generatedClass = compliment.loadClass(builderWithNonPropertyAbstractFunctionsHandled, packageName, className)
 
             return generatedClass
         } catch (e: Exception) {
@@ -75,57 +74,4 @@ abstract class ThreeStepsByteCodeStrategy<B> : ByteCodeStrategy {
         }
     }
 
-    /**
-     * Defines class structure by specifying package name, class name, modifiers, and annotations.
-     * The result is a builder object that will be used in subsequent steps.
-     *
-     * @param baseClass The base class to implement/extend
-     * @param typeParams Optional list of concrete types for generic type parameters
-     * @param packageName Target package name for the generated class
-     * @param className Name for the generated class
-     * @return Builder object for the next step
-     */
-    abstract fun defineClass(
-        baseClass: KClass<*>,
-        typeParams: List<KClass<*>>?,
-        packageName: String,
-        className: String
-    ): B
-
-    /**
-     * Implements abstract properties by adding concrete getters and setters.
-     * Uses the builder from the previous step and property descriptors.
-     *
-     * @param builder Builder object from defineClass step
-     * @param properties List of property descriptors to implement
-     * @param typeParamsMapByName Optional map of type parameter names to concrete types
-     * @return Updated builder for the next step
-     */
-    abstract fun implementProperties(
-        builder: B,
-        properties: List<PropertyDescriptor>,
-        typeParamsMapByName: Map<String, KClass<*>>? = null
-    ): B
-
-    open fun handleNonPropertyAbstractFunctions(builder: B, functions: List<KFunction<*>>): B {
-        if (functions.isEmpty()) return builder
-
-        throw DtoBuddyBadInputException(
-            "The following functions are not implemented properly: ${functions.map { it.name }}"
-        )
-    }
-
-    /**
-     * Finalizes the class definition, generates the bytecode and loads it into the runtime.
-     *
-     * @param builder Builder object from implementProperties step
-     * @param packageName Target package name for the generated class
-     * @param className Name for the generated class
-     * @return Generated concrete class
-     */
-    abstract fun loadClass(
-        builder: B,
-        packageName: String,
-        className: String
-    ): KClass<*>
 }

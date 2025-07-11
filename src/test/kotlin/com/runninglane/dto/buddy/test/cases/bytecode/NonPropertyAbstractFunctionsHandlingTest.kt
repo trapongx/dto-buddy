@@ -1,7 +1,8 @@
 package com.runninglane.dto.buddy.test.cases.bytecode
 
 import com.runninglane.dto.buddy.DtoBuddy
-import com.runninglane.dto.buddy.bytecode.compile.CompileKotlinByteCodeStrategy
+import com.runninglane.dto.buddy.bytecode.ThreeStepsByteCodeStrategy
+import com.runninglane.dto.buddy.bytecode.compile.CompileKotlinByteCodeStrategyCompliment
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.TypeSpec
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -15,7 +16,7 @@ class NonPropertyAbstractFunctionsHandlingTest {
         abstract fun shout(name: String): String
     }
 
-    class TestByteCodeStrategy : CompileKotlinByteCodeStrategy() {
+    class TestByteCodeStrategyCompliment : CompileKotlinByteCodeStrategyCompliment() {
         override fun handleNonPropertyAbstractFunctions(
             builder: TypeSpec.Builder,
             functions: List<KFunction<*>>
@@ -35,7 +36,8 @@ class NonPropertyAbstractFunctionsHandlingTest {
 
     @Test
     fun testHandleNonPropertyAbstractFunctions() {
-        val dtoBuddy = DtoBuddy(TestByteCodeStrategy())
+        val byteCodeStrategy = ThreeStepsByteCodeStrategy(TestByteCodeStrategyCompliment())
+        val dtoBuddy = DtoBuddy(byteCodeStrategy)
         val concreteClass = dtoBuddy.implement(TestBaseClass::class)
         val shoutFunction = concreteClass.functions.first { it.name == "shout" }
         assertFalse(shoutFunction.isAbstract)
