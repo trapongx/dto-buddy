@@ -148,8 +148,8 @@ class DtoBuddy() {
         baseClass: KClass<*>,
         typeParams: List<KClass<*>>? = null
     ): KClass<*> {
-        val packageName = namingStrategy.buildPackageName(baseClass)
-        val className = namingStrategy.buildClassName(baseClass)
+        val packageName = namingStrategy.buildPackageName(baseClass.java)
+        val className = namingStrategy.buildClassName(baseClass.java)
 
         // Generate cache key
         val cacheKey = "$packageName.$className"

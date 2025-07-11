@@ -2,16 +2,15 @@ package com.runninglane.dto.buddy.test.cases.naming
 
 import com.runninglane.dto.buddy.DtoBuddy
 import com.runninglane.dto.buddy.naming.NamingStrategy
-import kotlin.reflect.KClass
 import kotlin.test.Test
 
 class NamingStrategyTest {
     class TestNamingStrategy : NamingStrategy {
-        override fun buildPackageName(baseClass: KClass<*>): String {
+        override fun buildPackageName(baseClass: Class<*>): String {
             return "com.example.jlp123456789.dto.customized"
         }
 
-        override fun buildClassName(baseClass: KClass<*>): String {
+        override fun buildClassName(baseClass: Class<*>): String {
             return "CustomName"
         }
     }
