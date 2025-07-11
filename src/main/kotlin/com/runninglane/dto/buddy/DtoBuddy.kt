@@ -143,6 +143,7 @@ class DtoBuddy() {
      * @param typeParams when base class is generic type
      * @return generated class
      */
+    @JvmSynthetic
     fun implement(
         baseClass: KClass<*>,
         typeParams: List<KClass<*>>? = null
@@ -176,7 +177,12 @@ class DtoBuddy() {
         }
     }
 
-    fun implement(baseClass: KClass<*>) = implement(baseClass, null)
+    fun implement(
+        baseClass: Class<*>,
+        typeParams: List<Class<*>>?
+    ) = implement(baseClass.kotlin, typeParams?.map { it.kotlin }).java
+
+    fun implement(baseClass: Class<*>) = implement(baseClass, null)
 
     /**
      * Creates a new instance of a DTO class and populates it with the provided parameters
@@ -185,14 +191,15 @@ class DtoBuddy() {
      * @param params Map of property names to values
      * @return A new instance of the DTO class with populated properties
      */
+    @JvmSynthetic
     @Suppress("UNCHECKED_CAST")
-    fun <DTO> create(concrete: KClass<*>, params: Map<String, Any?>): DTO {
+    fun <DTO> create(concrete: KClass<*>, params: Map<String, Any?>? = null): DTO {
         try {
             // Create a new instance
             val instance = instanceStrategy.create(concrete)
 
             // Populate the properties
-            instanceStrategy.populate(instance, params)
+            params?.also { instanceStrategy.populate(instance, it) }
 
             return instance as DTO
         } catch (e: Exception) {
@@ -211,9 +218,9 @@ class DtoBuddy() {
      * @param concrete The class to instantiate
      * @return A new instance of the DTO class
      */
-    fun <DTO> create(concrete: KClass<*>): DTO {
-        return create(concrete, emptyMap())
-    }
+    fun <DTO> create(concrete: Class<*>, params: Map<String, Any?>?): DTO = create(concrete.kotlin, params)
+
+    fun <DTO> create(concrete: Class<*>): DTO = create(concrete, null)
 
     /**
      * Populates an existing DTO instance with values from the provided parameter map

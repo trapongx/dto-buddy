@@ -9,8 +9,10 @@ interface InstanceStrategy {
      * @param concrete The class to instantiate
      * @return A new instance of the DTO class
      */
-    @Suppress("UNCHECKED_CAST")
+    @JvmSynthetic
     fun create(concrete: KClass<*>): Any
+
+    fun create(concrete: Class<*>): Any = create(concrete.kotlin)
 
     /**
      * Populates an existing DTO instance with values from the provided parameter map
