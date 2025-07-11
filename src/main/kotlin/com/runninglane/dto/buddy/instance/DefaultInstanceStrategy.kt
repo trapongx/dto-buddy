@@ -71,7 +71,7 @@ open class DefaultInstanceStrategy : InstanceStrategy {
 
         for ((propertyName, value) in params) {
             try {
-                val setter = setters[propertyName] ?: throw DtoBuddyBadInputException("No setter found")
+                val setter = setters[propertyName] ?: throw DtoBuddyBadInputException("No setter found for property `$propertyName` on object of type ${dto::class.qualifiedName}")
                 setter.call(dto, value)
             } catch (e: Exception) {
                 if (e is DtoBuddyBadInputException) throw e

@@ -1,6 +1,6 @@
 package com.runninglane.dto.buddy.test.java.cases.simple;
 
-import com.runninglane.dto.buddy.DtoBuddy;
+import com.runninglane.dto.buddy.javainterop.DtoBuddy;
 import com.runninglane.dto.buddy.test.NamingStrategyWithCountUpSuffix;
 import org.junit.jupiter.api.Test;
 

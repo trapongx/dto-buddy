@@ -1,6 +1,7 @@
 package com.runninglane.dto.buddy.test.java.cases.contract;
 
-interface BaseClasses {
+public interface CompliantBaseClasses {
+
     interface InterfaceWithNoMember {
     }
 
@@ -14,28 +15,8 @@ interface BaseClasses {
         void setName(String name);
     }
 
-    interface InterfaceWithDefaultGetter {
-        default String getName() {
-            return "John Doe";
-        }
-    }
-
-    interface InterfaceWithDefaultGetterAndAbstractSetter {
-        default String getName() {
-            return "John Doe";
-        }
-
-        void setName(String name);
-    }
-
     interface InterfaceWithAbstractProperty {
         String getName();
-    }
-
-    interface InterfaceWithAbstractPropertyAndDefaultGetter {
-        default String getName() {
-            return "John Doe";
-        }
     }
 
     abstract class AbstractClassWithNoMember {
@@ -132,23 +113,4 @@ interface BaseClasses {
         }
     }
 
-    class ConcreteClassWithConcreteImmutableProperty {
-        private final String name = "John Doe";
-
-        public String getName() {
-            return name;
-        }
-    }
-
-    class ConcreteClassWithConcreteMutableProperty {
-        private String name = "John Doe";
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-    }
 }

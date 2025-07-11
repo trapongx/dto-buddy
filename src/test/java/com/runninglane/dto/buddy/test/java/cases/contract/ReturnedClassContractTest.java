@@ -1,28 +1,23 @@
 package com.runninglane.dto.buddy.test.java.cases.contract;
 
-import com.runninglane.dto.buddy.DtoBuddy;
+import com.runninglane.dto.buddy.javainterop.DtoBuddy;
+import com.runninglane.dto.buddy.test.java.cases.contract.CompliantBaseClasses.*;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Modifier;
-import java.util.AbstractMap;
-import java.util.Arrays;
-
-import static com.runninglane.dto.buddy.test.java.cases.contract.BaseClasses.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * The rule is the returned class must be a concrete class
  */
-public class ReturnedClassContractTest {
-
+class ReturnedClassContractTest {
     private final DtoBuddy dtoBuddy = new DtoBuddy();
 
     private void test(Class<?> baseClass, boolean expectBaseClassReturned) {
         try {
             Class<?> concreteClass = dtoBuddy.implement(baseClass);
             assertFalse(concreteClass.isInterface());
-            assertFalse(Modifier.isAbstract(concreteClass.getModifiers()));
+            assertFalse(java.lang.reflect.Modifier.isAbstract(concreteClass.getModifiers()));
             if (expectBaseClassReturned) {
                 assertEquals(baseClass, concreteClass);
             }
@@ -33,20 +28,17 @@ public class ReturnedClassContractTest {
 
     @Test
     public void testInterface() {
-        Arrays.asList(
+        java.util.List.of(
             InterfaceWithNoMember.class,
             InterfaceWithAbstractGetter.class,
             InterfaceWithAbstractGetterAndAbstractSetter.class,
-            InterfaceWithDefaultGetter.class,
-            InterfaceWithDefaultGetterAndAbstractSetter.class,
-            InterfaceWithAbstractProperty.class,
-            InterfaceWithAbstractPropertyAndDefaultGetter.class
+            InterfaceWithAbstractProperty.class
         ).forEach(baseClass -> test(baseClass, false));
     }
 
     @Test
     public void testAbstractClass() {
-        Arrays.asList(
+        java.util.List.of(
             AbstractClassWithNoMember.class,
             AbstractClassWithAbstractGetter.class,
             AbstractClassWithAbstractGetterAndAbstractSetter.class,
@@ -60,15 +52,14 @@ public class ReturnedClassContractTest {
 
     @Test
     public void testConcreteClass() {
-        Arrays.asList(
-            new AbstractMap.SimpleEntry<>(ConcreteClassWithNoMember.class, true),
-            new AbstractMap.SimpleEntry<>(ConcreteClassWithGetter.class, false),
-            new AbstractMap.SimpleEntry<>(ConcreteClassWithSetter.class, false),
-            new AbstractMap.SimpleEntry<>(ConcreteClassWithGetterAndSetterWithoutField.class, true),
-            new AbstractMap.SimpleEntry<>(ConcreteClassWithGetterAndSetterWithField.class, true),
-            new AbstractMap.SimpleEntry<>(ConcreteClassWithConcreteImmutableProperty.class, false),
-            new AbstractMap.SimpleEntry<>(ConcreteClassWithConcreteMutableProperty.class, true)
-        ).forEach(entry -> test(entry.getKey(), entry.getValue()));
+        java.util.Map.of(
+            ConcreteClassWithNoMember.class, true,
+            ConcreteClassWithGetter.class, false,
+            ConcreteClassWithSetter.class, false,
+            ConcreteClassWithGetterAndSetterWithoutField.class, true,
+            ConcreteClassWithGetterAndSetterWithField.class, true
+        ).forEach((baseClass, expectBaseClassReturned) ->
+            test(baseClass, expectBaseClassReturned));
     }
 
 }

@@ -1,6 +1,9 @@
 package com.runninglane.dto.buddy.test.java.cases.generic.single;
 
-import com.runninglane.dto.buddy.DtoBuddy;
+import com.runninglane.dto.buddy.javainterop.DtoBuddy;
+import com.runninglane.dto.buddy.javainterop.bytecode.ThreeStepsByteCodeStrategy;
+import com.runninglane.dto.buddy.javainterop.bytecode.compile.CompileJavaByteCodeStrategyCompliment;
+import com.runninglane.dto.buddy.test.java.cases.generic.GenericTypeTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
@@ -9,7 +12,13 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SingleTypeParameterTest {
-    private final DtoBuddy dtoBuddy = new DtoBuddy();
+    private final DtoBuddy dtoBuddy = new DtoBuddy(
+        new ThreeStepsByteCodeStrategy<>(
+            new CompileJavaByteCodeStrategyCompliment()
+        )
+    );
+
+    private final GenericTypeTestHelper helper = new GenericTypeTestHelper();
 
     @Test
     public void testImplement() {
@@ -20,24 +29,15 @@ public class SingleTypeParameterTest {
 
         assertNotNull(concreteClass);
         assertTrue(DtoInterfaceWithSingleTypeParameter.class.isAssignableFrom(concreteClass));
-        
-        Optional<Method> getName = Arrays.stream(concreteClass.getMethods())
-            .filter(m -> m.getName().equals("getName"))
-            .findFirst();
-        assertTrue(getName.isPresent());
-        assertEquals(String.class, getName.get().getReturnType());
 
-        Optional<Method> getAge = Arrays.stream(concreteClass.getMethods())
-            .filter(m -> m.getName().equals("getAge"))
-            .findFirst();
-        assertTrue(getAge.isPresent());
-        assertEquals(Integer.class, getAge.get().getReturnType());
+        Method getName = helper.findMostSpecificMethodByName(concreteClass, "getName");
+        assertEquals(String.class, getName.getReturnType());
 
-        Optional<Method> getEmail = Arrays.stream(concreteClass.getMethods())
-            .filter(m -> m.getName().equals("getEmail"))
-            .findFirst();
-        assertTrue(getEmail.isPresent());
-        assertEquals(String.class, getEmail.get().getReturnType());
+        Method getAge = helper.findMostSpecificMethodByName(concreteClass, "getAge");
+        assertEquals(Integer.class, getAge.getReturnType());
+
+        Method getEmail = helper.findMostSpecificMethodByName(concreteClass, "getEmail");
+        assertEquals(String.class, getEmail.getReturnType());
     }
 
     @Test

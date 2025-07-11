@@ -1,6 +1,6 @@
 package com.runninglane.dto.buddy.test.java.cases.bytecode;
 
-import com.runninglane.dto.buddy.DtoBuddy;
+import com.runninglane.dto.buddy.javainterop.DtoBuddy;
 import com.runninglane.dto.buddy.javainterop.bytecode.ByteCodeStrategy;
 import com.runninglane.dto.buddy.javainterop.bytecode.ThreeStepsByteCodeStrategy;
 import com.runninglane.dto.buddy.javainterop.bytecode.compile.CompileJavaByteCodeStrategyCompliment;

@@ -1,22 +1,26 @@
 package com.runninglane.dto.buddy.test.java.cases.bytecode;
 
-import com.runninglane.dto.buddy.DtoBuddy;
-import com.runninglane.dto.buddy.bytecode.bytebuddy.ByteBuddyByteCodeStrategy;
-import net.bytebuddy.dynamic.DynamicType;
-import net.bytebuddy.implementation.MethodDelegation;
-import net.bytebuddy.implementation.bind.annotation.Argument;
-import net.bytebuddy.implementation.bind.annotation.RuntimeType;
-import net.bytebuddy.implementation.bind.annotation.This;
-import net.bytebuddy.matcher.ElementMatchers;
+import com.runninglane.dto.buddy.javainterop.DtoBuddy;
+import com.runninglane.dto.buddy.javainterop.bytecode.ByteCodeStrategy;
+import com.runninglane.dto.buddy.javainterop.bytecode.ThreeStepsByteCodeStrategy;
+import com.runninglane.dto.buddy.javainterop.bytecode.compile.CompileJavaByteCodeStrategyCompliment;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeSpec;
+import kotlin.reflect.KClass;
+import kotlin.reflect.KFunction;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class NonPropertyAbstractMethodsHandlingTest {
-    public abstract static class TestBaseClass {
+    public static abstract class TestBaseClass {
         protected String greeting = "Hello";
 
         public String getGreeting() {
@@ -27,43 +31,40 @@ public class NonPropertyAbstractMethodsHandlingTest {
             this.greeting = greeting;
         }
 
-        abstract String shout(String name);
+        public abstract String shout(String name);
     }
 
-    public static class ShoutDelegate {
-        @RuntimeType
-        public String shout(@Argument(0) String name, @This TestBaseClass instance) {
-            return instance.getGreeting() + " " + name + "!";
-        }
-    }
-
-    static class TestByteCodeStrategy extends ByteBuddyByteCodeStrategy {
+    static class TestByteCodeStrategyCompliment extends CompileJavaByteCodeStrategyCompliment {
         @Override
-        public DynamicType.Builder<?> handleNonPropertyAbstractMethods(
-            DynamicType.Builder<?> builder,
-            List<Method> methods
+        public @NotNull TypeSpec.Builder handleNonPropertyAbstractMethods(
+            @NotNull TypeSpec.Builder builder,
+            @NotNull List<Method> methods,
+            @Nullable Map<String, ? extends Class<?>> typeParamsMapByName
         ) {
-            DynamicType.Builder<?> updatedBuilder = builder.method(ElementMatchers.named("shout"))
-                .intercept(MethodDelegation.to(new ShoutDelegate()))
-                .annotateMethod(new Override() {
-                    @Override
-                    public Class<? extends java.lang.annotation.Annotation> annotationType() {
-                        return Override.class;
-                    }
-                });
+            TypeSpec.Builder updatedBuilder = builder.addMethod(
+                MethodSpec.methodBuilder("shout")
+                    .addAnnotation(Override.class)
+                    .addModifiers(javax.lang.model.element.Modifier.PUBLIC)
+                    .addParameter(String.class, "name")
+                    .returns(String.class)
+                    .addCode("return getGreeting() + \" \" + name + \"!\";\n")
+                    .build()
+            );
 
             List<Method> unhandledMethods = methods.stream()
                 .filter(method -> !method.getName().equals("shout"))
                 .collect(Collectors.toList());
 
-            return super.handleNonPropertyAbstractMethods(updatedBuilder, unhandledMethods);
+            return super.handleNonPropertyAbstractMethods(updatedBuilder, unhandledMethods, typeParamsMapByName);
         }
     }
 
-    // TODO uncomment this test method when we can find the fix
-    //@Test
+    @Test
     public void testHandleNonPropertyAbstractMethods() {
-        DtoBuddy dtoBuddy = new DtoBuddy(new TestByteCodeStrategy());
+        ByteCodeStrategy byteCodeStrategy = new ThreeStepsByteCodeStrategy<>(
+            new TestByteCodeStrategyCompliment()
+        );
+        DtoBuddy dtoBuddy = new DtoBuddy(byteCodeStrategy);
         Class<?> concreteClass = dtoBuddy.implement(TestBaseClass.class, null);
         Method shoutMethod = Arrays.stream(concreteClass.getMethods())
             .filter(method -> method.getName().equals("shout"))

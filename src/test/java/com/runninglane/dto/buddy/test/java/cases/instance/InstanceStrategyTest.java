@@ -1,6 +1,6 @@
 package com.runninglane.dto.buddy.test.java.cases.instance;
 
-import com.runninglane.dto.buddy.DtoBuddy;
+import com.runninglane.dto.buddy.javainterop.DtoBuddy;
 import com.runninglane.dto.buddy.instance.DefaultInstanceStrategy;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,9 @@
 package com.runninglane.dto.buddy.test.java.cases.generic.multiple;
 
-import com.runninglane.dto.buddy.DtoBuddy;
+import com.runninglane.dto.buddy.javainterop.DtoBuddy;
+import com.runninglane.dto.buddy.javainterop.bytecode.ThreeStepsByteCodeStrategy;
+import com.runninglane.dto.buddy.javainterop.bytecode.compile.CompileJavaByteCodeStrategyCompliment;
+import com.runninglane.dto.buddy.test.java.cases.generic.GenericTypeTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -11,7 +14,13 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MultipleTypeParametersTest {
-    private final DtoBuddy dtoBuddy = new DtoBuddy();
+    private final DtoBuddy dtoBuddy = new DtoBuddy(
+        new ThreeStepsByteCodeStrategy<>(
+            new CompileJavaByteCodeStrategyCompliment()
+        )
+    );
+
+    private final GenericTypeTestHelper helper = new GenericTypeTestHelper();
 
     @Test
     public void testImplement() {
@@ -22,16 +31,9 @@ public class MultipleTypeParametersTest {
 
         assertNotNull(concreteClass);
         assertTrue(DtoInterfaceWithMultipleTypeParameters.class.isAssignableFrom(concreteClass));
-        assertEquals(String.class, findMethodByName(concreteClass, "getSimple").getReturnType());
-        assertEquals(List.class, findMethodByName(concreteClass, "getList").getReturnType());
-        assertEquals(Map.class, findMethodByName(concreteClass, "getMap").getReturnType());
-    }
-
-    private java.lang.reflect.Method findMethodByName(Class<?> clazz, String name) {
-        return Arrays.stream(clazz.getMethods())
-            .filter(method -> method.getName().equals(name))
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("Method not found: " + name));
+        assertEquals(String.class, helper.findMostSpecificMethodByName(concreteClass, "getSimple").getReturnType());
+        assertEquals(List.class, helper.findMostSpecificMethodByName(concreteClass, "getList").getReturnType());
+        assertEquals(Map.class, helper.findMostSpecificMethodByName(concreteClass, "getMap").getReturnType());
     }
 
     @Test

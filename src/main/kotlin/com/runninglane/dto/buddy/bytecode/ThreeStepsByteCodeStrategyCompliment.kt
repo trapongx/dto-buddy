@@ -37,7 +37,11 @@ interface ThreeStepsByteCodeStrategyCompliment<B> {
         typeParamsMapByName: Map<String, KClass<*>>? = null
     ): B
 
-    fun handleNonPropertyAbstractFunctions(builder: B, functions: List<KFunction<*>>): B {
+    fun handleNonPropertyAbstractFunctions(
+        builder: B,
+        functions: List<KFunction<*>>,
+        typeParamsMapByName: Map<String, KClass<*>>?
+    ): B {
         if (functions.isEmpty()) return builder
 
         throw DtoBuddyBadInputException(

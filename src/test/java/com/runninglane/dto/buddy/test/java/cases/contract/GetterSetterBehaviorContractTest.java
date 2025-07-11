@@ -1,13 +1,13 @@
 package com.runninglane.dto.buddy.test.java.cases.contract;
 
-import com.runninglane.dto.buddy.DtoBuddy;
-import com.runninglane.dto.buddy.test.cases.contract.*;
+import com.runninglane.dto.buddy.javainterop.DtoBuddy;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.Map;
+import java.util.List;
 
+import static com.runninglane.dto.buddy.test.java.cases.contract.CompliantBaseClasses.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -16,8 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  */
 public class GetterSetterBehaviorContractTest {
     private final DtoBuddy dtoBuddy = new DtoBuddy();
-    
-    private void test(Class<?> baseClass, boolean expectBaseClassReturned, boolean testGetSet) {
+
+    private void test(Class<?> baseClass, boolean expectBaseClassReturned, boolean testGetSet, boolean testGetSetInJavaStyle) {
         try {
             Class<?> concreteClass = dtoBuddy.implement(baseClass);
             assertFalse(concreteClass.isInterface());
@@ -26,12 +26,7 @@ public class GetterSetterBehaviorContractTest {
                 assertEquals(baseClass, concreteClass);
             }
             if (testGetSet) {
-                Object dto = dtoBuddy.create(concreteClass, Map.of("name", "Test"));
-                var getName = concreteClass.getMethod("getName");
-                var setName = concreteClass.getMethod("setName", String.class);
-                assertEquals("Test", getName.invoke(dto));
-                setName.invoke(dto, "Test2");
-                assertEquals("Test2", getName.invoke(dto));
+                TestGetSetCapability.testGetSet(dtoBuddy, concreteClass);
             }
         } catch (Throwable e) {
             throw new RuntimeException("Failed to test " + baseClass.getSimpleName(), e);
@@ -40,23 +35,23 @@ public class GetterSetterBehaviorContractTest {
 
     @Test
     public void testInterface() {
-        Arrays.asList(
+        List<Class<?>> classes = Arrays.asList(
             InterfaceWithNoMember.class,
             InterfaceWithAbstractGetter.class,
             InterfaceWithAbstractGetterAndAbstractSetter.class,
-            InterfaceWithDefaultGetter.class,
-            InterfaceWithDefaultGetterAndAbstractSetter.class,
-            InterfaceWithAbstractProperty.class,
-            InterfaceWithAbstractPropertyAndDefaultGetter.class
-        ).forEach(baseClass -> {
+            InterfaceWithAbstractProperty.class
+        );
+
+        for (Class<?> baseClass : classes) {
             boolean testGetSet = baseClass != InterfaceWithNoMember.class;
-            test(baseClass, false, testGetSet);
-        });
+            boolean testGetSetInJavaStyle = testGetSet && !baseClass.getSimpleName().contains("Property");
+            test(baseClass, false, testGetSet, testGetSetInJavaStyle);
+        }
     }
 
     @Test
     public void testAbstractClass() {
-        Arrays.asList(
+        List<Class<?>> classes = Arrays.asList(
             AbstractClassWithNoMember.class,
             AbstractClassWithAbstractGetter.class,
             AbstractClassWithAbstractGetterAndAbstractSetter.class,
@@ -65,20 +60,26 @@ public class GetterSetterBehaviorContractTest {
             AbstractClassWithAbstractImmutableProperty.class,
             AbstractClassWithAbstractMutableProperty.class,
             AbstractClassWithConcreteMutableProperty.class
-        ).forEach(baseClass -> {
+        );
+
+        for (Class<?> baseClass : classes) {
             boolean testGetSet = !baseClass.getSimpleName().matches(".*(NoMember|Concrete).*");
-            test(baseClass, false, testGetSet);
-        });
+            boolean testGetSetInJavaStyle = testGetSet && !baseClass.getSimpleName().contains("Property");
+            test(baseClass, false, testGetSet, testGetSetInJavaStyle);
+        }
     }
 
     @Test
     public void testConcreteClass() {
-        Arrays.asList(
+        List<Class<?>> classes = Arrays.asList(
             ConcreteClassWithNoMember.class,
             ConcreteClassWithGetterAndSetterWithoutField.class,
-            ConcreteClassWithGetterAndSetterWithField.class,
-            ConcreteClassWithConcreteMutableProperty.class
-        ).forEach(baseClass -> test(baseClass, true, false));
+            ConcreteClassWithGetterAndSetterWithField.class
+        );
+
+        for (Class<?> baseClass : classes) {
+            test(baseClass, true, false, false);
+        }
     }
 
 }

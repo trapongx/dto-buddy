@@ -1,166 +1,97 @@
 package com.runninglane.dto.buddy.test.java.cases.contract;
 
-import com.runninglane.dto.buddy.DtoBuddy;
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException;
+import com.runninglane.dto.buddy.javainterop.DtoBuddy;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-import java.util.Map;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static com.runninglane.dto.buddy.test.java.cases.contract.CompliantBaseClasses.*;
+import static com.runninglane.dto.buddy.test.java.cases.contract.NonCompliantBaseClasses.*;
 
-public class BasePropertyConditionContractTest {
-
-    public interface InterfaceWithAbstractGetter {
-        String getName();
-    }
-
-    public interface InterfaceWithAbstractGetterAndAbstractSetter {
-        String getName();
-
-        void setName(String name);
-    }
-
-    public interface InterfaceWithDefaultGetter {
-        default String getName() {
-            return "John Doe";
-        }
-    }
-
-    public interface InterfaceWithDefaultGetterAndAbstractSetter {
-        default String getName() {
-            return "John Doe";
-        }
-
-        void setName(String name);
-    }
-
-    public interface InterfaceWithAbstractProperty {
-        String getName();
-    }
-
-    public interface InterfaceWithAbstractPropertyAndDefaultGetter {
-        default String getName() {
-            return "John Doe";
-        }
-    }
-
-    public abstract static class AbstractClassWithAbstractGetter {
-        public abstract String getName();
-    }
-
-    public abstract static class AbstractClassWithAbstractGetterAndAbstractSetter {
-        public abstract String getName();
-
-        public abstract void setName(String name);
-    }
-
-    public abstract static class AbstractClassWithConcreteGetterAndAbstractSetter {
-        public String getName() {
-            return "John";
-        }
-
-        public abstract void setName(String name);
-    }
-
-    public abstract static class AbstractClassWithAbstractGetterAndConcreteSetter {
-        public abstract String getName();
-
-        public void setName(String name) {
-            throw new UnsupportedOperationException("Not yet implemented");
-        }
-    }
-
-    public abstract static class AbstractClassWithConcreteGetter {
-        public String getName() {
-            return "John Doe";
-        }
-    }
-
-    public abstract static class AbstractClassWithConcreteSetter {
-        public void setName(String name) {
-            throw new UnsupportedOperationException("Not yet implemented");
-        }
-    }
-
-    public abstract static class AbstractClassWithConcreteImmutableProperty {
-        private final String name = "John Doe";
-
-        public String getName() {
-            return name;
-        }
-    }
-
+class BasePropertyConditionContractTest {
     private final DtoBuddy dtoBuddy = new DtoBuddy();
-    
-    private void assertSucceed(Class<?> baseClass) {
+
+    private void assertSucceed (Class < ? > baseClass){
         try {
             Class<?> concreteClass = dtoBuddy.implement(baseClass);
-            Object dto = dtoBuddy.create(concreteClass, Map.of("name", "Test"));
-            var getName = concreteClass.getMethod("getName");
-            assertEquals("Test", getName.invoke(dto));
-            var setName = concreteClass.getMethod("setName", String.class);
-            setName.invoke(dto, "Test2");
-            assertEquals("Test2", getName.invoke(dto));
+            TestGetSetCapability.testGetSet(dtoBuddy, concreteClass);
         } catch (Throwable e) {
             throw new RuntimeException("Failed to test " + baseClass.getSimpleName(), e);
         }
     }
 
     @Test
-    public void shouldSucceedWithInterfaceHavingGetterAndOptionallySetter() {
-        Arrays.asList(
+    public void shouldSucceedWithInterfaceHavingAbstractGetterAndOptionallySetter () {
+        List<Class<?>> classes = Arrays.asList(
             InterfaceWithAbstractGetter.class,
             InterfaceWithAbstractGetterAndAbstractSetter.class,
-            InterfaceWithDefaultGetter.class,
-            InterfaceWithDefaultGetterAndAbstractSetter.class,
-            InterfaceWithAbstractProperty.class,
-            InterfaceWithAbstractPropertyAndDefaultGetter.class
-        ).forEach(this::assertSucceed);
+            InterfaceWithAbstractProperty.class
+        );
+
+        for (Class<?> baseClass : classes) {
+            assertSucceed(baseClass);
+        }
     }
 
     @Test
-    public void shouldSucceedWithAbstractClassHavingAbstractGetterAndOptionallyAbstractSetter() {
-        Arrays.asList(
+    public void shouldSucceedWithAbstractClassHavingAbstractGetterAndOptionallyAbstractSetter () {
+        List<Class<?>> classes = Arrays.asList(
             AbstractClassWithAbstractGetter.class,
             AbstractClassWithAbstractGetterAndAbstractSetter.class
-        ).forEach(this::assertSucceed);
+        );
+
+        for (Class<?> baseClass : classes) {
+            assertSucceed(baseClass);
+        }
     }
 
     @Test
-    public void shouldSucceedWithoutPropertyImplementationWhenBaseClassIsAbstractClassHavingEitherConcreteGetterOrConcreteSetter() {
+    public void shouldSucceedWithoutPropertyImplementationWhenBaseClassIsInterfaceOrAbstractClassHavingEitherConcreteGetterOrConcreteSetter
+    () {
+        {
+            Class<?> concreteClass = dtoBuddy.implement(InterfaceWithDefaultGetter.class);
+            Assertions.assertFalse(Arrays.stream(concreteClass.getDeclaredFields()).anyMatch(f -> f.getName().equals("name")));
+            Assertions.assertTrue(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("getName")));
+            Assertions.assertFalse(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("setName")));
+        }
+
         {
             Class<?> concreteClass = dtoBuddy.implement(AbstractClassWithConcreteGetter.class);
-            assertTrue(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("getName")));
-            assertFalse(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("setName")));
+            Assertions.assertFalse(Arrays.stream(concreteClass.getDeclaredFields()).anyMatch(f -> f.getName().equals("name")));
+            Assertions.assertTrue(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("getName")));
+            Assertions.assertFalse(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("setName")));
         }
 
         {
             Class<?> concreteClass = dtoBuddy.implement(AbstractClassWithConcreteSetter.class);
-            assertFalse(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("getName")));
-            assertTrue(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("setName")));
+            Assertions.assertFalse(Arrays.stream(concreteClass.getDeclaredFields()).anyMatch(f -> f.getName().equals("name")));
+            Assertions.assertFalse(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("getName")));
+            Assertions.assertTrue(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("setName")));
         }
 
-        {
-            Class<?> concreteClass = dtoBuddy.implement(AbstractClassWithConcreteImmutableProperty.class);
-            assertTrue(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("getName")));
-            assertFalse(Arrays.stream(concreteClass.getMethods()).anyMatch(m -> m.getName().equals("setName")));
-        }
     }
 
     @Test
-    public void shouldFailWithAbstractClassHavingAPairOfDifferentConcretenessOfGetterAndSetter() {
-        Arrays.asList(
+    public void shouldFailWithAbstractClassHavingAPairOfDifferentConcretenessOfGetterAndSetter () {
+        List<Class<?>> classes = Arrays.asList(
+            InterfaceWithDefaultGetterAndAbstractSetter.class,
+            InterfaceWithAbstractGetterAndDefaultSetter.class,
             AbstractClassWithConcreteGetterAndAbstractSetter.class,
             AbstractClassWithAbstractGetterAndConcreteSetter.class
-        ).forEach(baseClass -> {
+        );
+
+        for (Class<?> baseClass : classes) {
             try {
-                assertThrows(DtoBuddyBadInputException.class, () ->
-                    dtoBuddy.implement(baseClass)
-                );
+                Assertions.assertThrows(DtoBuddyBadInputException.class, () -> {
+                    dtoBuddy.implement(baseClass);
+                });
             } catch (Throwable e) {
                 throw new RuntimeException("Failed to test " + baseClass.getSimpleName(), e);
             }
-        });
+        }
     }
+
 }

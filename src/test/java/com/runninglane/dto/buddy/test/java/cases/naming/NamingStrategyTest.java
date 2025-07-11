@@ -1,6 +1,6 @@
 package com.runninglane.dto.buddy.test.java.cases.naming;
 
-import com.runninglane.dto.buddy.DtoBuddy;
+import com.runninglane.dto.buddy.javainterop.DtoBuddy;
 import com.runninglane.dto.buddy.naming.NamingStrategy;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;

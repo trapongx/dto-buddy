@@ -9,7 +9,6 @@ import com.runninglane.dto.buddy.exception.DtoBuddySystemException
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import kotlin.reflect.*
-import kotlin.reflect.full.createType
 import kotlin.reflect.full.valueParameters
 
 /**
@@ -184,12 +183,12 @@ open class CompileKotlinByteCodeStrategyCompliment : ThreeStepsByteCodeStrategyC
      */
     override fun handleNonPropertyAbstractFunctions(
         builder: TypeSpec.Builder,
-        functions: List<KFunction<*>>
+        functions: List<KFunction<*>>,
+        typeParamsMapByName: Map<String, KClass<*>>?
     ): TypeSpec.Builder {
         var resultBuilder = builder
 
         for (function in functions) {
-            val returnType = function.returnType
             val parameterTypes = function.parameters.map { it.type }.toTypedArray()
             val parameterNames = parameterTypes.indices.map { "param$it" }
 
@@ -198,16 +197,10 @@ open class CompileKotlinByteCodeStrategyCompliment : ThreeStepsByteCodeStrategyC
 
             // Add parameters
             for (i in parameterTypes.indices) {
-                funSpecBuilder.addParameter(parameterNames[i], parameterTypes[i].asTypeName())
+                funSpecBuilder.addParameter(parameterNames[i], resolveTypeName(parameterTypes[i], typeParamsMapByName))
             }
 
-            // Set return type and body
-            if (returnType != Unit::class.createType()) {
-                funSpecBuilder.returns(returnType.asTypeName())
-                // Generate a default return value based on type
-                val defaultReturnValue = getDefaultValueForType(returnType.asTypeName())
-                funSpecBuilder.addStatement("return $defaultReturnValue")
-            }
+            funSpecBuilder.addStatement("throw UnsupportedOperationException(\"Not implemented yet\")")
 
             resultBuilder = resultBuilder.addFunction(funSpecBuilder.build())
         }

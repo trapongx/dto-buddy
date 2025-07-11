@@ -15,24 +15,28 @@ import kotlin.reflect.KClass
  * It can dynamically create concrete implementations of interfaces or abstract classes,
  * instantiate those implementations, and populate their properties.
  */
-class DtoBuddy() {
-    constructor(namingStrategy: NamingStrategy) : this() {
-        this.namingStrategy = namingStrategy
-    }
-
-    constructor(byteCodeStrategy: ByteCodeStrategy) : this() {
-        this.byteCodeStrategy = byteCodeStrategy
-    }
-
-    constructor(instanceStrategy: InstanceStrategy) : this() {
-        this.instanceStrategy = instanceStrategy
-    }
-
-    var namingStrategy: NamingStrategy = DefaultNamingStrategy()
-
-    var byteCodeStrategy: ByteCodeStrategy = DefaultByteCodeStrategy()
-
+class DtoBuddy(
+    var namingStrategy: NamingStrategy = DefaultNamingStrategy(),
+    var byteCodeStrategy: ByteCodeStrategy = DefaultByteCodeStrategy(),
     var instanceStrategy: InstanceStrategy = DefaultInstanceStrategy()
+) {
+    constructor(namingStrategy: NamingStrategy) : this(
+        namingStrategy,
+        DefaultByteCodeStrategy(),
+        DefaultInstanceStrategy()
+    )
+
+    constructor(byteCodeStrategy: ByteCodeStrategy) : this(
+        DefaultNamingStrategy(),
+        byteCodeStrategy,
+        DefaultInstanceStrategy()
+    )
+
+    constructor(instanceStrategy: InstanceStrategy) : this(
+        DefaultNamingStrategy(),
+        DefaultByteCodeStrategy(),
+        instanceStrategy
+    )
 
     // Cache for generated classes to avoid regenerating the same class
     private val classCache = mutableMapOf<String, Pair<KClass<*>, KClass<*>>>()
@@ -177,13 +181,6 @@ class DtoBuddy() {
         }
     }
 
-    fun implement(
-        baseClass: Class<*>,
-        typeParams: List<Class<*>>?
-    ) = implement(baseClass.kotlin, typeParams?.map { it.kotlin }).java
-
-    fun implement(baseClass: Class<*>) = implement(baseClass, null)
-
     /**
      * Creates a new instance of a DTO class and populates it with the provided parameters
      *
@@ -209,18 +206,6 @@ class DtoBuddy() {
             }
         }
     }
-
-    /**
-     * Creates a new instance of a DTO class with empty parameters.
-     * This is a convenience function that delegates to {@link #create(Class, Map)}
-     * with an empty parameter map.
-     *
-     * @param concrete The class to instantiate
-     * @return A new instance of the DTO class
-     */
-    fun <DTO> create(concrete: Class<*>, params: Map<String, Any?>?): DTO = create(concrete.kotlin, params)
-
-    fun <DTO> create(concrete: Class<*>): DTO = create(concrete, null)
 
     /**
      * Populates an existing DTO instance with values from the provided parameter map

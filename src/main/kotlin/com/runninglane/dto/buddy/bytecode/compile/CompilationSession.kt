@@ -23,7 +23,8 @@ class CompilationSession(
     // Keep a global shared directory for all compilations in this session
     private val sessionDir by lazy {
         val dir = Files.createTempDirectory("compilation-session").toFile()
-        dir.deleteOnExit() // Clean up on JVM shutdown
+        println("dir = $dir")
+        //dir.deleteOnExit() // Clean up on JVM shutdown
         dir
     }
 

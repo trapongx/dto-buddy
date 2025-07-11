@@ -57,7 +57,7 @@ open class ThreeStepsByteCodeStrategy<B>(private val compliment: ThreeStepsByteC
 
             val builderWithNonPropertyAbstractFunctionsHandled = when {
                 nonPropertyAbstractFunctions.isNotEmpty() ->
-                    compliment.handleNonPropertyAbstractFunctions(implementedBuilder, nonPropertyAbstractFunctions)
+                    compliment.handleNonPropertyAbstractFunctions(implementedBuilder, nonPropertyAbstractFunctions, typeParamsMapByName)
 
                 else -> implementedBuilder
             }
@@ -69,7 +69,7 @@ open class ThreeStepsByteCodeStrategy<B>(private val compliment: ThreeStepsByteC
         } catch (e: Exception) {
             when (e) {
                 is DtoBuddyBadInputException, is DtoBuddySystemException -> throw e
-                else -> throw DtoBuddySystemException("Failed to implement DTO: ${e.message}")
+                else -> throw DtoBuddySystemException("Failed to implement DTO: ${e.message}", e)
             }
         }
     }
