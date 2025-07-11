@@ -1,6 +1,7 @@
 package com.runninglane.dto.buddy.instance
 
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
+import com.runninglane.dto.buddy.exception.DtoBuddySystemException
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KMutableProperty1
@@ -70,10 +71,15 @@ open class DefaultInstanceStrategy : InstanceStrategy {
 
         for ((propertyName, value) in params) {
             try {
-                val setter = setters[propertyName] ?: error("No setter found")
+                val setter = setters[propertyName] ?: throw DtoBuddyBadInputException("No setter found")
                 setter.call(dto, value)
             } catch (e: Exception) {
-                throw DtoBuddyBadInputException("Failed to set property `$propertyName` on object of type ${dto::class.qualifiedName}: ${e.message}")
+                if (e is DtoBuddyBadInputException) throw e
+
+                throw DtoBuddySystemException(
+                    "Failed to set property `$propertyName` on object of type ${dto::class.qualifiedName}",
+                    e
+                )
             }
         }
     }

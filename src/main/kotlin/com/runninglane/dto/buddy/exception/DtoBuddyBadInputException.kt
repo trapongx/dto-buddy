@@ -1,3 +1,3 @@
 package com.runninglane.dto.buddy.exception
 
-class DtoBuddyBadInputException(message: String) : DtoBuddyException(message)
+class DtoBuddyBadInputException(message: String, cause: Throwable? = null) : DtoBuddyException(message, cause)
