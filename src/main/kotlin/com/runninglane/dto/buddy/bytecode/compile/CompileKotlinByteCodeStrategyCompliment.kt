@@ -78,19 +78,20 @@ open class CompileKotlinByteCodeStrategyCompliment : ThreeStepsByteCodeStrategyC
             // Check if this property type references a generic type parameter that needs to be resolved
             val typeName = resolveTypeName(property.type, typeParamsMapByName)
 
+            // Initialize the property with default value to satisfy Kotlin compiler
+            val defaultValue = getDefaultValueForType(typeName)
+            
             if (property.kProperty != null) {
                 // For Kotlin properties, use the standard property implementation
                 val propertySpec = PropertySpec.builder(property.name, typeName)
                     .mutable(true)
                     .addModifiers(KModifier.OVERRIDE)
-
-                // Initialize the property with default value to satisfy Kotlin compiler
-                val defaultValue = when {
-                    // For nullable types, always use null as the default value
-                    property.isNullable -> "null"
-                    else -> getDefaultValueForType(typeName)
-                }
-                propertySpec.initializer(defaultValue)
+                    .let {
+                        if (defaultValue == null && !property.isNullable)
+                            it.addModifiers(KModifier.LATEINIT)
+                        else
+                            it.initializer(defaultValue ?: "null")
+                    }
 
                 // Add the property to the class
                 classBuilder = classBuilder.addProperty(propertySpec.build())
@@ -101,7 +102,12 @@ open class CompileKotlinByteCodeStrategyCompliment : ThreeStepsByteCodeStrategyC
                 val fieldSpec = PropertySpec.builder(fieldName, typeName)
                     .mutable(true)
                     .addModifiers(KModifier.PRIVATE)
-                    .initializer(if (property.isNullable) "null" else getDefaultValueForType(typeName))
+                    .let {
+                        if (defaultValue == null && !property.isNullable)
+                            it.addModifiers(KModifier.LATEINIT)
+                        else
+                            it.initializer(defaultValue ?: "null")
+                    }
                     .build()
                 classBuilder = classBuilder.addProperty(fieldSpec)
 
@@ -213,7 +219,7 @@ open class CompileKotlinByteCodeStrategyCompliment : ThreeStepsByteCodeStrategyC
     /**
     * Provides default values for common return types
      */
-    private fun getDefaultValueForType(typeName: TypeName): String {
+    private fun getDefaultValueForType(typeName: TypeName): String? {
         return when {
             // For non-nullable primitive types, use appropriate default values
             typeName.toString() == "kotlin.String" -> "\"\""
@@ -235,7 +241,7 @@ open class CompileKotlinByteCodeStrategyCompliment : ThreeStepsByteCodeStrategyC
             typeName.toString().startsWith("kotlin.collections.MutableMap") -> "mutableMapOf()"
 
             // For other non-nullable reference types, use null with casting
-            else -> "null"
+            else -> null
         }
     }
 

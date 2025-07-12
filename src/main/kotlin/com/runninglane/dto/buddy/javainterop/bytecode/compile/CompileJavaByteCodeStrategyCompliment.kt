@@ -94,6 +94,13 @@ open class CompileJavaByteCodeStrategyCompliment() : ThreeStepsByteCodeStrategyC
                     .addAnnotation(Override::class.java)
                     .addModifiers(Modifier.PUBLIC)
                     .returns(typeName)
+                    .also {
+                        if (property.isNullable) {
+                            it.addAnnotation(ClassName.get("org.jetbrains.annotations", "Nullable"))
+                        } else {
+                            it.addAnnotation(ClassName.get("org.jetbrains.annotations", "NotNull"))
+                        }
+                    }
                     .addStatement("return $fieldName")
                     .build()
                 classBuilder = classBuilder.addMethod(getterMethod)
@@ -108,7 +115,17 @@ open class CompileJavaByteCodeStrategyCompliment() : ThreeStepsByteCodeStrategyC
                         ?: it
                 }
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(typeName, escapedParamName)
+                .addParameter(
+                    ParameterSpec.builder(typeName, escapedParamName)
+                        .addAnnotation(
+                            if (property.isNullable) {
+                                ClassName.get("org.jetbrains.annotations", "Nullable")
+                            } else {
+                                ClassName.get("org.jetbrains.annotations", "NotNull")
+                            }
+                        )
+                        .build()
+                )
                 .addStatement("this.$fieldName = $escapedParamName")
                 .build()
             classBuilder = classBuilder.addMethod(setterMethod)
