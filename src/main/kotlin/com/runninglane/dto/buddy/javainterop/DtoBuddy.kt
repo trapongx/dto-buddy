@@ -18,14 +18,17 @@ class DtoBuddy {
 
     private val delegate: KDtoBuddy
 
+    @Suppress("unused")
     var namingStrategy: NamingStrategy
         get() = delegate.namingStrategy
         set(value) { delegate.namingStrategy = value }
 
+    @Suppress("unused")
     var byteCodeStrategy: ByteCodeStrategy
         get() = delegate.byteCodeStrategy
         set(value) { delegate.byteCodeStrategy = value }
 
+    @Suppress("unused")
     var instanceStrategy: InstanceStrategy
         get() = delegate.instanceStrategy
         set(value) { delegate.instanceStrategy = value }
