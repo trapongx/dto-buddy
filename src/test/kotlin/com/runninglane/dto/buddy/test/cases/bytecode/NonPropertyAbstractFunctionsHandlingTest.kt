@@ -8,6 +8,7 @@ import com.squareup.kotlinpoet.TypeSpec
 import org.junit.jupiter.api.Assertions.assertFalse
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
+import kotlin.reflect.KProperty
 import kotlin.reflect.full.functions
 import kotlin.test.Test
 
@@ -18,8 +19,9 @@ class NonPropertyAbstractFunctionsHandlingTest {
     }
 
     class TestByteCodeStrategyCompliment : CompileKotlinByteCodeStrategyCompliment() {
-        override fun handleNonPropertyAbstractFunctions(
+        override fun handleOtherAbstractMembers(
             builder: TypeSpec.Builder,
+            properties: List<KProperty<*>>,
             functions: List<KFunction<*>>,
             typeParamsMapByName: Map<String, KClass<*>>?
         ): TypeSpec.Builder {
@@ -32,7 +34,7 @@ class NonPropertyAbstractFunctionsHandlingTest {
                     .build()
             )
             val unhandledFunctions = functions.filter { it.name != "shout" }
-            return super.handleNonPropertyAbstractFunctions(updatedBuilder, unhandledFunctions, typeParamsMapByName)
+            return super.handleOtherAbstractMembers(updatedBuilder, properties, unhandledFunctions, typeParamsMapByName)
         }
     }
 

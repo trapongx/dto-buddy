@@ -4,6 +4,7 @@ import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
 import com.runninglane.dto.buddy.exception.DtoBuddySystemException
 import kotlin.reflect.KClass
 import kotlin.reflect.full.functions
+import kotlin.reflect.full.memberProperties
 
 /**
  * Implements the three-step bytecode generation strategy:
@@ -51,13 +52,22 @@ open class ThreeStepsByteCodeStrategy<B>(private val compliment: ThreeStepsByteC
             // Implement properties
             val implementedBuilder = compliment.implementProperties(builder, properties, typeParamsMapByName)
 
+            val nonPublicAbstractProperties = baseClass.memberProperties.toList()
+                .minus(properties.mapNotNull { it.kProperty })
+                .filter { it.isAbstract }
+
             val nonPropertyAbstractFunctions = baseClass.functions.toList()
                 .minus(properties.flatMap { listOfNotNull(it.getter, it.setter) })
                 .filter { it.isAbstract }
 
             val builderWithNonPropertyAbstractFunctionsHandled = when {
-                nonPropertyAbstractFunctions.isNotEmpty() ->
-                    compliment.handleNonPropertyAbstractFunctions(implementedBuilder, nonPropertyAbstractFunctions, typeParamsMapByName)
+                nonPublicAbstractProperties.isNotEmpty() || nonPropertyAbstractFunctions.isNotEmpty() ->
+                    compliment.handleOtherAbstractMembers(
+                        implementedBuilder,
+                        nonPublicAbstractProperties,
+                        nonPropertyAbstractFunctions,
+                        typeParamsMapByName
+                    )
 
                 else -> implementedBuilder
             }

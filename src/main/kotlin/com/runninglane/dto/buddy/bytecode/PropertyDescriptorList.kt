@@ -2,6 +2,7 @@ package com.runninglane.dto.buddy.bytecode
 
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
+import kotlin.reflect.KVisibility
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.functions
 import kotlin.reflect.full.memberProperties
@@ -16,7 +17,7 @@ internal object PropertyDescriptorList {
         val settersByProperty = mutableMapOf<String, MutableList<KFunction<*>>>()
 
         // Organize functions by property name and function type
-        for (function in baseClass.functions) {
+        for (function in baseClass.functions.filter { it.visibility == KVisibility.PUBLIC }) {
             val functionName = function.name
 
             when {
@@ -56,7 +57,7 @@ internal object PropertyDescriptorList {
             }
         }
 
-        baseClass.memberProperties.forEach { kProperty ->
+        baseClass.memberProperties.filter { it.visibility == KVisibility.PUBLIC }.forEach { kProperty ->
             val propertyName = kProperty.name
             val builder = builders.getOrPut(propertyName) {
                 PropertyDescriptor.Builder(baseClass, propertyName)

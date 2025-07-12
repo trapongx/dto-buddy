@@ -181,31 +181,21 @@ open class CompileKotlinByteCodeStrategyCompliment : ThreeStepsByteCodeStrategyC
      * Handles non-property abstract functions by generating default implementations
      * For functions returning non-void types, returns a default value based on return type
      */
-    override fun handleNonPropertyAbstractFunctions(
+    override fun handleOtherAbstractMembers(
         builder: TypeSpec.Builder,
+        properties: List<KProperty<*>>,
         functions: List<KFunction<*>>,
         typeParamsMapByName: Map<String, KClass<*>>?
     ): TypeSpec.Builder {
-        var resultBuilder = builder
-
-        for (function in functions) {
-            val parameterTypes = function.parameters.map { it.type }.toTypedArray()
-            val parameterNames = parameterTypes.indices.map { "param$it" }
-
-            val funSpecBuilder = FunSpec.builder(function.name)
-                .addModifiers(KModifier.OVERRIDE)
-
-            // Add parameters
-            for (i in parameterTypes.indices) {
-                funSpecBuilder.addParameter(parameterNames[i], resolveTypeName(parameterTypes[i], typeParamsMapByName))
-            }
-
-            funSpecBuilder.addStatement("throw UnsupportedOperationException(\"Not implemented yet\")")
-
-            resultBuilder = resultBuilder.addFunction(funSpecBuilder.build())
+        if (properties.size + functions.size > 0) {
+            throw DtoBuddyBadInputException(
+                "The following properties and functions are not implemented: ${
+                    functions.map { it.name } + properties.map { it.name }
+                }"
+            )
         }
 
-        return resultBuilder
+        return builder
     }
 
     /**

@@ -164,39 +164,18 @@ open class CompileJavaByteCodeStrategyCompliment() : ThreeStepsByteCodeStrategyC
      * Handles non-property abstract functions by generating default implementations
      * For functions returning non-void types, returns a default value based on return type
      */
-    override fun handleNonPropertyAbstractMethods(
+    override fun handleOtherAbstractMethods(
         builder: TypeSpec.Builder,
         methods: List<Method>,
         typeParamsMapByName: Map<String, Class<*>>?
     ): TypeSpec.Builder {
-        var resultBuilder = builder
-
-        for (method in methods) {
-            val returnType = method.returnType
-            val parameters = method.parameters?.toList()?.subList(1, method.parameterCount) ?: emptyList()
-            val parameterTypes = parameters.map { it.type }.toTypedArray()
-            val parameterNames = parameters.mapIndexed { index, param -> param.name ?: "param$index" }
-
-            val methodBuilder = MethodSpec.methodBuilder(method.name)
-                .addAnnotation(Override::class.java)
-                .addModifiers(Modifier.PUBLIC)
-
-            // Add parameters
-            for (i in parameters.indices) {
-                val resolvedType = resolveTypeName(parameterTypes[i], null)
-                methodBuilder.addParameter(resolvedType, parameterNames[i])
-            }
-
-            // Set return type and body
-            val javaReturnType = resolveTypeName(returnType, typeParamsMapByName)
-            methodBuilder.returns(javaReturnType)
-
-            methodBuilder.addStatement("throw new ${'$'}T()", UnsupportedOperationException::class.java)
-
-            resultBuilder = resultBuilder.addMethod(methodBuilder.build())
+        if (methods.isNotEmpty()) {
+            throw DtoBuddyBadInputException(
+                "The following methods are not implemented: ${methods.map { it.name }}"
+            )
         }
 
-        return resultBuilder
+        return builder
     }
 
     /**

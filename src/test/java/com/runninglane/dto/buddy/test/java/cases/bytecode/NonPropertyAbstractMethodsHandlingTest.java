@@ -6,8 +6,6 @@ import com.runninglane.dto.buddy.javainterop.bytecode.ThreeStepsByteCodeStrategy
 import com.runninglane.dto.buddy.javainterop.bytecode.compile.CompileJavaByteCodeStrategyCompliment;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
-import kotlin.reflect.KClass;
-import kotlin.reflect.KFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -36,7 +34,7 @@ public class NonPropertyAbstractMethodsHandlingTest {
 
     static class TestByteCodeStrategyCompliment extends CompileJavaByteCodeStrategyCompliment {
         @Override
-        public @NotNull TypeSpec.Builder handleNonPropertyAbstractMethods(
+        public @NotNull TypeSpec.Builder handleOtherAbstractMethods(
             @NotNull TypeSpec.Builder builder,
             @NotNull List<Method> methods,
             @Nullable Map<String, ? extends Class<?>> typeParamsMapByName
@@ -55,7 +53,7 @@ public class NonPropertyAbstractMethodsHandlingTest {
                 .filter(method -> !method.getName().equals("shout"))
                 .collect(Collectors.toList());
 
-            return super.handleNonPropertyAbstractMethods(updatedBuilder, unhandledMethods, typeParamsMapByName);
+            return super.handleOtherAbstractMethods(updatedBuilder, unhandledMethods, typeParamsMapByName);
         }
     }
 

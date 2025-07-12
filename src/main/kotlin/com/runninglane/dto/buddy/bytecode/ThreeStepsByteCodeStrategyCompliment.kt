@@ -3,6 +3,8 @@ package com.runninglane.dto.buddy.bytecode
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
+import kotlin.reflect.KProperty
+import kotlin.reflect.KProperty1
 
 interface ThreeStepsByteCodeStrategyCompliment<B> {
     /**
@@ -37,8 +39,9 @@ interface ThreeStepsByteCodeStrategyCompliment<B> {
         typeParamsMapByName: Map<String, KClass<*>>? = null
     ): B
 
-    fun handleNonPropertyAbstractFunctions(
+    fun handleOtherAbstractMembers(
         builder: B,
+        properties: List<KProperty<*>>,
         functions: List<KFunction<*>>,
         typeParamsMapByName: Map<String, KClass<*>>?
     ): B {

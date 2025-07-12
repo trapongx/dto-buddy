@@ -3,6 +3,7 @@ package com.runninglane.dto.buddy.javainterop.bytecode
 import java.lang.reflect.Method
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
+import kotlin.reflect.KProperty
 import kotlin.reflect.jvm.javaMethod
 import kotlin.reflect.jvm.kotlinFunction
 
@@ -73,25 +74,27 @@ interface ThreeStepsByteCodeStrategyCompliment<B> : KThreeStepsByteCodeStrategyC
         typeParamsMapByName?.mapValues { it.value.java }
     )
 
-    fun handleNonPropertyAbstractMethods(
+    fun handleOtherAbstractMethods(
         builder: B,
         methods: List<Method>,
         typeParamsMapByName: Map<String, Class<*>>? = null
     ): B {
-        return super.handleNonPropertyAbstractFunctions(
+        return super.handleOtherAbstractMembers(
             builder,
+            emptyList(),
             methods.map { it.kotlinFunction!! },
             typeParamsMapByName?.mapValues { it.value.kotlin }
         )
     }
 
     @JvmSynthetic
-    override fun handleNonPropertyAbstractFunctions(
+    override fun handleOtherAbstractMembers(
         builder: B,
+        properties: List<KProperty<*>>,
         functions: List<KFunction<*>>,
         typeParamsMapByName: Map<String, KClass<*>>?
     ): B {
-        return handleNonPropertyAbstractMethods(builder, functions.map { it.javaMethod!! })
+        return handleOtherAbstractMethods(builder, functions.map { it.javaMethod!! })
     }
 
     /**

@@ -5,7 +5,9 @@ import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
 import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
 import org.jetbrains.kotlin.config.Services
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.PrintStream
 import java.io.StringWriter
 import java.net.URI
 import java.net.URLClassLoader
@@ -232,8 +234,9 @@ class CompilationSession(
                 jvmTarget = System.getProperty("java.version").substringBefore(".")
             }
 
+            val errorStream = ByteArrayOutputStream()
             val messageCollector = PrintingMessageCollector(
-                System.err,
+                PrintStream(errorStream),
                 MessageRenderer.PLAIN_FULL_PATHS,
                 false
             )
@@ -242,6 +245,7 @@ class CompilationSession(
             if (exitCode.code != 0) {
                 throw RuntimeException(
                     "Kotlin compilation failed with exit code $exitCode.\n" +
+                    "Compiler output:\n${String(errorStream.toByteArray())}\n" +
                     "Source:\n${src.lines().take(20).joinToString("\n")}"
                 )
             }
