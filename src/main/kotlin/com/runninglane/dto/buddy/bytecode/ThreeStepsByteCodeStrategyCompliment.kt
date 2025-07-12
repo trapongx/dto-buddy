@@ -4,7 +4,6 @@ import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty
-import kotlin.reflect.KProperty1
 
 interface ThreeStepsByteCodeStrategyCompliment<B> {
     /**

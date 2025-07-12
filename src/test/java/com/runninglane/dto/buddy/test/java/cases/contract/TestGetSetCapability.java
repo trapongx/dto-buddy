@@ -7,7 +7,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 interface TestGetSetCapability {
     static void testGetSet(DtoBuddy dtoBuddy, Class<?> concreteClass) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {

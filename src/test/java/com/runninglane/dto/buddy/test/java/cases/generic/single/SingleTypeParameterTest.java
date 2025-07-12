@@ -7,7 +7,9 @@ import com.runninglane.dto.buddy.test.java.cases.generic.GenericTypeTestHelper;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 

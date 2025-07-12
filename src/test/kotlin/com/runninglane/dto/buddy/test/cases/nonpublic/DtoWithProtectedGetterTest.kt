@@ -4,7 +4,6 @@ import com.runninglane.dto.buddy.DtoBuddy
 import com.runninglane.dto.buddy.bytecode.ThreeStepsByteCodeStrategy
 import com.runninglane.dto.buddy.bytecode.compile.CompileKotlinByteCodeStrategyCompliment
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
-import com.runninglane.dto.buddy.exception.DtoBuddySystemException
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec

@@ -1,7 +1,7 @@
 package com.runninglane.dto.buddy.test.java.cases.instance;
 
-import com.runninglane.dto.buddy.javainterop.DtoBuddy;
 import com.runninglane.dto.buddy.instance.DefaultInstanceStrategy;
+import com.runninglane.dto.buddy.javainterop.DtoBuddy;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +39,6 @@ public class InstanceStrategyTest {
 
         @Override
         public void populate(@NotNull Object dto, Map<String, ?> params) {
-            //noinspection DataFlowIssue
             Map<String, ?> upperParams = params.entrySet().stream()
                 .collect(Collectors.toMap(
                     Map.Entry::getKey,

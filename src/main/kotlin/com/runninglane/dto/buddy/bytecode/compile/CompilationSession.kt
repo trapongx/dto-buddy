@@ -12,11 +12,7 @@ import java.io.StringWriter
 import java.net.URI
 import java.net.URLClassLoader
 import java.nio.file.Files
-import javax.tools.DiagnosticCollector
-import javax.tools.JavaCompiler
-import javax.tools.JavaFileObject
-import javax.tools.SimpleJavaFileObject
-import javax.tools.ToolProvider
+import javax.tools.*
 import kotlin.reflect.KClass
 
 class CompilationSession(

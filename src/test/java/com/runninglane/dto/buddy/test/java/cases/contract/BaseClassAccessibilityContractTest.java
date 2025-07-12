@@ -1,7 +1,7 @@
 package com.runninglane.dto.buddy.test.java.cases.contract;
 
-import com.runninglane.dto.buddy.javainterop.DtoBuddy;
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException;
+import com.runninglane.dto.buddy.javainterop.DtoBuddy;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
