@@ -5,6 +5,7 @@ import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 open class BaseClassAccessibilityContractTest {
 
@@ -52,10 +53,11 @@ open class BaseClassAccessibilityContractTest {
     }
 
     @Test
-    fun shouldFailWhenClassIsFinalAndIsNotCompleteAndMutable() {
-        assertThrows<DtoBuddyBadInputException> {
+    fun shouldReturnBaseClassWhenClassIsFinalAndIsNotCompleteAndMutable() {
+        assertEquals(
+            FinalClassWithImmutableProperties::class,
             dtoBuddy.implement(FinalClassWithImmutableProperties::class)
-        }
+        )
     }
 
     @Test

@@ -25,17 +25,15 @@ open class ThreeStepsByteCodeStrategy<B>(private val compliment: ThreeStepsByteC
         packageName: String,
         className: String
     ): KClass<*> {
+        val isConcreteClass = !baseClass.java.isInterface && !baseClass.isAbstract
+        if (isConcreteClass) {
+            return baseClass
+        }
+
         // Though cacheKey is not in classCache, it does not mean that the base class has never been analyzed before.
         // It's possible that the same baseClass passed in with different other parameters.
         val properties = propertiesCache.getOrPut(baseClass) {
             PropertyDescriptorList.from(baseClass)
-        }
-
-        val isConcreteClass = !baseClass.java.isInterface && !baseClass.isAbstract
-        val isCompleteAndMutable = properties.all { it.isAlreadyCompleteAndMutable() }
-        if (isConcreteClass && isCompleteAndMutable) {
-            // All properties are already mutable, and it's not an interface, return the original class
-            return baseClass
         }
 
         // Create the data collector object to keep track of the implementation process for customization

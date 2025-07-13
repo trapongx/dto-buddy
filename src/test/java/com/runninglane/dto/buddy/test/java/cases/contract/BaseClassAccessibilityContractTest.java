@@ -4,8 +4,7 @@ import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException;
 import com.runninglane.dto.buddy.javainterop.DtoBuddy;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BaseClassAccessibilityContractTest {
 
@@ -64,8 +63,9 @@ public class BaseClassAccessibilityContractTest {
     }
 
     @Test
-    public void shouldFailWhenClassIsFinalAndIsNotCompleteAndMutable() {
-        assertThrows(DtoBuddyBadInputException.class, () ->
+    public void shouldReturnBaseClassWhenClassIsFinalAndIsNotCompleteAndMutable() {
+        assertEquals(
+            FinalClassWithImmutableProperties.class,
             dtoBuddy.implement(FinalClassWithImmutableProperties.class)
         );
     }
