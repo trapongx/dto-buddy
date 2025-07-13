@@ -10,6 +10,7 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import kotlin.reflect.*
 import kotlin.reflect.full.valueParameters
+import kotlin.reflect.jvm.jvmErasure
 
 /**
  * Implementation of ByteCodeStrategy that uses KotlinPoet to generate source code
@@ -255,7 +256,13 @@ open class CompileKotlinByteCodeStrategyCompliment : ThreeStepsByteCodeStrategyC
      * Also handles complex generic types like List<T> by recursively resolving type arguments
      */
     protected fun resolveTypeName(type: KType, typeParamsMapByName: Map<String, KClass<*>>?): TypeName {
+        // Debug information to help track type resolution
+        // println("Resolving type: $type, classifier: ${type.classifier}, jvmErasure: ${type.jvmErasure}")
         val classifier = type.classifier
+        // Get the full original type string to preserve exact type information
+        val fullTypeStr = type.toString()
+        // Extract just the class name part (before any generic parameters)
+        val exactTypeStr = fullTypeStr.substringBefore('<')
 
         return when {
             // Case 1: Direct type parameter (e.g., T)
@@ -269,9 +276,25 @@ open class CompileKotlinByteCodeStrategyCompliment : ThreeStepsByteCodeStrategyC
             }
 
             // Case 2: Generic class with type arguments (e.g., List<T>)
-            classifier is KClass<*> && type.arguments.isNotEmpty() && typeParamsMapByName != null -> {
-                // Get the raw type (e.g., List)
-                val rawTypeName = classifier.asClassName()
+            classifier is KClass<*> && type.arguments.isNotEmpty()-> {
+                // Use a more precise approach to get the exact type class name
+                // This preserves properties like mutability that might be lost in classifier
+                val rawTypeName = if (exactTypeStr != classifier.qualifiedName) {
+                    // The type string doesn't match the classifier's qualified name
+                    // This indicates we need to use the exact type from the string
+                    val packageName = exactTypeStr.substringBeforeLast('.', "").takeIf { it.isNotEmpty() } ?: ""  
+                    val simpleClassName = exactTypeStr.substringAfterLast('.')
+
+                    // Only create a custom ClassName if we have valid package and class names
+                    if (packageName.isNotEmpty() && simpleClassName.isNotEmpty()) {
+                        ClassName(packageName, simpleClassName)
+                    } else {
+                        classifier.asClassName()
+                    }
+                } else {
+                    // Type string matches classifier's qualified name, so just use the classifier directly
+                    classifier.asClassName()
+                }
 
                 // Process each type argument
                 val typeArguments = type.arguments.map { projection ->
