@@ -211,7 +211,7 @@ open class CompileKotlinByteCodeStrategyCompliment : ThreeStepsByteCodeStrategyC
     /**
      * Escapes Kotlin reserved words with back ticks
      */
-    private fun escapeReservedWord(name: String): String {
+    protected fun escapeReservedWord(name: String): String {
         val reservedWords = setOf(
             "as", "break", "class", "continue", "do", "else", "false", "for", "fun", "if",
             "in", "interface", "is", "null", "object", "package", "return", "super", "this",
@@ -223,7 +223,7 @@ open class CompileKotlinByteCodeStrategyCompliment : ThreeStepsByteCodeStrategyC
     /**
     * Provides default values for common return types
      */
-    private fun getDefaultValueForType(typeName: TypeName): String? {
+    protected fun getDefaultValueForType(typeName: TypeName): String? {
         return when {
             // For non-nullable primitive types, use appropriate default values
             typeName.toString() == "kotlin.String" -> "\"\""
@@ -254,7 +254,7 @@ open class CompileKotlinByteCodeStrategyCompliment : ThreeStepsByteCodeStrategyC
      * If the type is a type parameter, it will be resolved using the typeParamsMapByName
      * Also handles complex generic types like List<T> by recursively resolving type arguments
      */
-    private fun resolveTypeName(type: KType, typeParamsMapByName: Map<String, KClass<*>>?): TypeName {
+    protected fun resolveTypeName(type: KType, typeParamsMapByName: Map<String, KClass<*>>?): TypeName {
         val classifier = type.classifier
 
         return when {
@@ -294,7 +294,7 @@ open class CompileKotlinByteCodeStrategyCompliment : ThreeStepsByteCodeStrategyC
         }
     }
 
-    private fun TypeName.considerJavaNullability(type: KType): TypeName = when {
+    protected fun TypeName.considerJavaNullability(type: KType): TypeName = when {
         type.isMarkedNullable || type.toString().endsWith("!") -> copy(nullable = true)
         else -> this
     }
