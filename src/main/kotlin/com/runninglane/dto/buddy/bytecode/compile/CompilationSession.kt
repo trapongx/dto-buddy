@@ -44,40 +44,47 @@ class CompilationSession(
      * @param className Name of the class to load after compilation
      * @param packageName Package of the class
      * @param language Source language, either "kotlin" or "java"
-     * @return The loaded class
+     * @return The primary loaded class
      */
     fun compileAndLoad(src: String, className: String, packageName: String, language: String = "kotlin"): Class<*> {
-        return when (language.lowercase()) {
+        // First load all classes to ensure they're available in the classloader
+        val allClasses = when (language.lowercase()) {
             "kotlin" -> when (inMemory) {
-                true -> compileAndLoadKotlinInMemory(src, className, packageName)
-                false -> compileAndLoadKotlin(src, className, packageName)
+                true -> loadAllClasses(src, className, packageName, this::compileKotlinInMemory)
+                false -> loadAllClasses(src, className, packageName, this::compileKotlin)
             }
             "java" -> when (inMemory) {
-                true -> compileAndLoadJavaInMemory(src, className, packageName)
-                false -> compileAndLoadJava(src, className, packageName)
+                true -> loadAllClasses(src, className, packageName, this::compileJavaInMemory)
+                false -> loadAllClasses(src, className, packageName, this::compileJava)
             }
             else -> throw IllegalArgumentException("Unsupported language: $language. Only 'kotlin' and 'java' are supported.")
-        }.java
+        }
+
+        // Return the main class
+        val fullClassName = "$packageName.$className"
+        return allClasses.find { it.name == fullClassName } 
+            ?: throw RuntimeException("Main class $fullClassName not found among compiled classes")
     }
 
     /**
-     * Compiles and loads a Kotlin source string.
+     * Compiles Kotlin source code and sets up a classloader
      * 
      * @param src The Kotlin source code to compile
      * @param className Name of the class to load after compilation
      * @param packageName Package of the class
-     * @return The loaded class
+     * @param baseDir The base directory for compilation
+     * @return Pair of (ClassLoader, output directory) for loading classes
      */
-    private fun compileAndLoadKotlin(src: String, className: String, packageName: String): KClass<*> {
+    private fun compileKotlin(src: String, className: String, packageName: String, baseDir: File): Pair<URLClassLoader, File> {
         // Get package name - either from parameter or by extracting from source
         val fullClassName = "$packageName.$className"
 
         // Setup directories
-        val sourceDir = File(sessionDir, "src").apply { mkdirs() }
-        val outputDir = File(sessionDir, "out").apply { mkdirs() }
+        val sourceDir = File(baseDir, "src").apply { mkdirs() }
+        val outputDir = File(baseDir, "out").apply { mkdirs() }
 
         // Create source file
-        val packageDir = File(sourceDir, fullClassName.replace('.', File.separatorChar)).apply { mkdirs() }
+        val packageDir = File(sourceDir, packageName.replace('.', File.separatorChar)).apply { mkdirs() }
         val sourceFile = File(packageDir, "$className.kt")
         sourceFile.writeText(src)
         createdKotlinSources[fullClassName] = sourceFile
@@ -110,25 +117,73 @@ class CompilationSession(
             )
         }
 
-        // Load the class using the standard classloader
+        // Create classloader to load compiled classes
         val classLoader = URLClassLoader(arrayOf(outputDir.toURI().toURL()), Thread.currentThread().contextClassLoader)
-        return classLoader.loadClass(fullClassName).kotlin
+        return Pair(classLoader, outputDir)
     }
 
     /**
-     * Compiles and loads a Java source string.
+     * Recursively collects all classes in a directory and its subdirectories
+     */
+    private fun collectClassesInDirectory(dir: File, packageName: String, classLoader: ClassLoader, result: MutableList<Class<*>>) {
+        dir.listFiles()?.forEach { file ->
+            when {
+                file.isDirectory -> {
+                    // For nested classes in subdirectories
+                    val subPackage = if (packageName.isEmpty()) file.name else "$packageName.${file.name}"
+                    collectClassesInDirectory(file, subPackage, classLoader, result)
+                }
+                file.name.endsWith(".class") -> {
+                    val className = "$packageName.${file.name.substring(0, file.name.length - 6)}"
+                    try {
+                        result.add(classLoader.loadClass(className))
+                    } catch (e: Exception) {
+                        // Log error but continue with other classes
+                        println("Warning: Failed to load class $className: ${e.message}")
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Helper method to compile and load all classes using the provided compilation function
+     */
+    private fun loadAllClasses(
+        src: String, 
+        className: String, 
+        packageName: String,
+        compileFn: (String, String, String, File) -> Pair<URLClassLoader, File>
+    ): List<Class<*>> {
+        val (classLoader, outputDir) = compileFn(src, className, packageName, sessionDir)
+
+        // Find all .class files in the output directory that match our package
+        val result = mutableListOf<Class<*>>()
+        val packagePath = packageName.replace('.', File.separatorChar)
+        val packageDir = File(outputDir, packagePath)
+
+        if (packageDir.exists()) {
+            collectClassesInDirectory(packageDir, packageName, classLoader, result)
+        }
+
+        return result
+    }
+
+    /**
+     * Compiles Java source code and sets up a classloader
      * 
      * @param src The Java source code to compile
      * @param className Name of the class to load after compilation
      * @param packageName Package of the class
-     * @return The loaded class
+     * @param baseDir The base directory for compilation
+     * @return Pair of (ClassLoader, output directory) for loading classes
      */
-    private fun compileAndLoadJava(src: String, className: String, packageName: String): KClass<*> {
+    private fun compileJava(src: String, className: String, packageName: String, baseDir: File): Pair<URLClassLoader, File> {
         val fullClassName = "$packageName.$className"
 
         // Setup directories
-        val sourceDir = File(sessionDir, "src-java").apply { mkdirs() }
-        val outputDir = File(sessionDir, "out-java").apply { mkdirs() }
+        val sourceDir = File(baseDir, "src-java").apply { mkdirs() }
+        val outputDir = File(baseDir, "out-java").apply { mkdirs() }
 
         // Create source file
         val packagePath = packageName.replace('.', File.separatorChar)
@@ -184,13 +239,13 @@ class CompilationSession(
         // Close the file manager
         fileManager.close()
 
-        // Load the class using a URLClassLoader
+        // Create classloader to load compiled classes
         val classLoader = URLClassLoader(arrayOf(outputDir.toURI().toURL()), Thread.currentThread().contextClassLoader)
-        return classLoader.loadClass(fullClassName).kotlin
+        return Pair(classLoader, outputDir)
     }
 
     /**
-     * Compiles and loads Kotlin source directly from a string.
+     * Compiles Kotlin source directly from a string.
      * This uses a temporary directory but cleans up after itself.
      * 
      * Note: True in-memory compilation with Kotlin is complex as the compiler
@@ -201,11 +256,10 @@ class CompilationSession(
      * @param src The Kotlin source code to compile
      * @param className Name of the class to load after compilation
      * @param packageName Package of the class
-     * @return The loaded class
+     * @param baseDir The base directory to use (ignored, will create a temp dir)
+     * @return Pair of (ClassLoader, output directory) for loading classes
      */
-    private fun compileAndLoadKotlinInMemory(src: String, className: String, packageName: String): KClass<*> {
-        val fullClassName = "$packageName.$className"
-
+    private fun compileKotlinInMemory(src: String, className: String, packageName: String, baseDir: File): Pair<URLClassLoader, File> {
         // Create a dedicated temporary directory for this compilation
         val tempDir = Files.createTempDirectory("kotlin-memory").toFile()
         try {
@@ -246,22 +300,30 @@ class CompilationSession(
                 )
             }
 
-            // Load the class using a URLClassLoader
+            // Create classloader to load compiled classes
             val classLoader = URLClassLoader(arrayOf(outputDir.toURI().toURL()), Thread.currentThread().contextClassLoader)
-            return classLoader.loadClass(fullClassName).kotlin
-        } finally {
-            // Clean up the temporary directory
+            return Pair(classLoader, outputDir)
+        } catch (e: Exception) {
             tempDir.deleteRecursively()
+            throw e
         }
+        // NOTE: We intentionally don't delete the temporary directory in the success case,
+        // because the classloader still needs to access the class files. It will be deleted
+        // when the JVM exits.
     }
 
     /**
-     * Compile and load Java source directly from a string (without creating files).
-     * Useful for simple cases where file persistence is not needed.
+     * Compiles Java source directly from a string (without creating files)
+     * and sets up a classloader.
+     * 
+     * @param src The Java source code to compile
+     * @param className Name of the class to load after compilation
+     * @param packageName Package of the class
+     * @param baseDir The base directory for output files
+     * @return Pair of (ClassLoader, output directory) for loading classes
      */
-    private fun compileAndLoadJavaInMemory(src: String, className: String, packageName: String): KClass<*> {
-        val fullClassName = "$packageName.$className"
-        val outputDir = File(sessionDir, "out-memory").apply { mkdirs() }
+    private fun compileJavaInMemory(src: String, className: String, packageName: String, baseDir: File): Pair<URLClassLoader, File> {
+        val outputDir = File(baseDir, "out-memory").apply { mkdirs() }
 
         // Create a diagnostic collector to capture compilation errors
         val diagnostics = DiagnosticCollector<JavaFileObject>()
@@ -312,9 +374,9 @@ class CompilationSession(
         // Close the file manager
         fileManager.close()
 
-        // Load the class using a URLClassLoader
+        // Create classloader to load compiled classes
         val classLoader = URLClassLoader(arrayOf(outputDir.toURI().toURL()), Thread.currentThread().contextClassLoader)
-        return classLoader.loadClass(fullClassName).kotlin
+        return Pair(classLoader, outputDir)
     }
 
 }
