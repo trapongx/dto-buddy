@@ -9,6 +9,7 @@ val javaPoetVersion: String by project
 val javaxValidationVersion: String by project
 
 plugins {
+    java
     kotlin("jvm")
     `maven-publish`
 }
@@ -32,6 +33,11 @@ dependencies {
     testImplementation(kotlin("reflect"))
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
+}
+
+// Configure Java plugin first to properly enable withSourcesJar
+java {
+    withSourcesJar()
 }
 
 // Add publishing configuration
