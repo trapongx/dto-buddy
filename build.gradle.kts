@@ -6,6 +6,7 @@ val bytebuddyVersion: String by project
 val junitJupiterVersion: String by project
 val kotlinPoetVersion: String by project
 val javaPoetVersion: String by project
+val javaxValidationVersion: String by project
 
 plugins {
     kotlin("jvm")
@@ -26,6 +27,7 @@ dependencies {
     implementation(kotlin("compiler-embeddable"))
     api("com.squareup:kotlinpoet:$kotlinPoetVersion")
     api("com.squareup:javapoet:$javaPoetVersion")
+    api("javax.validation:validation-api:$javaxValidationVersion")
     testImplementation(kotlin("test"))
     testImplementation(kotlin("reflect"))
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")

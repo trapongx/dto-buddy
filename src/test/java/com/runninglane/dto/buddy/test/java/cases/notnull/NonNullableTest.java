@@ -2,8 +2,7 @@ package com.runninglane.dto.buddy.test.java.cases.notnull;
 
 import com.runninglane.dto.buddy.javainterop.DtoBuddy;
 import com.runninglane.dto.buddy.test.NamingStrategyWithCountUpSuffix;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import javax.validation.constraints.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -24,7 +23,7 @@ public class NonNullableTest {
         assertEquals("Not Nullable Dummy", dto.getNotNullable().getName());
         assertNull(dto.getNullable());
         assertTrue(concreteClass.getMethod("getNotNullable").isAnnotationPresent(NotNull.class));
-        assertTrue(concreteClass.getMethod("getNullable").isAnnotationPresent(Nullable.class));
+        assertFalse(concreteClass.getMethod("getNullable").isAnnotationPresent(NotNull.class));
     }
 
     @Test
@@ -38,6 +37,6 @@ public class NonNullableTest {
         assertEquals("Not Nullable Dummy", dto.getNotNullable().getName());
         assertNull(dto.getNullable());
         assertTrue(concreteClass.getMethod("getNotNullable").isAnnotationPresent(NotNull.class));
-        assertTrue(concreteClass.getMethod("getNullable").isAnnotationPresent(Nullable.class));
+        assertFalse(concreteClass.getMethod("getNullable").isAnnotationPresent(NotNull.class));
     }
 }

@@ -2,9 +2,9 @@ package com.runninglane.dto.buddy.test.java.cases.instance;
 
 import com.runninglane.dto.buddy.instance.DefaultInstanceStrategy;
 import com.runninglane.dto.buddy.javainterop.DtoBuddy;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
+import javax.validation.constraints.NotNull;
 import java.util.Map;
 import java.util.stream.Collectors;
 

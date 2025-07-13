@@ -1,7 +1,10 @@
 package com.runninglane.dto.buddy.bytecode
 
 import com.runninglane.dto.buddy.exception.DtoBuddySystemException
+import javax.validation.constraints.NotNull
 import kotlin.reflect.*
+import kotlin.reflect.full.hasAnnotation
+import kotlin.reflect.full.valueParameters
 
 /**
  * Helper class to track property metadata during analysis
@@ -42,8 +45,11 @@ data class PropertyDescriptor(
                 ?: setter?.parameters?.get(0)?.type
                 ?: throw DtoBuddySystemException("Failed to determine property type for `$name` in ${baseClass.qualifiedName}")
 
-            val isNullable: Boolean =  type.isMarkedNullable || type.toString().endsWith("!")
-
+            val isNullable: Boolean = type.isMarkedNullable.or(
+                type.toString().endsWith("!")
+                    .and(getter?.hasAnnotation<NotNull>() != true)
+                    .and(setter?.valueParameters?.get(0)?.type?.hasAnnotation<NotNull>() != true)
+            )
             val hasConcreteGetter = getter?.isAbstract == false
             val hasConcreteSetter = setter?.isAbstract == false
 

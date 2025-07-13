@@ -6,8 +6,7 @@ import com.runninglane.dto.buddy.javainterop.bytecode.ThreeStepsByteCodeStrategy
 import com.runninglane.dto.buddy.javainterop.bytecode.compile.CompileJavaByteCodeStrategyCompliment;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import javax.validation.constraints.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
@@ -37,7 +36,7 @@ public class NonPropertyAbstractMethodsHandlingTest {
         public @NotNull TypeSpec.Builder handleOtherAbstractMethods(
             @NotNull TypeSpec.Builder builder,
             @NotNull List<Method> methods,
-            @Nullable Map<String, ? extends Class<?>> typeParamsMapByName
+            Map<String, ? extends Class<?>> typeParamsMapByName
         ) {
             TypeSpec.Builder updatedBuilder = builder.addMethod(
                 MethodSpec.methodBuilder("shout")

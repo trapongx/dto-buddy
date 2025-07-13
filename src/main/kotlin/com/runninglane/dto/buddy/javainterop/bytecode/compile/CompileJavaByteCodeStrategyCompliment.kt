@@ -94,12 +94,10 @@ open class CompileJavaByteCodeStrategyCompliment() : ThreeStepsByteCodeStrategyC
                     .addAnnotation(Override::class.java)
                     .addModifiers(Modifier.PUBLIC)
                     .returns(typeName)
-                    .also {
-                        if (property.isNullable) {
-                            it.addAnnotation(ClassName.get("org.jetbrains.annotations", "Nullable"))
-                        } else {
-                            it.addAnnotation(ClassName.get("org.jetbrains.annotations", "NotNull"))
-                        }
+                    .let {
+                        if (!property.isNullable) {
+                            it.addAnnotation(ClassName.get("javax.validation.constraints", "NotNull"))
+                        } else it
                     }
                     .addStatement("return $fieldName")
                     .build()
@@ -117,13 +115,11 @@ open class CompileJavaByteCodeStrategyCompliment() : ThreeStepsByteCodeStrategyC
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(
                     ParameterSpec.builder(typeName, escapedParamName)
-                        .addAnnotation(
-                            if (property.isNullable) {
-                                ClassName.get("org.jetbrains.annotations", "Nullable")
-                            } else {
-                                ClassName.get("org.jetbrains.annotations", "NotNull")
-                            }
-                        )
+                        .let {
+                            if (!property.isNullable) {
+                                it.addAnnotation(ClassName.get("javax.validation.constraints", "NotNull"))
+                            } else it
+                        }
                         .build()
                 )
                 .addStatement("this.$fieldName = $escapedParamName")
