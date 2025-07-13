@@ -38,9 +38,12 @@ open class ThreeStepsByteCodeStrategy<B>(private val compliment: ThreeStepsByteC
             return baseClass
         }
 
+        // Create the data collector object to keep track of the implementation process for customization
+        val dataCollector = compliment.buildDataCollector(baseClass, typeParams, packageName, className)
+
         try {
             // Create the dynamic type builder
-            val builder = compliment.defineClass(baseClass, typeParams, packageName, className)
+            val builder = compliment.defineClass(baseClass, typeParams, packageName, className, dataCollector)
 
             // Create a map of type parameter names to actual types
             val typeParamsMapByName = typeParams?.takeIf { it.isNotEmpty() }
@@ -50,7 +53,7 @@ open class ThreeStepsByteCodeStrategy<B>(private val compliment: ThreeStepsByteC
                 } ?: emptyMap()
 
             // Implement properties
-            val implementedBuilder = compliment.implementProperties(builder, properties, typeParamsMapByName)
+            val implementedBuilder = compliment.implementProperties(builder, properties, typeParamsMapByName, dataCollector)
 
             val nonPublicAbstractProperties = baseClass.memberProperties.toList()
                 .minus(properties.mapNotNull { it.kProperty })
@@ -66,20 +69,26 @@ open class ThreeStepsByteCodeStrategy<B>(private val compliment: ThreeStepsByteC
                         implementedBuilder,
                         nonPublicAbstractProperties,
                         nonPropertyAbstractFunctions,
-                        typeParamsMapByName
+                        typeParamsMapByName,
+                        dataCollector
                     )
 
                 else -> implementedBuilder
             }
 
             // Load the generated class
-            val generatedClass = compliment.loadClass(builderWithNonPropertyAbstractFunctionsHandled, packageName, className)
+            val generatedClass = compliment.loadClass(
+                builderWithNonPropertyAbstractFunctionsHandled, packageName, className, dataCollector
+            )
 
             return generatedClass
         } catch (e: Exception) {
             when (e) {
                 is DtoBuddyBadInputException, is DtoBuddySystemException -> throw e
-                else -> throw DtoBuddySystemException("Failed to implement DTO: ${e.message}", e)
+                else -> throw DtoBuddySystemException(
+                    "Failed to implement DTO: ${e.message}, dataCollector: $dataCollector",
+                    e
+                )
             }
         }
     }

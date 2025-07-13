@@ -22,12 +22,13 @@ class CompileKotlinByteCodeStrategyTest {
             baseClass: KClass<*>,
             typeParams: List<KClass<*>>?,
             packageName: String,
-            className: String
+            className: String,
+            dataCollector: Any?
         ): TypeSpec.Builder {
             val testAnnotationSpec = AnnotationSpec.builder(TestAnnotation::class)
                 .addMember("value = %S", "test123")
                 .build()
-            return super.defineClass(baseClass, typeParams, packageName, className)
+            return super.defineClass(baseClass, typeParams, packageName, className, dataCollector)
                 .addAnnotation(testAnnotationSpec)
         }
     }

@@ -29,7 +29,8 @@ open class CompileJavaByteCodeStrategyCompliment() : ThreeStepsByteCodeStrategyC
         baseClass: Class<*>,
         typeParams: List<Class<*>>?,
         packageName: String,
-        className: String
+        className: String,
+        dataCollector: Any?
     ): TypeSpec.Builder {
         // Validate that base class is public
         validateBaseClass(baseClass.kotlin)
@@ -66,7 +67,8 @@ open class CompileJavaByteCodeStrategyCompliment() : ThreeStepsByteCodeStrategyC
     override fun implementGetterSetterMethods(
         builder: TypeSpec.Builder,
         properties: List<PropertyDescriptor>,
-        typeParamsMapByName: Map<String, Class<*>>?
+        typeParamsMapByName: Map<String, Class<*>>?,
+        dataCollector: Any?
     ): TypeSpec.Builder {
         var classBuilder = builder
 
@@ -136,7 +138,8 @@ open class CompileJavaByteCodeStrategyCompliment() : ThreeStepsByteCodeStrategyC
     override fun loadJavaClass(
         builder: TypeSpec.Builder,
         packageName: String,
-        className: String
+        className: String,
+        dataCollector: Any?
     ): Class<*> {
         try {
             // Create a JavaFile (Java source file)
@@ -180,7 +183,8 @@ open class CompileJavaByteCodeStrategyCompliment() : ThreeStepsByteCodeStrategyC
     override fun handleOtherAbstractMethods(
         builder: TypeSpec.Builder,
         methods: List<Method>,
-        typeParamsMapByName: Map<String, Class<*>>?
+        typeParamsMapByName: Map<String, Class<*>>?,
+        dataCollector: Any?
     ): TypeSpec.Builder {
         if (methods.isNotEmpty()) {
             throw DtoBuddyBadInputException(

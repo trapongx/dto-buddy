@@ -28,7 +28,8 @@ open class CompileKotlinByteCodeStrategyCompliment : ThreeStepsByteCodeStrategyC
         baseClass: KClass<*>,
         typeParams: List<KClass<*>>?,
         packageName: String,
-        className: String
+        className: String,
+        dataCollector: Any?
     ): TypeSpec.Builder {
         // Validate that base class is public
         validateBaseClass(baseClass)
@@ -66,7 +67,8 @@ open class CompileKotlinByteCodeStrategyCompliment : ThreeStepsByteCodeStrategyC
     override fun implementProperties(
         builder: TypeSpec.Builder,
         properties: List<PropertyDescriptor>,
-        typeParamsMapByName: Map<String, KClass<*>>?
+        typeParamsMapByName: Map<String, KClass<*>>?,
+        dataCollector: Any?
     ): TypeSpec.Builder {
         var classBuilder = builder
 
@@ -145,7 +147,8 @@ open class CompileKotlinByteCodeStrategyCompliment : ThreeStepsByteCodeStrategyC
     override fun loadClass(
         builder: TypeSpec.Builder,
         packageName: String,
-        className: String
+        className: String,
+        dataCollector: Any?
     ): KClass<*> {
         try {
             // Create a FileSpec (Kotlin source file)
@@ -191,7 +194,8 @@ open class CompileKotlinByteCodeStrategyCompliment : ThreeStepsByteCodeStrategyC
         builder: TypeSpec.Builder,
         properties: List<KProperty<*>>,
         functions: List<KFunction<*>>,
-        typeParamsMapByName: Map<String, KClass<*>>?
+        typeParamsMapByName: Map<String, KClass<*>>?,
+        dataCollector: Any?
     ): TypeSpec.Builder {
         if (properties.size + functions.size > 0) {
             throw DtoBuddyBadInputException(

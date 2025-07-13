@@ -6,6 +6,13 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty
 
 interface ThreeStepsByteCodeStrategyCompliment<B> {
+    fun buildDataCollector(
+        baseClass: KClass<*>,
+        typeParams: List<KClass<*>>?,
+        packageName: String,
+        className: String
+    ): Any? = null
+
     /**
      * Defines class structure by specifying package name, class name, modifiers, and annotations.
      * The result is a builder object that will be used in subsequent steps.
@@ -20,7 +27,8 @@ interface ThreeStepsByteCodeStrategyCompliment<B> {
         baseClass: KClass<*>,
         typeParams: List<KClass<*>>?,
         packageName: String,
-        className: String
+        className: String,
+        dataCollector: Any?
     ): B
 
     /**
@@ -35,14 +43,16 @@ interface ThreeStepsByteCodeStrategyCompliment<B> {
     fun implementProperties(
         builder: B,
         properties: List<PropertyDescriptor>,
-        typeParamsMapByName: Map<String, KClass<*>>? = null
+        typeParamsMapByName: Map<String, KClass<*>>?,
+        dataCollector: Any?
     ): B
 
     fun handleOtherAbstractMembers(
         builder: B,
         properties: List<KProperty<*>>,
         functions: List<KFunction<*>>,
-        typeParamsMapByName: Map<String, KClass<*>>?
+        typeParamsMapByName: Map<String, KClass<*>>?,
+        dataCollector: Any?
     ): B {
         if (functions.isEmpty()) return builder
 
@@ -62,6 +72,7 @@ interface ThreeStepsByteCodeStrategyCompliment<B> {
     fun loadClass(
         builder: B,
         packageName: String,
-        className: String
+        className: String,
+        dataCollector: Any?
     ): KClass<*>
 }

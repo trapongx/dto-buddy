@@ -32,7 +32,8 @@ interface ThreeStepsByteCodeStrategyCompliment<B> : KThreeStepsByteCodeStrategyC
         baseClass: Class<*>,
         typeParams: List<Class<*>>?,
         packageName: String,
-        className: String
+        className: String,
+        dataCollector: Any?
     ): B
 
     @JvmSynthetic
@@ -40,12 +41,14 @@ interface ThreeStepsByteCodeStrategyCompliment<B> : KThreeStepsByteCodeStrategyC
         baseClass: KClass<*>,
         typeParams: List<KClass<*>>?,
         packageName: String,
-        className: String
+        className: String,
+        dataCollector: Any?
     ): B = defineClass(
         baseClass.java,
         typeParams?.map { it.java },
         packageName,
-        className
+        className,
+        dataCollector
     )
 
     /**
@@ -60,30 +63,35 @@ interface ThreeStepsByteCodeStrategyCompliment<B> : KThreeStepsByteCodeStrategyC
     fun implementGetterSetterMethods(
         builder: B,
         properties: List<PropertyDescriptor>,
-        typeParamsMapByName: Map<String, Class<*>>? = null
+        typeParamsMapByName: Map<String, Class<*>>?,
+        dataCollector: Any?
     ): B
 
     @JvmSynthetic
     override fun implementProperties(
         builder: B,
         properties: List<KPropertyDescriptor>,
-        typeParamsMapByName: Map<String, KClass<*>>?
+        typeParamsMapByName: Map<String, KClass<*>>?,
+        dataCollector: Any?
     ): B = implementGetterSetterMethods(
         builder,
         properties.filter { it.kProperty == null }.map { it.java() },
-        typeParamsMapByName?.mapValues { it.value.java }
+        typeParamsMapByName?.mapValues { it.value.java },
+        dataCollector
     )
 
     fun handleOtherAbstractMethods(
         builder: B,
         methods: List<Method>,
-        typeParamsMapByName: Map<String, Class<*>>? = null
+        typeParamsMapByName: Map<String, Class<*>>?,
+        dataCollector: Any?
     ): B {
         return super.handleOtherAbstractMembers(
             builder,
             emptyList(),
             methods.map { it.kotlinFunction!! },
-            typeParamsMapByName?.mapValues { it.value.kotlin }
+            typeParamsMapByName?.mapValues { it.value.kotlin },
+            dataCollector
         )
     }
 
@@ -92,9 +100,15 @@ interface ThreeStepsByteCodeStrategyCompliment<B> : KThreeStepsByteCodeStrategyC
         builder: B,
         properties: List<KProperty<*>>,
         functions: List<KFunction<*>>,
-        typeParamsMapByName: Map<String, KClass<*>>?
+        typeParamsMapByName: Map<String, KClass<*>>?,
+        dataCollector: Any?
     ): B {
-        return handleOtherAbstractMethods(builder, functions.map { it.javaMethod!! })
+        return handleOtherAbstractMethods(
+            builder,
+            functions.map { it.javaMethod!! },
+            typeParamsMapByName?.mapValues { it.value.java },
+            dataCollector
+        )
     }
 
     /**
@@ -108,13 +122,15 @@ interface ThreeStepsByteCodeStrategyCompliment<B> : KThreeStepsByteCodeStrategyC
     fun loadJavaClass(
         builder: B,
         packageName: String,
-        className: String
+        className: String,
+        dataCollector: Any?
     ): Class<*>
 
     @JvmSynthetic
     override fun loadClass(
         builder: B,
         packageName: String,
-        className: String
-    ): KClass<*> = loadJavaClass(builder, packageName, className).kotlin
+        className: String,
+        dataCollector: Any?
+    ): KClass<*> = loadJavaClass(builder, packageName, className, dataCollector).kotlin
 }

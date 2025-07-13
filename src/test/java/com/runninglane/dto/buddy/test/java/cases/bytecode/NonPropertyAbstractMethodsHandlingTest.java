@@ -36,7 +36,8 @@ public class NonPropertyAbstractMethodsHandlingTest {
         public @NotNull TypeSpec.Builder handleOtherAbstractMethods(
             @NotNull TypeSpec.Builder builder,
             @NotNull List<Method> methods,
-            Map<String, ? extends Class<?>> typeParamsMapByName
+            Map<String, ? extends Class<?>> typeParamsMapByName,
+            Object dataCollector
         ) {
             TypeSpec.Builder updatedBuilder = builder.addMethod(
                 MethodSpec.methodBuilder("shout")
@@ -52,7 +53,7 @@ public class NonPropertyAbstractMethodsHandlingTest {
                 .filter(method -> !method.getName().equals("shout"))
                 .collect(Collectors.toList());
 
-            return super.handleOtherAbstractMethods(updatedBuilder, unhandledMethods, typeParamsMapByName);
+            return super.handleOtherAbstractMethods(updatedBuilder, unhandledMethods, typeParamsMapByName, dataCollector);
         }
     }
 

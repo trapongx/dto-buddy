@@ -31,9 +31,10 @@ class ByteCodeStrategyTest {
             @NotNull Class<?> baseClass,
             List<? extends Class<?>> typeParams,
             @NotNull String packageName,
-            @NotNull String className
+            @NotNull String className,
+            Object dataCollector
         ) {
-            return super.defineClass(baseClass, typeParams, packageName, className)
+            return super.defineClass(baseClass, typeParams, packageName, className, dataCollector)
                 .addAnnotation(AnnotationSpec.builder(TestAnnotation.class)
                     .addMember("value", "$S", "test123")
                     .build());

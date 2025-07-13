@@ -46,7 +46,8 @@ class DtoWithProtectedGetterTest {
                 builder: TypeSpec.Builder,
                 properties: List<KProperty<*>>,
                 functions: List<KFunction<*>>,
-                typeParamsMapByName: Map<String, KClass<*>>?
+                typeParamsMapByName: Map<String, KClass<*>>?,
+                dataCollector: Any?
             ): TypeSpec.Builder {
                 val updatedBuilder = builder.addProperty(
                     PropertySpec.builder("name", String::class)
@@ -55,7 +56,7 @@ class DtoWithProtectedGetterTest {
                         .build()
                 )
                 val unhandledProperties = properties.filter { it.name != "name" }
-                return super.handleOtherAbstractMembers(updatedBuilder, unhandledProperties, functions, typeParamsMapByName)
+                return super.handleOtherAbstractMembers(updatedBuilder, unhandledProperties, functions, typeParamsMapByName, dataCollector)
             }
         }
 
@@ -71,7 +72,8 @@ class DtoWithProtectedGetterTest {
                 builder: TypeSpec.Builder,
                 properties: List<KProperty<*>>,
                 functions: List<KFunction<*>>,
-                typeParamsMapByName: Map<String, KClass<*>>?
+                typeParamsMapByName: Map<String, KClass<*>>?,
+                dataCollector: Any?
             ): TypeSpec.Builder {
                 val updatedBuilder = builder.addFunction(
                     FunSpec.builder("getName")
@@ -81,7 +83,7 @@ class DtoWithProtectedGetterTest {
                         .build()
                 )
                 val unhandledFunctions = functions.filter { it.name != "getName" }
-                return super.handleOtherAbstractMembers(updatedBuilder, properties, unhandledFunctions, typeParamsMapByName)
+                return super.handleOtherAbstractMembers(updatedBuilder, properties, unhandledFunctions, typeParamsMapByName, dataCollector)
             }
         }
 

@@ -23,7 +23,8 @@ class NonPropertyAbstractFunctionsHandlingTest {
             builder: TypeSpec.Builder,
             properties: List<KProperty<*>>,
             functions: List<KFunction<*>>,
-            typeParamsMapByName: Map<String, KClass<*>>?
+            typeParamsMapByName: Map<String, KClass<*>>?,
+            dataCollector: Any?
         ): TypeSpec.Builder {
             val updatedBuilder = builder.addFunction(
                 FunSpec.builder("shout")
@@ -34,7 +35,7 @@ class NonPropertyAbstractFunctionsHandlingTest {
                     .build()
             )
             val unhandledFunctions = functions.filter { it.name != "shout" }
-            return super.handleOtherAbstractMembers(updatedBuilder, properties, unhandledFunctions, typeParamsMapByName)
+            return super.handleOtherAbstractMembers(updatedBuilder, properties, unhandledFunctions, typeParamsMapByName, dataCollector)
         }
     }
 
