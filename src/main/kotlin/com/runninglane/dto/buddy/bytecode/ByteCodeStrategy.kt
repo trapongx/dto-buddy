@@ -14,6 +14,7 @@ interface ByteCodeStrategy {
         baseClass: KClass<*>,
         typeParams: List<KClass<*>>?,
         packageName: String,
-        className: String
+        className: String,
+        dataCollector: Any?
     ): KClass<*>
 }

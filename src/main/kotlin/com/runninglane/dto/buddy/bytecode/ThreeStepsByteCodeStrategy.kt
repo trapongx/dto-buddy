@@ -23,7 +23,8 @@ open class ThreeStepsByteCodeStrategy<B>(private val compliment: ThreeStepsByteC
         baseClass: KClass<*>,
         typeParams: List<KClass<*>>?,
         packageName: String,
-        className: String
+        className: String,
+        dataCollector: Any?
     ): KClass<*> {
         val isConcreteClass = !baseClass.java.isInterface && !baseClass.isAbstract
         if (isConcreteClass) {
@@ -35,9 +36,6 @@ open class ThreeStepsByteCodeStrategy<B>(private val compliment: ThreeStepsByteC
         val properties = propertiesCache.getOrPut(baseClass) {
             PropertyDescriptorList.from(baseClass)
         }
-
-        // Create the data collector object to keep track of the implementation process for customization
-        val dataCollector = compliment.buildDataCollector(baseClass, typeParams, packageName, className)
 
         try {
             // Create the dynamic type builder

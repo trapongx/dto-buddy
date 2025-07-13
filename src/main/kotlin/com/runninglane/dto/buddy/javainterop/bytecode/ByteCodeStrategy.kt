@@ -14,7 +14,8 @@ interface ByteCodeStrategy : KByteCodeStrategy {
         baseClass: Class<*>,
         typeParams: List<Class<*>>?,
         packageName: String,
-        className: String
+        className: String,
+        dataCollector: Any?
     ): Class<*>
 
     @JvmSynthetic
@@ -22,6 +23,13 @@ interface ByteCodeStrategy : KByteCodeStrategy {
         baseClass: KClass<*>,
         typeParams: List<KClass<*>>?,
         packageName: String,
-        className: String
-    ): KClass<*> = implement(baseClass.java, typeParams?.map { it.java }, packageName, className).kotlin
+        className: String,
+        dataCollector: Any?
+    ): KClass<*> = implement(
+        baseClass.java,
+        typeParams?.map { it.java },
+        packageName,
+        className,
+        dataCollector
+    ).kotlin
 }

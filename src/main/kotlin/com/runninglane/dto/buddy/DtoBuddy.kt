@@ -150,7 +150,8 @@ class DtoBuddy(
     @JvmSynthetic
     fun implement(
         baseClass: KClass<*>,
-        typeParams: List<KClass<*>>? = null
+        typeParams: List<KClass<*>>? = null,
+        dataCollector: Any? = null
     ): KClass<*> {
         val packageName = namingStrategy.buildPackageName(baseClass.java)
         val className = namingStrategy.buildClassName(baseClass.java)
@@ -171,7 +172,7 @@ class DtoBuddy(
         }
 
         return try {
-            byteCodeStrategy.implement(baseClass, typeParams, packageName, className)
+            byteCodeStrategy.implement(baseClass, typeParams, packageName, className, dataCollector)
                 .also { generatedClass -> classCache[cacheKey] = baseClass to generatedClass }
         } catch (e: Exception) {
             when (e) {

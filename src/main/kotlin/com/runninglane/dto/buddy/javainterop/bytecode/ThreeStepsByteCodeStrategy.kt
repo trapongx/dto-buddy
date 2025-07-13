@@ -17,12 +17,14 @@ class ThreeStepsByteCodeStrategy<B>(compliment: ThreeStepsByteCodeStrategyCompli
         baseClass: Class<*>,
         typeParams: List<Class<*>>?,
         packageName: String,
-        className: String
+        className: String,
+        dataCollector: Any?
     ): Class<*> = super<KThreeStepsByteCodeStrategy>.implement(
         baseClass.kotlin,
         typeParams?.map { it.kotlin },
         packageName,
-        className
+        className,
+        dataCollector
     ).java
 
     @JvmSynthetic
@@ -30,12 +32,14 @@ class ThreeStepsByteCodeStrategy<B>(compliment: ThreeStepsByteCodeStrategyCompli
         baseClass: KClass<*>,
         typeParams: List<KClass<*>>?,
         packageName: String,
-        className: String
+        className: String,
+        dataCollector: Any?
     ): KClass<*> = super<KThreeStepsByteCodeStrategy>.implement(
         baseClass,
         typeParams,
         packageName,
-        className
+        className,
+        dataCollector
     )
 
 }

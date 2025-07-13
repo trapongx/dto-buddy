@@ -6,13 +6,6 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty
 
 interface ThreeStepsByteCodeStrategyCompliment<B> {
-    fun buildDataCollector(
-        baseClass: KClass<*>,
-        typeParams: List<KClass<*>>?,
-        packageName: String,
-        className: String
-    ): Any? = null
-
     /**
      * Defines class structure by specifying package name, class name, modifiers, and annotations.
      * The result is a builder object that will be used in subsequent steps.
