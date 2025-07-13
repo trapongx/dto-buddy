@@ -1,7 +1,6 @@
 package com.runninglane.dto.buddy.bytecode
 
 import com.runninglane.dto.buddy.exception.DtoBuddySystemException
-import javax.validation.constraints.NotNull
 import kotlin.reflect.*
 import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.full.valueParameters
@@ -47,8 +46,8 @@ data class PropertyDescriptor(
 
             val isNullable: Boolean = type.isMarkedNullable.or(
                 type.toString().endsWith("!")
-                    .and(getter?.hasAnnotation<NotNull>() != true)
-                    .and(setter?.valueParameters?.get(0)?.type?.hasAnnotation<NotNull>() != true)
+                    .and(getter?.annotations?.any { it.annotationClass.simpleName == "NotNull" } != true)
+                    .and(setter?.valueParameters?.get(0)?.type?.annotations?.any { it.annotationClass.simpleName == "NotNull" } != true)
             )
             val hasConcreteGetter = getter?.isAbstract == false
             val hasConcreteSetter = setter?.isAbstract == false

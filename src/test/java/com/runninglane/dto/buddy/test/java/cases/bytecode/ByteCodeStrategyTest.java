@@ -6,7 +6,7 @@ import com.runninglane.dto.buddy.javainterop.bytecode.ThreeStepsByteCodeStrategy
 import com.runninglane.dto.buddy.javainterop.bytecode.compile.CompileJavaByteCodeStrategyCompliment;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.TypeSpec;
-import javax.validation.constraints.NotNull;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.lang.annotation.Retention;

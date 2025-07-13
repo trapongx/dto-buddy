@@ -2,9 +2,10 @@ package com.runninglane.dto.buddy.test.java.cases.notnull;
 
 import com.runninglane.dto.buddy.javainterop.DtoBuddy;
 import com.runninglane.dto.buddy.test.NamingStrategyWithCountUpSuffix;
-import javax.validation.constraints.NotNull;
 import org.junit.jupiter.api.Test;
 
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,8 +23,14 @@ public class NonNullableTest {
         assertNotNull(dto);
         assertEquals("Not Nullable Dummy", dto.getNotNullable().getName());
         assertNull(dto.getNullable());
-        assertTrue(concreteClass.getMethod("getNotNullable").isAnnotationPresent(NotNull.class));
-        assertFalse(concreteClass.getMethod("getNullable").isAnnotationPresent(NotNull.class));
+        assertTrue(
+            Arrays.stream(concreteClass.getMethod("getNotNullable").getAnnotations())
+                .anyMatch((annotation) -> annotation.toString().contains("NotNull"))
+        );
+        assertFalse(
+            Arrays.stream(concreteClass.getMethod("getNullable").getAnnotations())
+                .anyMatch((annotation) -> annotation.toString().contains("NotNull"))
+        );
     }
 
     @Test
@@ -36,7 +43,13 @@ public class NonNullableTest {
         assertNotNull(dto);
         assertEquals("Not Nullable Dummy", dto.getNotNullable().getName());
         assertNull(dto.getNullable());
-        assertTrue(concreteClass.getMethod("getNotNullable").isAnnotationPresent(NotNull.class));
-        assertFalse(concreteClass.getMethod("getNullable").isAnnotationPresent(NotNull.class));
+        assertTrue(
+            Arrays.stream(concreteClass.getMethod("getNotNullable").getAnnotations())
+                .anyMatch((annotation) -> annotation.toString().contains("NotNull"))
+        );
+        assertFalse(
+            Arrays.stream(concreteClass.getMethod("getNullable").getAnnotations())
+                .anyMatch((annotation) -> annotation.toString().contains("NotNull"))
+        );
     }
 }
