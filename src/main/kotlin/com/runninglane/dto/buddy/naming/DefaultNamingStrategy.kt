@@ -22,6 +22,11 @@ open class DefaultNamingStrategy : NamingStrategy {
      * @return The name for the generated class
      */
     override fun buildClassName(baseClass: Class<*>): String {
-        return "${baseClass.simpleName}\$Dto"
+        val enclosingClasses = generateSequence(baseClass) { it.enclosingClass }
+            .map { it.simpleName }
+            .toList()
+            .reversed()
+            .joinToString("$")
+        return "$enclosingClasses\$Dto"
     }
 }
