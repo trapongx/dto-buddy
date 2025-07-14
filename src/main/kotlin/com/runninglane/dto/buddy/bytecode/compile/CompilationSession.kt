@@ -21,9 +21,18 @@ class CompilationSession(
     // Keep a global shared directory for all compilations in this session
     private val sessionDir by lazy {
         val dir = Files.createTempDirectory("compilation-session").toFile()
-        println("dir = $dir")
-        //dir.deleteOnExit() // Clean up on JVM shutdown
+        // Enable cleanup when JVM exits
+        dir.deleteOnExit()
         dir
+    }
+
+    val sourceDir = File(sessionDir, "src").apply { mkdirs() }
+    val outputDir = File(sessionDir, "out").apply { mkdirs() }
+
+    // Use a single shared classloader for all compilations
+    private val sharedClassLoader by lazy {
+        // Create a classloader with the output directory
+        URLClassLoader(arrayOf(outputDir.toURI().toURL()), Thread.currentThread().contextClassLoader)
     }
 
     // Keep track of all source files created in this session
@@ -67,7 +76,7 @@ class CompilationSession(
     }
 
     /**
-     * Compiles Kotlin source code and sets up a classloader
+     * Compiles Kotlin source code and uses the shared classloader
      * 
      * @param src The Kotlin source code to compile
      * @param className Name of the class to load after compilation
@@ -75,16 +84,13 @@ class CompilationSession(
      * @param baseDir The base directory for compilation
      * @return Pair of (ClassLoader, output directory) for loading classes
      */
-    private fun compileKotlin(src: String, className: String, packageName: String, baseDir: File): Pair<URLClassLoader, File> {
+    private fun compileKotlin(src: String, className: String, packageName: String): Pair<ClassLoader, File> {
         // Get package name - either from parameter or by extracting from source
         val fullClassName = "$packageName.$className"
 
-        // Setup directories
-        val sourceDir = File(baseDir, "src").apply { mkdirs() }
-        val outputDir = File(baseDir, "out").apply { mkdirs() }
-
         // Create source file
-        val packageDir = File(sourceDir, packageName.replace('.', File.separatorChar)).apply { mkdirs() }
+        val packagePath = packageName.replace('.', File.separatorChar)
+        val packageDir = File(sourceDir, packagePath).apply { mkdirs() }
         val sourceFile = File(packageDir, "$className.kt")
         sourceFile.writeText(src)
         createdKotlinSources[fullClassName] = sourceFile
@@ -153,9 +159,9 @@ class CompilationSession(
         src: String, 
         className: String, 
         packageName: String,
-        compileFn: (String, String, String, File) -> Pair<URLClassLoader, File>
+        compileFn: (String, String, String) -> Unit
     ): List<Class<*>> {
-        val (classLoader, outputDir) = compileFn(src, className, packageName, sessionDir)
+        compileFn(src, className, packageName)
 
         // Find all .class files in the output directory that match our package
         val result = mutableListOf<Class<*>>()
@@ -163,7 +169,7 @@ class CompilationSession(
         val packageDir = File(outputDir, packagePath)
 
         if (packageDir.exists()) {
-            collectClassesInDirectory(packageDir, packageName, classLoader, result)
+            collectClassesInDirectory(packageDir, packageName, sharedClassLoader, result)
         }
 
         return result
@@ -178,12 +184,8 @@ class CompilationSession(
      * @param baseDir The base directory for compilation
      * @return Pair of (ClassLoader, output directory) for loading classes
      */
-    private fun compileJava(src: String, className: String, packageName: String, baseDir: File): Pair<URLClassLoader, File> {
+    private fun compileJava(src: String, className: String, packageName: String) {
         val fullClassName = "$packageName.$className"
-
-        // Setup directories
-        val sourceDir = File(baseDir, "src-java").apply { mkdirs() }
-        val outputDir = File(baseDir, "out-java").apply { mkdirs() }
 
         // Create source file
         val packagePath = packageName.replace('.', File.separatorChar)
@@ -238,10 +240,6 @@ class CompilationSession(
 
         // Close the file manager
         fileManager.close()
-
-        // Create classloader to load compiled classes
-        val classLoader = URLClassLoader(arrayOf(outputDir.toURI().toURL()), Thread.currentThread().contextClassLoader)
-        return Pair(classLoader, outputDir)
     }
 
     /**
@@ -259,57 +257,39 @@ class CompilationSession(
      * @param baseDir The base directory to use (ignored, will create a temp dir)
      * @return Pair of (ClassLoader, output directory) for loading classes
      */
-    private fun compileKotlinInMemory(src: String, className: String, packageName: String, baseDir: File): Pair<URLClassLoader, File> {
-        // Create a dedicated temporary directory for this compilation
-        val tempDir = Files.createTempDirectory("kotlin-memory").toFile()
-        try {
-            // Setup directories
-            val sourceDir = File(tempDir, "src").apply { mkdirs() }
-            val outputDir = File(tempDir, "out").apply { mkdirs() }
+    private fun compileKotlinInMemory(src: String, className: String, packageName: String) {
+        // Create source file
+        val packagePath = packageName.replace('.', File.separatorChar)
+        val packageDir = File(sourceDir, packagePath).apply { mkdirs() }
+        val sourceFile = File(packageDir, "$className.kt")
+        sourceFile.writeText(src)
 
-            // Create source file
-            val packagePath = packageName.replace('.', File.separatorChar)
-            val packageDir = File(sourceDir, packagePath).apply { mkdirs() }
-            val sourceFile = File(packageDir, "$className.kt")
-            sourceFile.writeText(src)
-
-            // Compile using K2JVMCompiler
-            val compiler = K2JVMCompiler()
-            val arguments = K2JVMCompilerArguments().apply {
-                freeArgs = listOf(sourceFile.absolutePath)
-                destination = outputDir.absolutePath
-                noStdlib = true
-                noReflect = true
-                classpath = System.getProperty("java.class.path")
-                jvmTarget = System.getProperty("java.version").substringBefore(".")
-            }
-
-            val errorStream = ByteArrayOutputStream()
-            val messageCollector = PrintingMessageCollector(
-                PrintStream(errorStream),
-                MessageRenderer.PLAIN_FULL_PATHS,
-                false
-            )
-
-            val exitCode = compiler.exec(messageCollector, Services.EMPTY, arguments)
-            if (exitCode.code != 0) {
-                throw RuntimeException(
-                    "Kotlin compilation failed with exit code $exitCode.\n" +
-                    "Compiler output:\n${String(errorStream.toByteArray())}\n" +
-                    "Source:\n${src.lines().take(20).joinToString("\n")}"
-                )
-            }
-
-            // Create classloader to load compiled classes
-            val classLoader = URLClassLoader(arrayOf(outputDir.toURI().toURL()), Thread.currentThread().contextClassLoader)
-            return Pair(classLoader, outputDir)
-        } catch (e: Exception) {
-            tempDir.deleteRecursively()
-            throw e
+        // Compile using K2JVMCompiler
+        val compiler = K2JVMCompiler()
+        val arguments = K2JVMCompilerArguments().apply {
+            freeArgs = listOf(sourceFile.absolutePath)
+            destination = outputDir.absolutePath
+            noStdlib = true
+            noReflect = true
+            classpath = System.getProperty("java.class.path")
+            jvmTarget = System.getProperty("java.version").substringBefore(".")
         }
-        // NOTE: We intentionally don't delete the temporary directory in the success case,
-        // because the classloader still needs to access the class files. It will be deleted
-        // when the JVM exits.
+
+        val errorStream = ByteArrayOutputStream()
+        val messageCollector = PrintingMessageCollector(
+            PrintStream(errorStream),
+            MessageRenderer.PLAIN_FULL_PATHS,
+            false
+        )
+
+        val exitCode = compiler.exec(messageCollector, Services.EMPTY, arguments)
+        if (exitCode.code != 0) {
+            throw RuntimeException(
+                "Kotlin compilation failed with exit code $exitCode.\n" +
+                "Compiler output:\n${String(errorStream.toByteArray())}\n" +
+                "Source:\n${src.lines().take(20).joinToString("\n")}"
+            )
+        }
     }
 
     /**
@@ -322,9 +302,7 @@ class CompilationSession(
      * @param baseDir The base directory for output files
      * @return Pair of (ClassLoader, output directory) for loading classes
      */
-    private fun compileJavaInMemory(src: String, className: String, packageName: String, baseDir: File): Pair<URLClassLoader, File> {
-        val outputDir = File(baseDir, "out-memory").apply { mkdirs() }
-
+    private fun compileJavaInMemory(src: String, className: String, packageName: String) {
         // Create a diagnostic collector to capture compilation errors
         val diagnostics = DiagnosticCollector<JavaFileObject>()
 
@@ -373,10 +351,31 @@ class CompilationSession(
 
         // Close the file manager
         fileManager.close()
-
-        // Create classloader to load compiled classes
-        val classLoader = URLClassLoader(arrayOf(outputDir.toURI().toURL()), Thread.currentThread().contextClassLoader)
-        return Pair(classLoader, outputDir)
     }
 
+    /**
+     * Closes resources associated with this compilation session.
+     * Should be called when the session is no longer needed.
+     */
+    fun dispose() {
+        try {
+            // For lazy properties, we can check if they've been initialized with this approach
+            try {
+                // Only close if the classloader has been created
+                sharedClassLoader.close()
+            } catch (_: UninitializedPropertyAccessException) {
+                // Ignore if the property hasn't been accessed yet
+            }
+
+            try {
+                // Only delete if the directory has been created
+                sessionDir.deleteRecursively()
+            } catch (_: UninitializedPropertyAccessException) {
+                // Ignore if the property hasn't been accessed yet
+            }
+        } catch (e: Exception) {
+            // Log but don't throw, as this is cleanup code
+            println("Warning: Error during CompilationSession disposal: ${e.message}")
+        }
+    }
 }
