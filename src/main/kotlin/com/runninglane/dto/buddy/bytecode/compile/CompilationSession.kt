@@ -15,9 +15,17 @@ import java.nio.file.Files
 import javax.tools.*
 import kotlin.reflect.KClass
 
-class CompilationSession(
+object CompilationSession {
     val inMemory: Boolean = System.getProperty("dto-buddy.compilation.in-memory")?.toBoolean() ?: true
-) {
+
+    // Cache of already loaded classes to avoid reloading
+    private val loadedClasses = mutableMapOf<String, Class<*>>()
+
+    // Get Java compiler once and reuse
+    private val javaCompiler: JavaCompiler by lazy {
+        ToolProvider.getSystemJavaCompiler() ?: throw RuntimeException("Java compiler not available. Make sure you're running with JDK, not JRE.")
+    }
+
     // Keep a global shared directory for all compilations in this session
     private val sessionDir by lazy {
         val dir = Files.createTempDirectory("compilation-session").toFile()
@@ -38,11 +46,6 @@ class CompilationSession(
     // Keep track of all source files created in this session
     private val createdKotlinSources = mutableMapOf<String, File>()
     private val createdJavaSources = mutableMapOf<String, File>()
-
-    // Get Java compiler once and reuse
-    private val javaCompiler: JavaCompiler by lazy {
-        ToolProvider.getSystemJavaCompiler() ?: throw RuntimeException("Java compiler not available. Make sure you're running with JDK, not JRE.")
-    }
 
     /**
      * Compiles and loads a source code string.
@@ -142,7 +145,15 @@ class CompilationSession(
                 file.name.endsWith(".class") -> {
                     val className = "$packageName.${file.name.substring(0, file.name.length - 6)}"
                     try {
-                        result.add(classLoader.loadClass(className))
+                        // Check if the class is already loaded
+                        val loadedClass = loadedClasses[className] ?: classLoader.loadClass(className).also { 
+                            loadedClasses[className] = it 
+                        }
+
+                        // Only add to results if not already in the list
+                        if (!result.any { it.name == className }) {
+                            result.add(loadedClass)
+                        }
                     } catch (e: Exception) {
                         // Log error but continue with other classes
                         println("Warning: Failed to load class $className: ${e.message}")

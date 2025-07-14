@@ -17,8 +17,6 @@ import kotlin.reflect.full.valueParameters
 import kotlin.reflect.jvm.kotlinFunction
 
 open class CompileJavaByteCodeStrategyCompliment() : ThreeStepsByteCodeStrategyCompliment<TypeSpec.Builder> {
-    private val compilationSession = CompilationSession(inMemory = false)
-
     /**
      * Create a TypeSpec builder based on the source class
      * - For interfaces: creates a class implementing the interface
@@ -150,7 +148,7 @@ open class CompileJavaByteCodeStrategyCompliment() : ThreeStepsByteCodeStrategyC
             val sourceCode = javaFile.toString()
 
             // Compile and load the generated Java class with the known class name
-            return compilationSession.compileAndLoad(sourceCode, className, packageName, "java")
+            return CompilationSession.compileAndLoad(sourceCode, className, packageName, "java")
         } catch (e: Exception) {
             throw DtoBuddySystemException("Failed to compile and load generated Java class: ${e.message}", e)
         }

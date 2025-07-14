@@ -17,8 +17,6 @@ import kotlin.reflect.jvm.jvmErasure
  * and then compiles it using the embedded Kotlin compiler.
  */
 open class CompileKotlinByteCodeStrategyCompliment : ThreeStepsByteCodeStrategyCompliment<TypeSpec.Builder> {
-    private val compilationSession = CompilationSession()
-
     /**
      * Create a TypeSpec builder based on the source class
      * - For interfaces: creates a class implementing the interface
@@ -161,7 +159,7 @@ open class CompileKotlinByteCodeStrategyCompliment : ThreeStepsByteCodeStrategyC
             val sourceCode = fileSpec.toString()
 
             // Compile and load the generated class with the known class name
-            return compilationSession.compileAndLoad(sourceCode, className, packageName).kotlin
+            return CompilationSession.compileAndLoad(sourceCode, className, packageName).kotlin
         } catch (e: Exception) {
             throw DtoBuddySystemException("Failed to compile and load generated class: ${e.message}", e)
         }
