@@ -122,7 +122,7 @@ object CompilationSession {
             throw RuntimeException(
                 "Kotlin compilation failed with exit code $exitCode.\n" +
                 "Source file: ${sourceFile.absolutePath}\n" +
-                "Content: \n${sourceContent.lines().take(20).joinToString("\n")}"
+                "Content: \n${sourceContent.lines().joinToString("\n")}"
             )
         }
 
@@ -245,7 +245,7 @@ object CompilationSession {
             throw RuntimeException(
                 "Java compilation failed:\n$errorMessages\n" +
                 "Source file: ${sourceFile.absolutePath}\n" +
-                "Content:\n${sourceContent.lines().take(20).joinToString("\n")}"
+                "Content:\n${sourceContent.lines().joinToString("\n")}"
             )
         }
 
