@@ -1,8 +1,9 @@
 package com.runninglane.dto.buddy.test.cases.bytecode
 
 import com.runninglane.dto.buddy.DtoBuddy
-import com.runninglane.dto.buddy.bytecode.ThreeStepsByteCodeStrategy
-import com.runninglane.dto.buddy.bytecode.compile.CompileKotlinByteCodeStrategyCompliment
+import com.runninglane.dto.buddy.bytecode.codegen.CodeGenBasedByteCodeStrategy
+import com.runninglane.dto.buddy.bytecode.codegen.KotlinCodeCompiler
+import com.runninglane.dto.buddy.bytecode.codegen.KotlinCodeGenerator
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.TypeSpec
 import kotlin.reflect.KClass
@@ -16,7 +17,7 @@ class CompileKotlinByteCodeStrategyTest {
 
     annotation class TestAnnotation(val value: String)
 
-    class TestCustomCompileKotlinByteCodeStrategyCompliment : CompileKotlinByteCodeStrategyCompliment() {
+    class TestCustomKotlinCodeGenerator : KotlinCodeGenerator() {
 
         override fun defineClass(
             baseClass: KClass<*>,
@@ -35,7 +36,7 @@ class CompileKotlinByteCodeStrategyTest {
 
     @Test
     fun testAddCustomAnnotation() {
-        val byteCodeStrategy = ThreeStepsByteCodeStrategy(TestCustomCompileKotlinByteCodeStrategyCompliment())
+        val byteCodeStrategy = CodeGenBasedByteCodeStrategy(TestCustomKotlinCodeGenerator(), KotlinCodeCompiler())
         val dtoBuddy = DtoBuddy(byteCodeStrategy)
         val concreteClass = dtoBuddy.implement(TestDto::class)
         val annotation = concreteClass.findAnnotation<TestAnnotation>()

@@ -2,8 +2,8 @@ package com.runninglane.dto.buddy.test.java.cases.bytecode;
 
 import com.runninglane.dto.buddy.javainterop.DtoBuddy;
 import com.runninglane.dto.buddy.javainterop.bytecode.ByteCodeStrategy;
-import com.runninglane.dto.buddy.javainterop.bytecode.ThreeStepsByteCodeStrategy;
-import com.runninglane.dto.buddy.javainterop.bytecode.compile.CompileJavaByteCodeStrategyCompliment;
+import com.runninglane.dto.buddy.javainterop.bytecode.codegen.JavaCodeGenBasedByteCodeStrategy;
+import com.runninglane.dto.buddy.javainterop.bytecode.codegen.JavaCodeGenerator;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +31,7 @@ public class NonPropertyAbstractMethodsHandlingTest {
         public abstract String shout(String name);
     }
 
-    static class TestByteCodeStrategyCompliment extends CompileJavaByteCodeStrategyCompliment {
+    static class TestByteCodeGenerator extends JavaCodeGenerator {
         @Override
         public @NotNull TypeSpec.Builder handleOtherAbstractMethods(
             @NotNull TypeSpec.Builder builder,
@@ -59,9 +59,7 @@ public class NonPropertyAbstractMethodsHandlingTest {
 
     @Test
     public void testHandleNonPropertyAbstractMethods() {
-        ByteCodeStrategy byteCodeStrategy = new ThreeStepsByteCodeStrategy<>(
-            new TestByteCodeStrategyCompliment()
-        );
+        ByteCodeStrategy byteCodeStrategy = new JavaCodeGenBasedByteCodeStrategy(new TestByteCodeGenerator());
         DtoBuddy dtoBuddy = new DtoBuddy(byteCodeStrategy);
         Class<?> concreteClass = dtoBuddy.implement(TestBaseClass.class, null);
         Method shoutMethod = Arrays.stream(concreteClass.getMethods())

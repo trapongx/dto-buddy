@@ -1,22 +1,19 @@
-package com.runninglane.dto.buddy.bytecode.compile
+package com.runninglane.dto.buddy.bytecode.codegen
 
 import com.runninglane.dto.buddy.annotation.DtoBuddyGenerated
 import com.runninglane.dto.buddy.bytecode.PropertyDescriptor
-import com.runninglane.dto.buddy.bytecode.ThreeStepsByteCodeStrategyCompliment
 import com.runninglane.dto.buddy.bytecode.validateContractCompliance
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
-import com.runninglane.dto.buddy.exception.DtoBuddySystemException
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import kotlin.reflect.*
 import kotlin.reflect.full.valueParameters
-import kotlin.reflect.jvm.jvmErasure
 
 /**
  * Implementation of ByteCodeStrategy that uses KotlinPoet to generate source code
  * and then compiles it using the embedded Kotlin compiler.
  */
-open class CompileKotlinByteCodeStrategyCompliment : ThreeStepsByteCodeStrategyCompliment<TypeSpec.Builder> {
+open class KotlinCodeGenerator : CodeGenerator<TypeSpec.Builder> {
     /**
      * Create a TypeSpec builder based on the source class
      * - For interfaces: creates a class implementing the interface
@@ -138,31 +135,6 @@ open class CompileKotlinByteCodeStrategyCompliment : ThreeStepsByteCodeStrategyC
         }
 
         return classBuilder
-    }
-
-    /**
-     * Generates Kotlin source code and compiles it using the CompilationSession
-     */
-    override fun loadClass(
-        builder: TypeSpec.Builder,
-        packageName: String,
-        className: String,
-        dataCollector: Any?
-    ): KClass<*> {
-        try {
-            // Create a FileSpec (Kotlin source file)
-            val fileSpec = FileSpec.builder(packageName, "$className.kt")
-                .addType(builder.build())
-                .build()
-
-            // Convert to source code string
-            val sourceCode = fileSpec.toString()
-
-            // Compile and load the generated class with the known class name
-            return CompilationSession.compileAndLoad(sourceCode, className, packageName).kotlin
-        } catch (e: Exception) {
-            throw DtoBuddySystemException("Failed to compile and load generated class: ${e.message}", e)
-        }
     }
 
     /**
@@ -318,5 +290,20 @@ open class CompileKotlinByteCodeStrategyCompliment : ThreeStepsByteCodeStrategyC
     protected fun TypeName.considerJavaNullability(type: KType): TypeName = when {
         type.isMarkedNullable || type.toString().endsWith("!") -> copy(nullable = true)
         else -> this
+    }
+
+    override fun writeToString(
+        builder: TypeSpec.Builder,
+        packageName: String,
+        className: String,
+        dataCollector: Any?
+    ): String {
+        // Create a FileSpec (Kotlin source file)
+        val fileSpec = FileSpec.builder(packageName, "$className.kt")
+            .addType(builder.build())
+            .build()
+
+        // Convert to source code string
+        return fileSpec.toString()
     }
 }

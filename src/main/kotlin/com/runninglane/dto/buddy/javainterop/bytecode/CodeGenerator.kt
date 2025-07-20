@@ -16,7 +16,7 @@ import kotlin.reflect.jvm.kotlinFunction
  * This strategy provides a structured approach to generate bytecode for DTO implementations.
  * It handles inheritance, interfaces, abstract classes and mutable/immutable properties.
  */
-interface ThreeStepsByteCodeStrategyCompliment<B> : KThreeStepsByteCodeStrategyCompliment<B> {
+interface CodeGenerator<B> : KCodeGenerator<B> {
 
     /**
      * Defines class structure by specifying package name, class name, modifiers, and annotations.
@@ -111,26 +111,4 @@ interface ThreeStepsByteCodeStrategyCompliment<B> : KThreeStepsByteCodeStrategyC
         )
     }
 
-    /**
-     * Finalizes the class definition, generates the bytecode and loads it into the runtime.
-     *
-     * @param builder Builder object from implementProperties step
-     * @param packageName Target package name for the generated class
-     * @param className Name for the generated class
-     * @return Generated concrete class
-     */
-    fun loadJavaClass(
-        builder: B,
-        packageName: String,
-        className: String,
-        dataCollector: Any?
-    ): Class<*>
-
-    @JvmSynthetic
-    override fun loadClass(
-        builder: B,
-        packageName: String,
-        className: String,
-        dataCollector: Any?
-    ): KClass<*> = loadJavaClass(builder, packageName, className, dataCollector).kotlin
 }

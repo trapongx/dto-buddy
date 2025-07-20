@@ -1,24 +1,22 @@
 package com.runninglane.dto.buddy.test.cases.bytecode
 
 import com.runninglane.dto.buddy.DtoBuddy
-import com.runninglane.dto.buddy.bytecode.ThreeStepsByteCodeStrategy
-import com.runninglane.dto.buddy.bytecode.compile.CompileKotlinByteCodeStrategyCompliment
-import com.squareup.kotlinpoet.AnnotationSpec
+import com.runninglane.dto.buddy.bytecode.codegen.CodeGenBasedByteCodeStrategy
+import com.runninglane.dto.buddy.bytecode.codegen.KotlinCodeCompiler
+import com.runninglane.dto.buddy.bytecode.codegen.KotlinCodeGenerator
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.TypeSpec
 import kotlin.reflect.KClass
-import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 class CustomLazyPropertyTest {
     abstract class TestDto {
         var name: String = "John"
     }
 
-    class Customizer : CompileKotlinByteCodeStrategyCompliment() {
+    class Customizer : KotlinCodeGenerator() {
 
         override fun defineClass(
             baseClass: KClass<*>,
@@ -39,7 +37,7 @@ class CustomLazyPropertyTest {
 
     @Test
     fun testAddCustomAnnotation() {
-        val byteCodeStrategy = ThreeStepsByteCodeStrategy(Customizer())
+        val byteCodeStrategy = CodeGenBasedByteCodeStrategy(Customizer(), KotlinCodeCompiler())
         val dtoBuddy = DtoBuddy(byteCodeStrategy)
         val concreteClass = dtoBuddy.implement(TestDto::class)
         val dto = dtoBuddy.create<TestDto>(concreteClass)

@@ -2,8 +2,8 @@ package com.runninglane.dto.buddy.test.java.cases.bytecode;
 
 import com.runninglane.dto.buddy.javainterop.DtoBuddy;
 import com.runninglane.dto.buddy.javainterop.bytecode.ByteCodeStrategy;
-import com.runninglane.dto.buddy.javainterop.bytecode.ThreeStepsByteCodeStrategy;
-import com.runninglane.dto.buddy.javainterop.bytecode.compile.CompileJavaByteCodeStrategyCompliment;
+import com.runninglane.dto.buddy.javainterop.bytecode.codegen.JavaCodeGenBasedByteCodeStrategy;
+import com.runninglane.dto.buddy.javainterop.bytecode.codegen.JavaCodeGenerator;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.TypeSpec;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +25,7 @@ class ByteCodeStrategyTest {
         String value();
     }
 
-    static class TestByteBuddyByteCodeStrategyCompliment extends CompileJavaByteCodeStrategyCompliment {
+    static class TestByteBuddyByteCodeGenerator extends JavaCodeGenerator {
         @Override
         public @NotNull TypeSpec.Builder defineClass(
             @NotNull Class<?> baseClass,
@@ -44,9 +44,7 @@ class ByteCodeStrategyTest {
 
     @Test
     public void testAddSecondaryConstructor() {
-        ByteCodeStrategy byteCodeStrategy = new ThreeStepsByteCodeStrategy<>(
-            new TestByteBuddyByteCodeStrategyCompliment()
-        );
+        ByteCodeStrategy byteCodeStrategy = new JavaCodeGenBasedByteCodeStrategy(new TestByteBuddyByteCodeGenerator());
         DtoBuddy dtoBuddy = new DtoBuddy(byteCodeStrategy);
         Class<?> concreteClass = dtoBuddy.implement(TestDto.class);
         TestAnnotation annotation = concreteClass.getAnnotation(TestAnnotation.class);

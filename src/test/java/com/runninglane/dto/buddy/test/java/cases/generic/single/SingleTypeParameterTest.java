@@ -1,8 +1,7 @@
 package com.runninglane.dto.buddy.test.java.cases.generic.single;
 
 import com.runninglane.dto.buddy.javainterop.DtoBuddy;
-import com.runninglane.dto.buddy.javainterop.bytecode.ThreeStepsByteCodeStrategy;
-import com.runninglane.dto.buddy.javainterop.bytecode.compile.CompileJavaByteCodeStrategyCompliment;
+import com.runninglane.dto.buddy.javainterop.bytecode.codegen.JavaCodeGenBasedByteCodeStrategy;
 import com.runninglane.dto.buddy.test.java.cases.generic.GenericTypeTestHelper;
 import org.junit.jupiter.api.Test;
 
@@ -14,11 +13,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SingleTypeParameterTest {
-    private final DtoBuddy dtoBuddy = new DtoBuddy(
-        new ThreeStepsByteCodeStrategy<>(
-            new CompileJavaByteCodeStrategyCompliment()
-        )
-    );
+    private final DtoBuddy dtoBuddy = new DtoBuddy(new JavaCodeGenBasedByteCodeStrategy());
 
     private final GenericTypeTestHelper helper = new GenericTypeTestHelper();
 

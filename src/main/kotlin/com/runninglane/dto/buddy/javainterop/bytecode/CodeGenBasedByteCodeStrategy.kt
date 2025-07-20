@@ -1,5 +1,6 @@
 package com.runninglane.dto.buddy.javainterop.bytecode
 
+import com.runninglane.dto.buddy.bytecode.codegen.CodeCompiler
 import kotlin.reflect.KClass
 
 /**
@@ -11,7 +12,10 @@ import kotlin.reflect.KClass
  * This strategy provides a structured approach to generate bytecode for DTO implementations.
  * It handles inheritance, interfaces, abstract classes and mutable/immutable properties.
  */
-class ThreeStepsByteCodeStrategy<B>(compliment: ThreeStepsByteCodeStrategyCompliment<B>) : KThreeStepsByteCodeStrategy<B>(compliment), ByteCodeStrategy {
+open class CodeGenBasedByteCodeStrategy<B>(
+    generator: CodeGenerator<B>,
+    compiler: CodeCompiler,
+) : KCodeGenBasedByteCodeStrategy<B>(generator, compiler), ByteCodeStrategy {
 
     override fun implement(
         baseClass: Class<*>,
@@ -19,7 +23,7 @@ class ThreeStepsByteCodeStrategy<B>(compliment: ThreeStepsByteCodeStrategyCompli
         packageName: String,
         className: String,
         dataCollector: Any?
-    ): Class<*> = super<KThreeStepsByteCodeStrategy>.implement(
+    ): Class<*> = super<KCodeGenBasedByteCodeStrategy>.implement(
         baseClass.kotlin,
         typeParams?.map { it.kotlin },
         packageName,
@@ -34,7 +38,7 @@ class ThreeStepsByteCodeStrategy<B>(compliment: ThreeStepsByteCodeStrategyCompli
         packageName: String,
         className: String,
         dataCollector: Any?
-    ): KClass<*> = super<KThreeStepsByteCodeStrategy>.implement(
+    ): KClass<*> = super<KCodeGenBasedByteCodeStrategy>.implement(
         baseClass,
         typeParams,
         packageName,

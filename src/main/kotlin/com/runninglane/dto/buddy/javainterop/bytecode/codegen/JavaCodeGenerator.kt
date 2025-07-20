@@ -1,12 +1,10 @@
-package com.runninglane.dto.buddy.javainterop.bytecode.compile
+package com.runninglane.dto.buddy.javainterop.bytecode.codegen
 
 import com.runninglane.dto.buddy.annotation.DtoBuddyGenerated
-import com.runninglane.dto.buddy.bytecode.compile.CompilationSession
 import com.runninglane.dto.buddy.bytecode.validateContractCompliance
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
-import com.runninglane.dto.buddy.exception.DtoBuddySystemException
+import com.runninglane.dto.buddy.javainterop.bytecode.CodeGenerator
 import com.runninglane.dto.buddy.javainterop.bytecode.PropertyDescriptor
-import com.runninglane.dto.buddy.javainterop.bytecode.ThreeStepsByteCodeStrategyCompliment
 import com.runninglane.dto.buddy.javainterop.bytecode.kotlin
 import com.squareup.javapoet.*
 import java.lang.reflect.*
@@ -16,7 +14,7 @@ import kotlin.reflect.KVisibility
 import kotlin.reflect.full.valueParameters
 import kotlin.reflect.jvm.kotlinFunction
 
-open class CompileJavaByteCodeStrategyCompliment() : ThreeStepsByteCodeStrategyCompliment<TypeSpec.Builder> {
+open class JavaCodeGenerator() : CodeGenerator<TypeSpec.Builder> {
     /**
      * Create a TypeSpec builder based on the source class
      * - For interfaces: creates a class implementing the interface
@@ -131,30 +129,6 @@ open class CompileJavaByteCodeStrategyCompliment() : ThreeStepsByteCodeStrategyC
     }
 
     /**
-     * Generates Kotlin source code and compiles it using the CompilationSession
-     */
-    override fun loadJavaClass(
-        builder: TypeSpec.Builder,
-        packageName: String,
-        className: String,
-        dataCollector: Any?
-    ): Class<*> {
-        try {
-            // Create a JavaFile (Java source file)
-            val javaFile = JavaFile.builder(packageName, builder.build())
-                .build()
-
-            // Convert to source code string
-            val sourceCode = javaFile.toString()
-
-            // Compile and load the generated Java class with the known class name
-            return CompilationSession.compileAndLoad(sourceCode, className, packageName, "java")
-        } catch (e: Exception) {
-            throw DtoBuddySystemException("Failed to compile and load generated Java class: ${e.message}", e)
-        }
-    }
-
-    /**
      * Validates that a base class meets the requirements:
      * - Must be public
      * - If class (not interface), must be open/abstract
@@ -258,5 +232,19 @@ open class CompileJavaByteCodeStrategyCompliment() : ThreeStepsByteCodeStrategyC
             // Fallback for other cases
             else -> TypeName.get(Any::class.java)
         }
+    }
+
+    override fun writeToString(
+        builder: TypeSpec.Builder,
+        packageName: String,
+        className: String,
+        dataCollector: Any?
+    ): String {
+        // Create a JavaFile (Java source file)
+        val javaFile = JavaFile.builder(packageName, builder.build())
+            .build()
+
+        // Convert to source code string
+        return javaFile.toString()
     }
 }

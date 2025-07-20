@@ -167,6 +167,13 @@ class DtoBuddy(
             return prevGenClass
         }
 
+        try {
+            // In case static codegen is used, the class might already exist
+            return Class.forName(cacheKey).kotlin
+        } catch (e: ClassNotFoundException) {
+            // As there's no existing class, we will go on generating it
+        }
+
         if((typeParams?.size ?: 0) != baseClass.typeParameters.size) {
             throw DtoBuddyBadInputException("Type parameter count mismatch: ${typeParams?.size} != ${baseClass.typeParameters.size}")
         }

@@ -2,8 +2,9 @@ package com.runninglane.dto.buddy.test.java.cases.nonpublic;
 
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException;
 import com.runninglane.dto.buddy.javainterop.DtoBuddy;
-import com.runninglane.dto.buddy.javainterop.bytecode.ThreeStepsByteCodeStrategy;
-import com.runninglane.dto.buddy.javainterop.bytecode.compile.CompileJavaByteCodeStrategyCompliment;
+import com.runninglane.dto.buddy.javainterop.bytecode.CodeGenBasedByteCodeStrategy;
+import com.runninglane.dto.buddy.javainterop.bytecode.codegen.JavaCodeGenBasedByteCodeStrategy;
+import com.runninglane.dto.buddy.javainterop.bytecode.codegen.JavaCodeGenerator;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +31,7 @@ public class DtoWithProtectedGetterTest {
 
     @Test
     public void shouldSucceedForTestDtoWithProtectedAbstractGetterWhenCustomizationApplied() {
-        class TestByteCodeStrategyCompliment extends CompileJavaByteCodeStrategyCompliment {
+        class TestByteCodeGenerator extends JavaCodeGenerator {
             public @NotNull TypeSpec.Builder handleOtherAbstractMethods(
                 @NotNull TypeSpec.Builder builder,
                 @NotNull List<Method> methods,
@@ -52,7 +53,7 @@ public class DtoWithProtectedGetterTest {
             }
         }
 
-        ThreeStepsByteCodeStrategy<?> byteCodeStrategy = new ThreeStepsByteCodeStrategy<>(new TestByteCodeStrategyCompliment());
+        CodeGenBasedByteCodeStrategy<?> byteCodeStrategy = new JavaCodeGenBasedByteCodeStrategy(new TestByteCodeGenerator());
         DtoBuddy dtoBuddy = new DtoBuddy(byteCodeStrategy);
         dtoBuddy.implement(TestDtoWithProtectedAbstractGetter.class);
     }

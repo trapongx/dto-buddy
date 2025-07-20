@@ -1,8 +1,9 @@
 package com.runninglane.dto.buddy.test.cases.nonpublic
 
 import com.runninglane.dto.buddy.DtoBuddy
-import com.runninglane.dto.buddy.bytecode.ThreeStepsByteCodeStrategy
-import com.runninglane.dto.buddy.bytecode.compile.CompileKotlinByteCodeStrategyCompliment
+import com.runninglane.dto.buddy.bytecode.codegen.CodeGenBasedByteCodeStrategy
+import com.runninglane.dto.buddy.bytecode.codegen.KotlinCodeCompiler
+import com.runninglane.dto.buddy.bytecode.codegen.KotlinCodeGenerator
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.PropertySpec
@@ -41,7 +42,7 @@ class DtoWithProtectedGetterTest {
 
     @Test
     fun shouldSucceedForTestDtoWithProtectedConcreteImmutablePropertyWhenCustomizationApplied() {
-        class TestByteCodeStrategyCompliment : CompileKotlinByteCodeStrategyCompliment() {
+        class TestCodeGenerator : KotlinCodeGenerator() {
             override fun handleOtherAbstractMembers(
                 builder: TypeSpec.Builder,
                 properties: List<KProperty<*>>,
@@ -60,14 +61,14 @@ class DtoWithProtectedGetterTest {
             }
         }
 
-        val byteCodeStrategy = ThreeStepsByteCodeStrategy(TestByteCodeStrategyCompliment())
+        val byteCodeStrategy = CodeGenBasedByteCodeStrategy(TestCodeGenerator(), KotlinCodeCompiler())
         val dtoBuddy = DtoBuddy(byteCodeStrategy)
         dtoBuddy.implement(TestDtoWithProtectedAbstractImmutableProperty::class)
     }
 
     @Test
     fun shouldSucceedForTestDtoWithProtectedAbstractGetterWhenCustomizationApplied() {
-        class TestByteCodeStrategyCompliment : CompileKotlinByteCodeStrategyCompliment() {
+        class TestCodeGenerator : KotlinCodeGenerator() {
             override fun handleOtherAbstractMembers(
                 builder: TypeSpec.Builder,
                 properties: List<KProperty<*>>,
@@ -87,7 +88,7 @@ class DtoWithProtectedGetterTest {
             }
         }
 
-        val byteCodeStrategy = ThreeStepsByteCodeStrategy(TestByteCodeStrategyCompliment())
+        val byteCodeStrategy = CodeGenBasedByteCodeStrategy(TestCodeGenerator(), KotlinCodeCompiler())
         val dtoBuddy = DtoBuddy(byteCodeStrategy)
         dtoBuddy.implement(TestDtoWithProtectedAbstractGetter::class)
     }

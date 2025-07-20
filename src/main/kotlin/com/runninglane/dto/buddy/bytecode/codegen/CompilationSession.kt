@@ -1,4 +1,4 @@
-package com.runninglane.dto.buddy.bytecode.compile
+package com.runninglane.dto.buddy.bytecode.codegen
 
 import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
@@ -13,7 +13,6 @@ import java.net.URI
 import java.net.URLClassLoader
 import java.nio.file.Files
 import javax.tools.*
-import kotlin.reflect.KClass
 
 object CompilationSession {
     val inMemory: Boolean = System.getProperty("dto-buddy.compilation.in-memory")?.toBoolean() ?: true

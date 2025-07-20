@@ -1,11 +1,12 @@
-package com.runninglane.dto.buddy.bytecode
+package com.runninglane.dto.buddy.bytecode.codegen
 
+import com.runninglane.dto.buddy.bytecode.PropertyDescriptor
 import com.runninglane.dto.buddy.exception.DtoBuddyBadInputException
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty
 
-interface ThreeStepsByteCodeStrategyCompliment<B> {
+interface CodeGenerator<B> {
     /**
      * Defines class structure by specifying package name, class name, modifiers, and annotations.
      * The result is a builder object that will be used in subsequent steps.
@@ -54,18 +55,10 @@ interface ThreeStepsByteCodeStrategyCompliment<B> {
         )
     }
 
-    /**
-     * Finalizes the class definition, generates the bytecode and loads it into the runtime.
-     *
-     * @param builder Builder object from implementProperties step
-     * @param packageName Target package name for the generated class
-     * @param className Name for the generated class
-     * @return Generated concrete class
-     */
-    fun loadClass(
+    fun writeToString(
         builder: B,
         packageName: String,
         className: String,
         dataCollector: Any?
-    ): KClass<*>
+    ): String
 }

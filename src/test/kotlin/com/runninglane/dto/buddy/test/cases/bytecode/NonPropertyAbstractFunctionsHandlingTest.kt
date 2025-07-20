@@ -1,8 +1,9 @@
 package com.runninglane.dto.buddy.test.cases.bytecode
 
 import com.runninglane.dto.buddy.DtoBuddy
-import com.runninglane.dto.buddy.bytecode.ThreeStepsByteCodeStrategy
-import com.runninglane.dto.buddy.bytecode.compile.CompileKotlinByteCodeStrategyCompliment
+import com.runninglane.dto.buddy.bytecode.codegen.CodeGenBasedByteCodeStrategy
+import com.runninglane.dto.buddy.bytecode.codegen.KotlinCodeCompiler
+import com.runninglane.dto.buddy.bytecode.codegen.KotlinCodeGenerator
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.TypeSpec
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -18,7 +19,7 @@ class NonPropertyAbstractFunctionsHandlingTest {
         abstract fun shout(name: String): String
     }
 
-    class TestByteCodeStrategyCompliment : CompileKotlinByteCodeStrategyCompliment() {
+    class TestCodeGenerator : KotlinCodeGenerator() {
         override fun handleOtherAbstractMembers(
             builder: TypeSpec.Builder,
             properties: List<KProperty<*>>,
@@ -41,7 +42,7 @@ class NonPropertyAbstractFunctionsHandlingTest {
 
     @Test
     fun testHandleNonPropertyAbstractFunctions() {
-        val byteCodeStrategy = ThreeStepsByteCodeStrategy(TestByteCodeStrategyCompliment())
+        val byteCodeStrategy = CodeGenBasedByteCodeStrategy(TestCodeGenerator(), KotlinCodeCompiler())
         val dtoBuddy = DtoBuddy(byteCodeStrategy)
         val concreteClass = dtoBuddy.implement(TestBaseClass::class)
         val shoutFunction = concreteClass.functions.first { it.name == "shout" }
