@@ -4,11 +4,14 @@ import com.runninglane.dto.buddy.DtoBuddy
 import com.runninglane.dto.buddy.bytecode.codegen.CodeCompiler
 import com.runninglane.dto.buddy.bytecode.codegen.CodeGenBasedByteCodeStrategy
 import com.runninglane.dto.buddy.bytecode.codegen.KotlinCodeGenerator
+import com.runninglane.dto.buddy.naming.DefaultNamingStrategy
+import com.runninglane.dto.buddy.naming.NamingStrategy
 import java.io.File
 import kotlin.reflect.KClass
 
 class StaticKotlinCodeGenerator(
     outputPath: File,
+    namingStrategy: NamingStrategy = DefaultNamingStrategy(),
     generator: KotlinCodeGenerator = KotlinCodeGenerator(),
     private val dataCollectorInitializer: ((KClass<*>) -> Any?)? = null
 ) {
@@ -28,7 +31,10 @@ class StaticKotlinCodeGenerator(
         }
     }
 
-    private val dtoBuddy = DtoBuddy(CodeGenBasedByteCodeStrategy(generator, compiler))
+    private val dtoBuddy = DtoBuddy(
+        namingStrategy = namingStrategy,
+        byteCodeStrategy = CodeGenBasedByteCodeStrategy(generator, compiler)
+    )
 
     fun generate(dtoClasses: List<KClass<*>>) {
         for (dtoClass in dtoClasses) {

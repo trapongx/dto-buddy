@@ -4,23 +4,25 @@ import com.runninglane.dto.buddy.DtoBuddy
 import com.runninglane.dto.buddy.javainterop.bytecode.codegen.JavaCodeCompiler
 import com.runninglane.dto.buddy.javainterop.bytecode.codegen.JavaCodeGenBasedByteCodeStrategy
 import com.runninglane.dto.buddy.javainterop.bytecode.codegen.JavaCodeGenerator
+import com.runninglane.dto.buddy.naming.DefaultNamingStrategy
+import com.runninglane.dto.buddy.naming.NamingStrategy
 import java.io.File
 import java.util.function.Function
 
 class StaticJavaCodeGenerator(
     outputPath: File,
-    generator: JavaCodeGenerator,
+    namingStrategy: NamingStrategy?,
+    generator: JavaCodeGenerator?,
     private val dataCollectorInitializer: Function<Class<*>, Any?>?
 ) {
-    constructor(outputPath: File) : this(outputPath, JavaCodeGenerator(), null)
+    constructor(outputPath: File) :
+            this(outputPath, null, null, null)
 
-    constructor(outputPath: File, dataCollectorInitializer: Function<Class<*>, Any?>) : this(
-        outputPath,
-        JavaCodeGenerator(),
-        dataCollectorInitializer
-    )
+    constructor(outputPath: File, dataCollectorInitializer: Function<Class<*>, Any?>) :
+            this(outputPath, null, null, dataCollectorInitializer)
 
-    constructor(outputPath: File, generator: JavaCodeGenerator) : this(outputPath, generator, null)
+    constructor(outputPath: File, generator: JavaCodeGenerator) :
+            this(outputPath, null, generator, null)
 
     private val compiler = object : JavaCodeCompiler() {
         override fun compileAndLoadJavaClass(
@@ -38,7 +40,10 @@ class StaticJavaCodeGenerator(
         }
     }
 
-    private val dtoBuddy = DtoBuddy(JavaCodeGenBasedByteCodeStrategy(generator, compiler))
+    private val dtoBuddy = DtoBuddy(
+        namingStrategy = namingStrategy ?: DefaultNamingStrategy(),
+        byteCodeStrategy = JavaCodeGenBasedByteCodeStrategy(generator ?: JavaCodeGenerator(), compiler)
+    )
 
     fun generate(dtoClasses: List<Class<*>>) {
         for (dtoClass in dtoClasses) {
