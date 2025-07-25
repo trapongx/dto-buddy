@@ -14,22 +14,22 @@ private typealias KDtoBuddy = com.runninglane.dto.buddy.DtoBuddy
  * It can dynamically create concrete implementations of interfaces or abstract classes,
  * instantiate those implementations, and populate their properties.
  */
-class DtoBuddy {
+open class DtoBuddy {
 
     private val delegate: KDtoBuddy
 
     @Suppress("unused")
-    var namingStrategy: NamingStrategy
+    open var namingStrategy: NamingStrategy
         get() = delegate.namingStrategy
         set(value) { delegate.namingStrategy = value }
 
     @Suppress("unused")
-    var byteCodeStrategy: ByteCodeStrategy
+    open var byteCodeStrategy: ByteCodeStrategy
         get() = delegate.byteCodeStrategy
         set(value) { delegate.byteCodeStrategy = value }
 
     @Suppress("unused")
-    var instanceStrategy: InstanceStrategy
+    open var instanceStrategy: InstanceStrategy
         get() = delegate.instanceStrategy
         set(value) { delegate.instanceStrategy = value }
 
@@ -65,19 +65,19 @@ class DtoBuddy {
         DefaultInstanceStrategy()
     )
 
-    fun implement(
+    open fun implement(
         baseClass: Class<*>,
         typeParams: List<Class<*>>?
     ) = delegate.implement(baseClass.kotlin, typeParams?.map { it.kotlin }).java
 
-    fun implement(baseClass: Class<*>) = implement(baseClass, null)
+    open fun implement(baseClass: Class<*>) = implement(baseClass, null)
 
-    fun <DTO> create(concrete: Class<*>, params: Map<String, Any?>?): DTO =
+    open fun <DTO> create(concrete: Class<*>, params: Map<String, Any?>?): DTO =
         delegate.create(concrete.kotlin, params)
 
-    fun <DTO> create(concrete: Class<*>): DTO = create(concrete, null)
+    open fun <DTO> create(concrete: Class<*>): DTO = create(concrete, null)
 
-    fun populate(dto: Any, params: Map<String, Any?>) {
+    open fun populate(dto: Any, params: Map<String, Any?>) {
         delegate.populate(dto, params)
     }
 }

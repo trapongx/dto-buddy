@@ -15,7 +15,7 @@ import kotlin.reflect.KClass
  * It can dynamically create concrete implementations of interfaces or abstract classes,
  * instantiate those implementations, and populate their properties.
  */
-class DtoBuddy(
+open class DtoBuddy(
     var namingStrategy: NamingStrategy = DefaultNamingStrategy(),
     var byteCodeStrategy: ByteCodeStrategy = DefaultByteCodeStrategy(),
     var instanceStrategy: InstanceStrategy = DefaultInstanceStrategy()
@@ -148,7 +148,7 @@ class DtoBuddy(
      * @return generated class
      */
     @JvmSynthetic
-    fun implement(
+    open fun implement(
         baseClass: KClass<*>,
         typeParams: List<KClass<*>>? = null,
         dataCollector: Any? = null
@@ -198,7 +198,7 @@ class DtoBuddy(
      */
     @JvmSynthetic
     @Suppress("UNCHECKED_CAST")
-    fun <DTO> create(concrete: KClass<*>, params: Map<String, Any?>? = null): DTO {
+    open fun <DTO> create(concrete: KClass<*>, params: Map<String, Any?>? = null): DTO {
         try {
             // Create a new instance
             val instance = instanceStrategy.create(concrete)
@@ -221,7 +221,7 @@ class DtoBuddy(
      * @param dto The DTO instance to populate
      * @param params Map of property names to values
      */
-    fun populate(dto: Any, params: Map<String, Any?>) {
+    open fun populate(dto: Any, params: Map<String, Any?>) {
         try {
             // Populate the properties
             instanceStrategy.populate(dto, params)
