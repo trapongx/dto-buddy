@@ -90,6 +90,29 @@ open class KotlinCodeGenerator : CodeGenerator<TypeSpec.Builder> {
                         else
                             it.initializer(defaultValue ?: "null")
                     }
+                    .let {
+                        // Add @JvmName for boolean properties starting with 'is'
+                        if (property.name.startsWith("is") && typeName.toString() == "kotlin.Boolean") {
+                            it.getter(
+                                FunSpec.getterBuilder()
+                                    .addAnnotation(
+                                        AnnotationSpec.builder(Suppress::class)
+                                            .addMember("\"INAPPLICABLE_JVM_NAME\"")
+                                            .build()
+                                    )
+                                    .addAnnotation(
+                                        AnnotationSpec.builder(JvmName::class)
+                                            .addMember(
+                                                "name = %S",
+                                                "get${property.name.replaceFirstChar { it.uppercase() }}"
+                                            )
+                                            .build()
+                                    )
+                                    .addStatement("return field")
+                                    .build()
+                            )
+                        } else it
+                    }
 
                 // Add the property to the class
                 classBuilder = classBuilder.addProperty(propertySpec.build())
